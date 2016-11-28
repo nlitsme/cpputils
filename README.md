@@ -11,4 +11,8 @@ Using iostream to configure hexdump output:
     
 A more detailed description can be found [in this blog post](http://nlitsme.github.io/posts/hexdumper-for-c%2B%2B-iostreams/)
 
+### todo
+
+ * add support for hexdumping data from streams.
+
 (C) 2016 Willem Hengeveld <itsme@xs4all.nl>
