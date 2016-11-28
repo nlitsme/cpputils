@@ -10,3 +10,5 @@ Using iostream to configure hexdump output:
     std::cout << hex::offset(0x12000) << hex::right << hex::dumper(data, size) << "\n";
     
 A more detailed description can be found [in this blog post](http://nlitsme.github.io/posts/hexdumper-for-c%2B%2B-iostreams/)
+
+(C) 2016 Willem Hengeveld <itsme@xs4all.nl>
