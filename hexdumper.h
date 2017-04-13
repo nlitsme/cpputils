@@ -32,17 +32,31 @@
 //     hex/dec/oct  = numeric base representation
 // showbase, uppercase
 // width    = nr of units per line.  -1 -> autoformat
+// precision = nr of bytes per unit
 // showpoint       -> 'show offset' :  iword(__baseofs)  is valid.
 // skipws          -> summarize identical lines
 //
 // unused stream flags:
 //
-// precision
 // boolalpha     bool is output as "true", instead of "1"
 // floatfield = fixed | scientific
 // showpos       ... show '+' and '-'
 // unitbuf       flush after every output
 
+
+// special stream manipulators
+//                      uint8_t {1,2,97,98,5}
+//
+//  hexstring        -- "0102616205"
+//  ascstring        -- "..ab."
+//  multiline        -- <16 bytes> \n <16 bytes> \n
+//  singleline       -- 01 02 61 62 05
+//  bin              -- 00000001 00000010 ...
+//  
+//  offset(o)        -- 00000000: 01 02 61 62 05
+//  
+//  step(s)          -- 00000000: .... \n 00001000: .... \n ...
+//  
 
 namespace hex {
 
@@ -260,14 +274,14 @@ class Hexdumper : public Hexdumper_base {
                 output_bin(os, val);
             }
             else
-                os << (unsigned)val;
+                os << (((unsigned)val)&((1LL<<(8*sizeof(T)))-1));
 
             ++p;
         }
     }
     static bool isprintable(char c)
     {
-        return (c>=0x20 && c<=0x7e) || c>=0x80;
+        return (c>=0x20 && c<=0x7e) || uint8_t(c)>=0x80;
     }
     static void output_asc(std::ostream& os, const T*first, const T*last)
     {
@@ -285,6 +299,8 @@ class Hexdumper : public Hexdumper_base {
     friend std::ostream& operator<<(std::ostream&os, const Hexdumper<T>& hd)
     {
         hd.dump(os);
+
+        // reset stream settings
         os.width(0);
         os.fill(0);
         os.precision(0);
