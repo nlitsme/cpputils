@@ -204,6 +204,12 @@ public:
     {
     }
 
+
+    ArgParser(int argc, char**argv)
+        : argc(argc), argv(const_cast<const char**>(argv))
+    {
+    }
+
     auto begin() { return ArgIterator(argv, 1, argc); }
     auto end() { return ArgIterator(argv, argc, argc); }
 };
