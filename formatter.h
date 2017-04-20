@@ -193,15 +193,15 @@ struct is_container<std::array<T,N> > : std::true_type {};
 
 template<typename...ARGS>
 struct StringFormatter {
-    std::tuple<ARGS...> args;
     const char *fmt;
+    std::tuple<ARGS...> args;
 
     StringFormatter(const char *fmt, ARGS&&...args)
         : fmt(fmt), args(std::forward<ARGS>(args)...)
     {
     }
     StringFormatter(StringFormatter && f)
-        : args(std::move(f.args)), fmt(f.fmt) 
+        : fmt(f.fmt),  args(std::move(f.args))
     {
     }
     friend std::ostream& operator<<(std::ostream&os, const StringFormatter& o)

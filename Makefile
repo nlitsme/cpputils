@@ -1,4 +1,4 @@
-CXXFLAGS=-O3 -std=c++1z
+CXXFLAGS=-O3 -std=c++1z -Wall
 
 all: unittests
 

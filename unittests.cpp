@@ -335,11 +335,11 @@ TEST_CASE("formatter") {
         CHECK( stringformat("%s", std::vector<uint8_t>{1,2,3,4}) == "1 2 3 4" );
     }
     SECTION("arrays") {
-        CHECK( stringformat("%s", std::array<int, 4>{1,2,3,4}) == "1 2 3 4" );
-        CHECK( stringformat("%,s", std::array<int, 4>{1,2,3,4}) == "1,2,3,4" );
+        CHECK( stringformat("%s", std::array<int, 4>{{1,2,3,4}}) == "1 2 3 4" );
+        CHECK( stringformat("%,s", std::array<int, 4>{{1,2,3,4}}) == "1,2,3,4" );
 
-        CHECK( stringformat("%s", std::array<double, 4>{1,2,3,4}) == "1 2 3 4" );
-        CHECK( stringformat("%s", std::array<uint8_t, 4>{1,2,3,4}) == "1 2 3 4" );
+        CHECK( stringformat("%s", std::array<double, 4>{{1,2,3,4}}) == "1 2 3 4" );
+        CHECK( stringformat("%s", std::array<uint8_t, 4>{{1,2,3,4}}) == "1 2 3 4" );
     }
     SECTION("custom") {
         CHECK( stringformat("%s", mytype()) == "MYTYPE" );
@@ -692,7 +692,7 @@ TEST_CASE("stringlibrary") {
 #include "argparse.h"
 TEST_CASE("argparse") {
     SECTION("test") {
-        const char*argv[] = { "pgmname", "-a", "123", "-b123", "-pear", "0x1234", "-pTEST", "--apple=test", "--long", "999", "firstfile", "secondfile", "-" };
+        const char*argv[] = { "pgmname", "-a", "123", "-b123", "-pear", "0x1234", "-vvv", "-pTEST", "--apple=test", "--long", "999", "firstfile", "secondfile", "-" };
         int argc = sizeof(argv)/sizeof(*argv);
         int n = 0;
         int argmask = 0;
@@ -723,6 +723,9 @@ TEST_CASE("argparse") {
                         argmask |= 8;
                         nargs ++;
                     }
+                    break;
+                case 'v':
+                    CHECK( arg.count() == 3 );
                     break;
                 case '-':
                     if (arg.match("--unused")) {

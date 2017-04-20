@@ -58,7 +58,7 @@ class ArgParser {
         }
 
         ArgIterator(const char **argv, int i, int argc)
-            : argv(argv), i(i), argc(argc)
+            : argv(argv), argc(argc), i(i)
         {
             setcurrent();
         }
