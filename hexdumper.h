@@ -7,7 +7,9 @@
 #include <ostream>
 #include <iomanip>
 
-
+//
+// ... design ...
+//
 // how to use the stream to configure the hexdump?
 //
 // it is possible to add custom io manipulators
