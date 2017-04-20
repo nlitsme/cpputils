@@ -283,7 +283,7 @@ class Hexdumper : public Hexdumper_base {
     }
     static bool isprintable(char c)
     {
-        return (c>=0x20 && c<=0x7e) || uint8_t(c)>=0x80;
+        return (c>=0x20 && c<=0x7e)/* || uint8_t(c)>=0xa0 */;
     }
     static void output_asc(std::ostream& os, const T*first, const T*last)
     {

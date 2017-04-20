@@ -381,6 +381,20 @@ TEST_CASE("hexdumper") {
         buf << hex::ascstring << hex::dumper("abcde\r\n", 7);
         CHECK( buf.str() == "abcde.." );
     }
+
+    SECTION("ascstring") {
+        std::vector<uint8_t> bv;
+        std::string asc;
+        for (int i=0 ; i<256 ; i++) {
+            bv.push_back(i);
+            asc.push_back( (i<32) || (i>=0x7f) ? '.' : char(i) );
+        }
+
+        std::stringstream buf;
+        buf << hex::ascstring << hex::dumper(bv);
+
+        CHECK( buf.str() == asc );
+    }
     SECTION("singleline") {
         std::stringstream buf;
         buf << hex::singleline <<  hex::dumper("abcde", 5);
