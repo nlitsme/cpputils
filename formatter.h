@@ -458,15 +458,15 @@ auto formatter(const char *fmt, ARGS&&...args)
 }
 
 template<typename...ARGS>
+int fprint(FILE *out, const char *fmt, ARGS&&...args)
+{
+    auto str = stringformat(fmt, std::forward<ARGS>(args)...);
+    return fwrite(str.c_str(), str.size(), 1, out);
+}
+template<typename...ARGS>
 int print(const char *fmt, ARGS&&...args)
 {
     return fprint(stdout, fmt, std::forward<ARGS>(args)...);
-}
-template<typename...ARGS>
-int fprint(FILE *out, const char *fmt, ARGS&&...args)
-{
-    auto str = stringfrmat(fmt, std::forward<ARGS>(args)...);
-    return fwrite(str.c_str(), str.size(), 1, out);
 }
 template<typename...ARGS>
 std::string stringformat(const char *fmt, ARGS&&...args)
