@@ -458,6 +458,14 @@ auto formatter(const char *fmt, ARGS&&...args)
 }
 
 template<typename...ARGS>
+std::string stringformat(const char *fmt, ARGS&&...args)
+{
+    std::stringstream buf;
+    buf << StringFormatter<ARGS...>(fmt, std::forward<ARGS>(args)...);
+
+    return buf.str();
+}
+template<typename...ARGS>
 int fprint(FILE *out, const char *fmt, ARGS&&...args)
 {
     auto str = stringformat(fmt, std::forward<ARGS>(args)...);
@@ -468,14 +476,7 @@ int print(const char *fmt, ARGS&&...args)
 {
     return fprint(stdout, fmt, std::forward<ARGS>(args)...);
 }
-template<typename...ARGS>
-std::string stringformat(const char *fmt, ARGS&&...args)
-{
-    std::stringstream buf;
-    buf << StringFormatter<ARGS...>(fmt, std::forward<ARGS>(args)...);
 
-    return buf.str();
-}
 #ifdef QT_VERSION
 template<typename...ARGS>
 QString qstringformat(const char *fmt, ARGS&&...args)
