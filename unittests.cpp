@@ -443,3 +443,336 @@ TEST_CASE("hexdumper") {
         }
     }
 }
+#include "stringlibrary.h"
+
+TEST_CASE("stringlibrary") {
+    SECTION("charptr") {
+        SECTION("compare") {
+            CHECK( stringcompare("abcd", "abcd") == 0 );
+            CHECK( stringcompare("abcd", "abc") > 0 );
+            CHECK( stringcompare("abcd", "abcde") < 0 );
+            CHECK( stringcompare("aaaa", "zzzz") < 0 );
+            CHECK( stringcompare("zzzz", "aaaa") > 0 );
+            CHECK( stringcompare("", "") == 0 );
+            CHECK( stringcompare("", "a") < 0 );
+            CHECK( stringcompare("a", "") > 0 );
+
+            CHECK( stringcompare(L"abcd", L"abcd") == 0 );
+            CHECK( stringcompare(L"abcd", L"abc") > 0 );
+            CHECK( stringcompare(L"abcd", L"abcde") < 0 );
+            CHECK( stringcompare(L"aaaa", L"zzzz") < 0 );
+            CHECK( stringcompare(L"zzzz", L"aaaa") > 0 );
+            CHECK( stringcompare(L"", L"") == 0 );
+            CHECK( stringcompare(L"", L"a") < 0 );
+            CHECK( stringcompare(L"a", L"") > 0 );
+        }
+        SECTION("icompare") {
+            CHECK( stringicompare("ABCD", "abcd") == 0 );
+            CHECK( stringicompare("abcd", "abcd") == 0 );
+            CHECK( stringicompare("ABCD", "abc") > 0 );
+            CHECK( stringicompare("ABCD", "abcde") < 0 );
+            CHECK( stringicompare("AAAA", "zzzz") < 0 );
+            CHECK( stringicompare("ZZZZ", "aaaa") > 0 );
+            CHECK( stringicompare("", "") == 0 );
+            CHECK( stringicompare("", "A") < 0 );
+            CHECK( stringicompare("A", "") > 0 );
+
+            CHECK( stringicompare(L"ABCD", L"abcd") == 0 );
+            CHECK( stringicompare(L"ABCD", L"abc") > 0 );
+            CHECK( stringicompare(L"ABCD", L"abcde") < 0 );
+            CHECK( stringicompare(L"AAAA", L"zzzz") < 0 );
+            CHECK( stringicompare(L"ZZZZ", L"aaaa") > 0 );
+            CHECK( stringicompare(L"", L"") == 0 );
+            CHECK( stringicompare(L"", L"a") < 0 );
+            CHECK( stringicompare(L"a", L"") > 0 );
+        }
+    }
+    SECTION("std::string") {
+
+        SECTION("icompare") {
+            CHECK( stringicompare(std::string("ABCD"), std::string("abcd")) == 0 );
+            CHECK( stringicompare(std::string("abcd"), std::string("abcd")) == 0 );
+            CHECK( stringicompare(std::string("ABCD"), std::string("abc")) > 0 );
+            CHECK( stringicompare(std::string("ABCD"), std::string("abcde")) < 0 );
+            CHECK( stringicompare(std::string("AAAA"), std::string("zzzz")) < 0 );
+            CHECK( stringicompare(std::string("ZZZZ"), std::string("aaaa")) > 0 );
+            CHECK( stringicompare(std::string(""), std::string("")) == 0 );
+            CHECK( stringicompare(std::string(""), std::string("A")) < 0 );
+            CHECK( stringicompare(std::string("A"), std::string("")) > 0 );
+
+            CHECK( stringicompare(std::basic_string<wchar_t>(L"ABCD"), std::basic_string<wchar_t>(L"abcd")) == 0 );
+            CHECK( stringicompare(std::basic_string<wchar_t>(L"ABCD"), std::basic_string<wchar_t>(L"abc")) > 0 );
+            CHECK( stringicompare(std::basic_string<wchar_t>(L"ABCD"), std::basic_string<wchar_t>(L"abcde")) < 0 );
+            CHECK( stringicompare(std::basic_string<wchar_t>(L"AAAA"), std::basic_string<wchar_t>(L"zzzz")) < 0 );
+            CHECK( stringicompare(std::basic_string<wchar_t>(L"ZZZZ"), std::basic_string<wchar_t>(L"aaaa")) > 0 );
+            CHECK( stringicompare(std::basic_string<wchar_t>(L""), std::basic_string<wchar_t>(L"")) == 0 );
+            CHECK( stringicompare(std::basic_string<wchar_t>(L""), std::basic_string<wchar_t>(L"a")) < 0 );
+            CHECK( stringicompare(std::basic_string<wchar_t>(L"a"), std::basic_string<wchar_t>(L"")) > 0 );
+        }
+    }
+    SECTION("copy") {
+        SECTION("char") {
+            char buf[8];
+            CHECK( stringcopy(buf, "abcd") == buf+4 );
+            CHECK( memcmp(buf, "abcd", 4) == 0 );
+        }
+        SECTION("wchar") {
+            wchar_t buf[8];
+            CHECK( stringcopy(buf, L"abcd") == buf+4 );
+            CHECK( memcmp(buf, L"abcd", 4*sizeof(wchar_t)) == 0 );
+        }
+    }
+    SECTION("parseunsigned") {
+        SECTION("empty") {
+            std::string empty;
+            CHECK( parseunsigned(empty, 0) == std::make_pair(0ULL, empty.cbegin()) );
+        }
+        SECTION("conversions") {
+            struct testvalues {
+                int base;
+                std::string str;
+                uint64_t value;
+
+                int endpos;
+            };
+            std::vector<testvalues> tests= {
+                { 0, "12345678", 12345678,   -1 },
+                { 0, "1234567812345678", 1234567812345678LL,   -1 },
+                { 0, "01234567", 01234567,   -1 },
+                { 0, "0123456712345671234567", 0123456712345671234567LL,   -1 },
+                { 0, "0x12345678", 0x12345678,   -1 },
+                { 0, "0x123456789abcdef", 0x123456789abcdef,   -1 },
+                { 0, "0b010101010101010101", 87381,   -1 },
+
+                { 10, "12345678", 12345678,   -1 },
+                { 10, "1234567812345678", 1234567812345678LL,   -1 },
+                { 8, "1234567", 01234567,   -1 },
+                { 8, "123456712345671234567", 0123456712345671234567LL,   -1 },
+                { 16, "12345678", 0x12345678,   -1 },
+                { 16, "123456789abcdef", 0x123456789abcdef,   -1 },
+                { 2, "010101010101010101", 87381,   -1 },
+
+                // check that non digits cause parsing to stop at the right pos.
+                { 0, "12345678,test", 12345678,   8 },
+                { 0, "01234567,test", 01234567,   8 },
+                { 0, "0x12345678,test", 0x12345678,   10 },
+                { 0, "0b010101010101010101,test", 87381,   20 },
+
+                { 10, "12345678,test", 12345678,   8 },
+                { 8, "1234567,test", 01234567,   7 },
+                { 16, "12345678,test", 0x12345678,   8 },
+                { 2, "010101010101010101,test", 87381,   18 },
+
+                // non octal digits are invalid
+                { 0, "012345678", 01234567,   8 },
+                { 8, "012345678", 01234567,   8 },
+            };
+
+            for (auto& t : tests) {
+                int delta = (t.endpos==-1) ? t.str.size() : t.endpos;
+
+                const auto pend = t.str.cbegin() + delta;
+                const auto *cend = t.str.c_str() + delta;
+
+                INFO( "test str=" << t.str << " base=" << t.base << " delta=" << delta );
+                CHECK( parseunsigned(t.str, t.base) == std::make_pair(t.value, pend) );
+                CHECK( parseunsigned(t.str.c_str(), t.base) == std::make_pair(t.value, cend) );
+            }
+        }
+    }
+
+    SECTION("parsesigned") {
+        SECTION("positivenumbers") {
+            struct testvalues {
+                int base;
+                std::string str;
+                int64_t value;
+
+                int endpos;
+            };
+            std::vector<testvalues> tests= {
+                { 0, "12345678", 12345678,   -1 },
+                { 0, "1234567812345678", 1234567812345678LL,   -1 },
+                { 0, "01234567", 01234567,   -1 },
+                { 0, "0123456712345671234567", 0123456712345671234567LL,   -1 },
+                { 0, "0x12345678", 0x12345678,   -1 },
+                { 0, "0x123456789abcdef", 0x123456789abcdef,   -1 },
+                { 0, "0b010101010101010101", 87381,   -1 },
+
+                { 10, "12345678", 12345678,   -1 },
+                { 10, "1234567812345678", 1234567812345678LL,   -1 },
+                { 8, "1234567", 01234567,   -1 },
+                { 8, "123456712345671234567", 0123456712345671234567LL,   -1 },
+                { 16, "12345678", 0x12345678,   -1 },
+                { 16, "123456789abcdef", 0x123456789abcdef,   -1 },
+                { 2, "010101010101010101", 87381,   -1 },
+
+                // check that non digits cause parsing to stop at the right pos.
+                { 0, "12345678,test", 12345678,   8 },
+                { 0, "01234567,test", 01234567,   8 },
+                { 0, "0x12345678,test", 0x12345678,   10 },
+                { 0, "0b010101010101010101,test", 87381,   20 },
+
+                { 10, "12345678,test", 12345678,   8 },
+                { 8, "1234567,test", 01234567,   7 },
+                { 16, "12345678,test", 0x12345678,   8 },
+                { 2, "010101010101010101,test", 87381,   18 },
+
+                // non octal digits are invalid
+                { 0, "012345678", 01234567,   8 },
+                { 8, "012345678", 01234567,   8 },
+            };
+
+            for (const auto& t : tests) {
+                int delta = (t.endpos==-1) ? t.str.size() : t.endpos;
+
+                const auto pend = t.str.cbegin() + delta;
+                const auto *cend = t.str.c_str() + delta;
+
+                INFO( "test str=" << t.str << " base=" << t.base << " delta=" << delta );
+                CHECK( parsesigned(t.str, t.base) == std::make_pair(t.value, pend) );
+                CHECK( parsesigned(t.str.c_str(), t.base) == std::make_pair(t.value, cend) );
+            }
+        }
+        SECTION("negativenumbers") {
+            struct testvalues {
+                int base;
+                std::string str;
+                int64_t value;
+
+                int endpos;
+            };
+            std::vector<testvalues> tests= {
+                { 0, "-12345678", -12345678,   -1 },
+                { 0, "-1234567812345678", -1234567812345678LL,   -1 },
+                { 0, "-01234567", -01234567,   -1 },
+                { 0, "-0123456712345671234567", -0123456712345671234567LL,   -1 },
+                { 0, "-0x12345678", -0x12345678,   -1 },
+                { 0, "-0x123456789abcdef", -0x123456789abcdef,   -1 },
+                { 0, "-0b010101010101010101", -87381,   -1 },
+
+                { 10, "-12345678", -12345678,   -1 },
+                { 10, "-1234567812345678", -1234567812345678LL,   -1 },
+                { 8, "-1234567", -01234567,   -1 },
+                { 8, "-123456712345671234567", -0123456712345671234567LL,   -1 },
+                { 16, "-12345678", -0x12345678,   -1 },
+                { 16, "-123456789abcdef", -0x123456789abcdef,   -1 },
+                { 2, "-010101010101010101", -87381,   -1 },
+
+                // check that non digits cause parsing to stop at the right pos.
+                { 0, "-12345678,test", -12345678,   8+1 },
+                { 0, "-01234567,test", -01234567,   8+1 },
+                { 0, "-0x12345678,test", -0x12345678,   10+1 },
+                { 0, "-0b010101010101010101,test", -87381,   20+1 },
+
+                { 10, "-12345678,test", -12345678,   8+1 },
+                { 8, "-1234567,test", -01234567,   7+1 },
+                { 16, "-12345678,test", -0x12345678,   8+1 },
+                { 2, "-010101010101010101,test", -87381,   18+1 },
+
+                // non octal digits are invalid
+                { 0, "-012345678", -01234567,   8+1 },
+                { 8, "-012345678", -01234567,   8+1 },
+            };
+
+            for (const auto& t : tests) {
+                int delta = (t.endpos==-1) ? t.str.size() : t.endpos;
+
+                const auto pend = t.str.cbegin() + delta;
+                const auto *cend = t.str.c_str() + delta;
+
+                INFO( "test str=" << t.str << " base=" << t.base << " delta=" << delta );
+                CHECK( parsesigned(t.str, t.base) == std::make_pair(t.value, pend) );
+                CHECK( parsesigned(t.str.c_str(), t.base) == std::make_pair(t.value, cend) );
+            }
+        }
+    }
+}
+
+#include "argparse.h"
+TEST_CASE("argparse") {
+    SECTION("test") {
+        const char*argv[] = { "pgmname", "-a", "123", "-b123", "-pear", "0x1234", "-pTEST", "--apple=test", "--long", "999", "firstfile", "secondfile", "-" };
+        int argc = sizeof(argv)/sizeof(*argv);
+        int n = 0;
+        int argmask = 0;
+        int nargs = 0;
+        bool foundstdin = false;
+        for (auto& arg : ArgParser(argc, argv))
+            switch(arg.option())
+            {
+                case 'a':
+                    CHECK( arg.getint() == 123 );
+                    argmask |= 1;
+                    nargs ++;
+                    break;
+
+                case 'b':
+                    CHECK( arg.getint() == 123 );
+                    argmask |= 2;
+                    nargs ++;
+                    break;
+                case 'p':
+                    if (arg.match("-pear")) {
+                        CHECK( arg.getint() == 0x1234 );
+                        argmask |= 4;
+                        nargs ++;
+                    }
+                    else {
+                        CHECK( std::string(arg.getstr()) == "TEST" );
+                        argmask |= 8;
+                        nargs ++;
+                    }
+                    break;
+                case '-':
+                    if (arg.match("--unused")) {
+                        CHECK( false );
+                    }
+                    else if (arg.match("--apple")) {
+                        CHECK( std::string(arg.getstr()) == "test" );
+                        argmask |= 16;
+                        nargs ++;
+                    }
+                    else if (arg.match("--long")) {
+                        CHECK( arg.getint() == 999 );
+                        argmask |= 32;
+                        nargs ++;
+                    }
+                    else {
+                        INFO( "unexpected long option" );
+                        CHECK( false );
+                    }
+                    break;
+                case 0:
+                    foundstdin = true;
+                    argmask |= 64;
+                    nargs ++;
+                    break;
+                case -1:
+                    switch(n++)
+                    {
+                        case 0:
+                            CHECK( std::string(arg.getstr()) == "firstfile" );
+                            argmask |= 128;
+                            nargs ++;
+                            break;
+                        case 1:
+                            CHECK( std::string(arg.getstr()) == "secondfile" );
+                            argmask |= 256;
+                            nargs ++;
+                            break;
+                        default:
+                            INFO( "expected only two non options args" );
+                            CHECK( false );
+                    }
+                    break;
+                default:
+                    INFO( "unexpected option" );
+                    CHECK( false );
+            }
+        CHECK( foundstdin == true );
+        CHECK( n == 2 );
+        CHECK( nargs == 9 );
+        CHECK( argmask == 0x1FF );
+    }
+}
