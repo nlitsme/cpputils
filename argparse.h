@@ -7,6 +7,8 @@
 #include <string>
 #include <stdlib.h>
 
+#include "stringlibrary.h"
+
 /*
 
  cmd -apple  -a 1234   first  second  -
