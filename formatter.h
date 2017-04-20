@@ -1,6 +1,17 @@
 #pragma once
 /*
- * A string formatter using iostream
+ * A string formatter using iostream.
+ *
+ * most features of the printf format strings are implemented.
+ * integer and string size specifiers like  '%ld', '%zs' or '%ls' are ignored.
+ *
+ * Usage:
+ *   std::cout << string::formatter("%d", 123);
+ *
+ *   or:
+ *
+ *   print("%d", 123);
+ *
  *
  * (C) 2016 Willem Hengeveld <itsme@xs4all.nl>
  */
@@ -16,16 +27,19 @@
 #include "stringconvert.h"
 #include "hexdumper.h"
 
-template<typename T>
-struct is_container : std::false_type {};
-
-template<typename T>
-struct is_container<std::vector<T> > : std::true_type {};
-template<typename T>
-struct is_container<std::basic_string<T> > : std::true_type {};
-template<typename T, int N>
-struct is_container<std::array<T,N> > : std::true_type {};
-
+/******************************************************************************
+ * add StringFormatter support for various types by implementing a operatoer<<:
+ *
+ *
+ *  windows managed c++  Platform::String, Platform::Guid
+ *  windows managed c++ Windows::Storage::Streams::IBuffer
+ *  windows GUID
+ *  Qt  QString
+ *  std::vector, std::array
+ *  non-char std::string ( does unicode conversion )
+ *  objects containing a 'ToString' method
+ *  P
+ */
 #ifdef _WIN32
 #ifdef __cplusplus_winrt 
 inline std::ostream& operator<<(std::ostream&os, Platform::String^s)
@@ -141,48 +155,95 @@ inline std::ostream& operator<<(std::ostream&os, const wchar_t *s)
     return os << string::convert<char>(s);
 }
 
-
-/*
- *   how to embed hexdumps:
- *       - using special format chars:  format("%{hexdump:spec}", v)
- *       - type dependent:   hexdump when a std::{vector|array}<unsigned-int> passed to '%s'
- *              this is what is currently implemented.
- *       - using wrapper:   format("%s", hexdump(v, ...))
- *              hexdump class has operator<<(ostream, hexdump) function
- *
- *   * all have problem that entire hexdump will be created before outputting.
- *     so not suitable for very large hexdumps.
+/*****************************************************************************
  *
  */
 
+namespace {
+/*
+ * some utility templates used for unpacking the parameter pack
+ */
+template<int ...> struct seq {};
+
+template<int N, int ...S> struct gens : gens<N-1, N-1, S...> {};
+
+template<int ...S> struct gens<0, S...>{ typedef seq<S...> type; };
+
+/*
+ * some template utilities, used to determine when to use hexdump
+ */
+template<typename T>
+struct is_container : std::false_type {};
+
+template<typename T>
+struct is_container<std::vector<T> > : std::true_type {};
+template<typename T>
+struct is_container<std::basic_string<T> > : std::true_type {};
+template<typename T, int N>
+struct is_container<std::array<T,N> > : std::true_type {};
+
+}
+
+/*****************************************************************************
+ * the StringFormatter class,
+ *
+ * keeps it's arguments in a tuple, outputs to a ostream when needed.
+ *
+ */
+
+template<typename...ARGS>
 struct StringFormatter {
-    std::stringstream buf;
-    template<typename...ARGS>
-    StringFormatter(const char *fmt, ARGS...args)
+    std::tuple<ARGS...> args;
+    const char *fmt;
+
+    StringFormatter(const char *fmt, ARGS&&...args)
+        : fmt(fmt), args(std::forward<ARGS>(args)...)
     {
-        format(fmt, args...);
+    }
+    StringFormatter(StringFormatter && f)
+        : args(std::move(f.args)), fmt(f.fmt) 
+    {
+    }
+    friend std::ostream& operator<<(std::ostream&os, const StringFormatter& o)
+    {
+        o.tostream(os);
+        return os;
+    }
+    void tostream(std::ostream&os) const
+    {
+        invokeformat(os, typename gens<sizeof...(ARGS)>::type());
+    }
+    template<int ...S>
+    void invokeformat(std::ostream&os, seq<S...>) const
+    {
+        format(os, fmt, std::get<S>(args) ...);
     }
 
+
+    //////////////
+    // from here on all methods are static.
+    //////////////
+
     // handle case when no params are left.
-    void format(const char *fmt)
+    static void format(std::ostream&os, const char *fmt) 
     {
         const char *p= fmt;
         while (*p) {
             if (*p=='%') {
                 p++;
                 if (*p=='%') {
-                    buf << *p++;
+                    os << *p++;
                 }
                 else {
                     throw std::runtime_error("not enough arguments to format");
                 }
             }
             else {
-                buf << *p++;
+                os << *p++;
             }
         }
     }
-    void applytype(std::ostream& os, char type)
+    static void applytype(std::ostream& os, char type)
     {
         // unused type/size chars: b k m n r v w y
         switch(type)
@@ -235,21 +296,8 @@ struct StringFormatter {
                 os << std::nouppercase;
     }
 
-#if 0
-    // NOTE: hex+asc-dump are not yet finished
-    template<typename T>
-        void ascdump(std::ostream& os, const char *spec, const char *endspec, T& value)
-        {
-            os << "ascdump(" << std::string(spec, endspec) << ')';
-        }
-    template<typename T>
-        void hexdump(std::ostream& os, const char *spec, const char *endspec, T& value)
-        {
-            os << "hexdump(" << std::string(spec, endspec) << ')';
-        }
-#endif
-    template<typename T, typename...ARGS>
-    void format(const char *fmt, T& value, ARGS...args)
+    template<typename T, typename...FARGS>
+    static void format(std::ostream& os, const char *fmt, T& value, FARGS&&...args) 
     {
         bool used_value = false;
         const char *p= fmt;
@@ -257,30 +305,8 @@ struct StringFormatter {
             if (*p=='%') {
                 p++;
                 if (*p=='%') {
-                    buf << *p++;
+                    os << *p++;
                 }
-#if 0
-                else if (*p=='{') {
-                    // extended format spec
-                    //    %{hexdump:...}
-                    //    %{ascdump:...}
-                    //
-                    char *q = std::strchr(p, '}');
-                    if (q==NULL)
-                        throw "invalid %{} format";
-                    if (p+8<=q && std::equal(p+1, p+8, "ascdump")) {
-                        ascdump(buf, p+8, q, value);
-                        p = q+1;
-                    }
-                    else if (p+8<=q && std::equal(p+1, p+8, "hexdump")) {
-                        hexdump(buf, p+8, q, value);
-                        p = q+1;
-                    }
-                    else {
-                        throw "unknown %{} format";
-                    }
-                }
-#endif
                 else {
 
                     // '-'  means left adjust
@@ -341,51 +367,51 @@ struct StringFormatter {
                         type= *p++;
 
                     // use formatting
-                    applytype(buf, type);
+                    applytype(os, type);
                     if (forcesign)
-                        buf << std::showpos;
+                        os << std::showpos;
                     else
-                        buf << std::noshowpos;
+                        os << std::noshowpos;
 
                     if (leftadjust)
-                        buf << std::left;
+                        os << std::left;
 
                     if (havewidth) {
-                        buf.width(width);
+                        os.width(width);
                         if (!leftadjust)
-                            buf << std::right;
+                            os << std::right;
                     }
                     else {
-                        buf.width(0);
+                        os.width(0);
                     }
                     // todo: support precision(truncate) for strings
                     if (haveprecision)
-                        buf.precision(precision);
-                    buf.fill(padchar);
+                        os.precision(precision);
+                    os.fill(padchar);
 
 
                     // todo: solve problem with (const wchar_t*) L"xxx" argument
                     //       -> currently this is represented as a pointer, instead of a unicode string.
                     if (type=='c')
-                        add_wchar(value);
+                        add_wchar(os, value);
                     else if (type=='p')
-                        add_pointer(value);
+                        add_pointer(os, value);
                     else if (type=='b')
-                        hex_dump_data(value);
+                        hex_dump_data(os, value);
                     else
-                        buf << value;
+                        os << value;
 
                     used_value = true;
                     // todo: make sure 'x', 'd' are outputted as integers.
 
                     // problem with "%b", std::vector<double>{1,2,3}
                     //     this will now be handled by hexdump, while i would like this to use operator<<
-                    format(p, args...);
+                    format(os, p, args...);
                     return;
                 }
             }
             else {
-                buf << *p++;
+                os << *p++;
             }
         }
 
@@ -396,83 +422,87 @@ struct StringFormatter {
     // otherwise the compiler would fail when trying to 
     // cast a non-pointer T to const void*
     template<typename T>
-    std::enable_if_t<std::is_pointer<T>::value, void> add_pointer(const T& value) { buf << (const void*)value; }
+    static std::enable_if_t<std::is_pointer<T>::value, void> add_pointer(std::ostream& os, const T& value) { os << (const void*)value; }
     template<typename T>
-    std::enable_if_t<!std::is_pointer<T>::value, void> add_pointer(const T& value) { }
+    static std::enable_if_t<!std::is_pointer<T>::value, void> add_pointer(std::ostream& os, const T& value) { }
 
     // make sure we don't call string::convert with non char types.
     template<typename T>
-    std::enable_if_t<std::is_integral<T>::value, void> add_wchar(const T& value) { 
+    static std::enable_if_t<std::is_integral<T>::value, void> add_wchar(std::ostream& os, const T& value) { 
         std::basic_string<wchar_t> wc(1, wchar_t(value));
-        buf << string::convert<char>(wc);
+        os << string::convert<char>(wc);
     }
     template<typename T>
-    std::enable_if_t<!std::is_integral<T>::value, void> add_wchar(const T& value) { }
+    static std::enable_if_t<!std::is_integral<T>::value, void> add_wchar(std::ostream& os, const T& value) { }
 
     // make sure we call hex::dumper only for bytevectors or arrays
     template<typename T>
-    std::enable_if_t<!is_container<T>::value,void> hex_dump_data(const T& value) { }
+    static std::enable_if_t<!is_container<T>::value,void> hex_dump_data(std::ostream& os, const T& value) { }
     template<typename T>
-    std::enable_if_t<is_container<T>::value && std::is_same<typename T::value_type,double>::value,void> hex_dump_data(const T& value) { }
+    static std::enable_if_t<is_container<T>::value && std::is_same<typename T::value_type,double>::value,void> hex_dump_data(std::ostream& os, const T& value) { }
 
     template<typename T>
-    std::enable_if_t<is_container<T>::value && !std::is_same<typename T::value_type,double>::value,void> hex_dump_data(const T& value) { 
-        if (buf.fill()=='0')
-            buf.fill(0);
-        buf << std::hex << hex::dumper(value);
-    }
-
-    std::string str() const
-    {
-        return buf.str();
-    }
-
-#ifdef _WIN32
-    void todebug()
-    {
-        OutputDebugString(string::convert<TCHAR>(buf.str()).c_str());
-    }
-#ifdef __cplusplus_winrt 
-    Platform::String^ ToString()
-    {
-        //String^ str = ref new String();
-        return ref new Platform::String(string::convert<wchar_t>(buf.str()).c_str());
-        /*
-        IBuffer^ ibuf= WindowsRuntimeBufferExtensions(buf.str().c_str());
-        return Windows::Security::Cryptography::CryptographicBuffer::ConvertBinaryToString(BinaryStringEncoding::Utf8, ibuf);
-        */
-        //return ref new Platform::String(buf.str().c_str(), buf.str().size());
-        
-    }
-#endif
-#endif
-    int print(FILE *out= stdout)
-    {
-        auto str= buf.str();
-        return fwrite(str.c_str(), 1, str.size(), out);
+    static std::enable_if_t<is_container<T>::value && !std::is_same<typename T::value_type,double>::value,void> hex_dump_data(std::ostream& os, const T& value) { 
+        if (os.fill()=='0')
+            os.fill(0);
+        os << std::hex << hex::dumper(value);
     }
 };
 
+namespace string {
 template<typename...ARGS>
-int print(const char *fmt, ARGS...args)
+auto formatter(const char *fmt, ARGS&&...args)
 {
-    return StringFormatter(fmt, args...).print();
+    return StringFormatter<ARGS...>(fmt, std::forward<ARGS>(args)...);
+}
+}
+
+template<typename...ARGS>
+int print(const char *fmt, ARGS&&...args)
+{
+    return fprint(stdout, fmt, std::forward<ARGS>(args)...);
 }
 template<typename...ARGS>
-int fprint(FILE *out, const char *fmt, ARGS...args)
+int fprint(FILE *out, const char *fmt, ARGS&&...args)
 {
-    return StringFormatter(fmt, args...).print(out);
+    auto str = stringfrmat(fmt, std::forward<ARGS>(args)...);
+    return fwrite(str.c_str(), str.size(), 1, out);
 }
 template<typename...ARGS>
-std::string stringformat(const char *fmt, ARGS...args)
+std::string stringformat(const char *fmt, ARGS&&...args)
 {
-    return StringFormatter(fmt, args...).str();
+    std::stringstream buf;
+    buf << StringFormatter<ARGS...>(fmt, std::forward<ARGS>(args)...);
+
+    return buf.str();
 }
 #ifdef QT_VERSION
 template<typename...ARGS>
-QString qstringformat(const char *fmt, ARGS...args)
+QString qstringformat(const char *fmt, ARGS&&...args)
 {
-    return QString::fromStdString(StringFormatter(fmt, args...).str());
+    return QString::fromStdString(stringformat(fmt, std::forward<ARGS>(args)...));
 }
 #endif
+
+#ifdef _WIN32
+template<typename...ARGS>
+void debug(const char *fmt, ARGS&&...args)
+{
+    OutputDebugString(string::convert<TCHAR>(stringformat(fmt, std::forward<ARGS>(args)...).c_str());
+}
+#ifdef __cplusplus_winrt 
+Platform::String^ ToString()
+{
+    //String^ str = ref new String();
+    return ref new Platform::String(string::convert<wchar_t>(stringformat(fmt, std::forward<ARGS>(args)...)).c_str());
+    /*
+    IBuffer^ ibuf= WindowsRuntimeBufferExtensions(buf.str().c_str());
+    return Windows::Security::Cryptography::CryptographicBuffer::ConvertBinaryToString(BinaryStringEncoding::Utf8, ibuf);
+    */
+    //return ref new Platform::String(buf.str().c_str(), buf.str().size());
+    
+}
+#endif
+#endif
+
 
