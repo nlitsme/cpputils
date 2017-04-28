@@ -398,6 +398,8 @@ struct StringFormatter {
                         add_pointer(os, value);
                     else if (type=='b')
                         hex_dump_data(os, value);
+                    else if (type=='x' || type=='d' || type=='i')
+                        output_int(os, value);
                     else
                         os << value;
 
@@ -447,6 +449,19 @@ struct StringFormatter {
             os.fill(0);
         os << std::hex << hex::dumper(value);
     }
+
+    template<typename T>
+    static std::enable_if_t<!std::is_integral<T>::value,void> output_int(std::ostream& os, T value) { }
+    template<typename T>
+    static std::enable_if_t<std::is_integral<T>::value && std::is_signed<T>::value,void> output_int(std::ostream& os, T value) {
+        os << (long long)value;
+    }
+    template<typename T>
+    static std::enable_if_t<std::is_integral<T>::value && std::is_unsigned<T>::value,void> output_int(std::ostream& os, T value) {
+        os << (unsigned long long)value;
+    }
+
+
 };
 
 namespace string {

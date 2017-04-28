@@ -238,6 +238,12 @@ TEST_CASE("formatter") {
         CHECK_FALSE( stringformat("%i", 123) != "123" );
         CHECK_FALSE( stringformat("%i", 123) == "321" );
     }
+    SECTION("hexints") {
+        CHECK( stringformat("%02x", uint8_t(123)) == "7b" );
+        CHECK( stringformat("%04x", uint8_t(123)) == "007b" );
+        CHECK( stringformat("%04x", uint16_t(12345)) == "3039" );
+        CHECK( stringformat("%08x", uint32_t(123456789)) == "075bcd15" );
+    }
     SECTION("hexdumps") {
         CHECK( stringformat("%b", "abc") == "" );      // hexdump of c-string does not work.
 
