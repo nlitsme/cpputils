@@ -398,7 +398,7 @@ struct StringFormatter {
                         add_pointer(os, value);
                     else if (type=='b')
                         hex_dump_data(os, value);
-                    else if (type=='x' || type=='d' || type=='i')
+                    else if (std::string("iduoxX").find(type)!=std::string::npos)
                         output_int(os, value);
                     else
                         os << value;

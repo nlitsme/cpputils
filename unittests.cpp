@@ -243,6 +243,38 @@ TEST_CASE("formatter") {
         CHECK( stringformat("%04x", uint8_t(123)) == "007b" );
         CHECK( stringformat("%04x", uint16_t(12345)) == "3039" );
         CHECK( stringformat("%08x", uint32_t(123456789)) == "075bcd15" );
+        CHECK( stringformat("%02x", int(123)) == "7b" );
+        CHECK( stringformat("%04x", int(123)) == "007b" );
+        CHECK( stringformat("%04x", int(12345)) == "3039" );
+        CHECK( stringformat("%08x", int(123456789)) == "075bcd15" );
+
+        CHECK( stringformat("%02x", unsigned(123)) == "7b" );
+        CHECK( stringformat("%04x", unsigned(123)) == "007b" );
+        CHECK( stringformat("%04x", unsigned(12345)) == "3039" );
+        CHECK( stringformat("%08x", unsigned(123456789)) == "075bcd15" );
+
+    }
+    SECTION("decints") {
+        CHECK( stringformat("%02d", uint8_t(123)) == "123" );
+        CHECK( stringformat("%04d", uint8_t(123)) == "0123" );
+        CHECK( stringformat("%06d", uint16_t(12345)) == "012345" );
+        CHECK( stringformat("%010d", uint32_t(123456789)) == "0123456789" );
+        CHECK( stringformat("%02d", int(123)) == "123" );
+        CHECK( stringformat("%04d", int(123)) == "0123" );
+        CHECK( stringformat("%06d", int(12345)) == "012345" );
+        CHECK( stringformat("%010d", int(123456789)) == "0123456789" );
+
+        CHECK( stringformat("%02d", unsigned(123)) == "123" );
+        CHECK( stringformat("%04d", unsigned(123)) == "0123" );
+        CHECK( stringformat("%06d", unsigned(12345)) == "012345" );
+        CHECK( stringformat("%010d", unsigned(123456789)) == "0123456789" );
+
+    }
+    SECTION("strings") {
+        CHECK( stringformat("%s", "abcd") == "abcd" );
+        CHECK( stringformat("%8s", "abcd") == "    abcd" );
+        CHECK( stringformat("%-8s", "abcd") == "abcd    " );
+        CHECK( stringformat("%3.3s", "abcd") == "abcd" );     // ... todo: should return "abc"
     }
     SECTION("hexdumps") {
         CHECK( stringformat("%b", "abc") == "" );      // hexdump of c-string does not work.
