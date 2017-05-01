@@ -40,6 +40,43 @@ Example:
 The first line converts a wchar\_t string, which is either utf-16 or utf-32 encoded depending on the compiler,
 to a utf-8 string, the second line converts to utf-16.
 
+## argparse
+
+Class for conveniently parsing commandline arguments.
+
+This example will parse: `cmd -apple  -a 1234   first  second  -`
+
+```c++
+for (auto& arg : ArgParser(argc, argv))
+   switch (arg.option())
+   {
+   case 'a': if (arg.match("apple")) {
+                 /*...*/
+             }
+             else {
+                 a_arg = arg.getint();
+             }
+             break;
+   case 'v': verbosity = arg.count();
+             break;
+   case 0:   usestdin = true;
+             break;
+   case -1:  switch(n++)
+             {
+             case 0: first = arg.getstr(); break;
+             case 1: second = arg.getstr(); break;
+             }
+   }
+```
+
+## stringlibrary
+
+Several utility functions for handling NUL terminated char and wchar strings, 
+and std::strings:
+ * stringcopy, stringlength, stringcompare, stringicompare
+
+Parsing integers from strings:
+ * parseunsigned, parsesigned
 
 ### todo
 
