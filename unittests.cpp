@@ -382,6 +382,320 @@ TEST_CASE("formatter") {
     SECTION("custom") {
         CHECK( stringformat("%s", mytype()) == "MYTYPE" );
     }
+    SECTION("fromcpython") {
+        CHECK( stringformat("%.1d", 1) == "1" );
+        //CHECK( stringformat("%.100d", 1) == "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001" );
+        CHECK( stringformat("%0100d", 1) == "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001" );
+        CHECK( stringformat("%f", 1.0) == "1.000000" );
+        CHECK( stringformat("%x", 10) == "a" );
+        CHECK( stringformat("%x", 100000000000) == "174876e800" );
+        CHECK( stringformat("%o", 10) == "12" );
+        CHECK( stringformat("%o", 100000000000) == "1351035564000" );
+        CHECK( stringformat("%d", 10) == "10" );
+        CHECK( stringformat("%d", 100000000000) == "100000000000" );
+        CHECK( stringformat("%d", 42) == "42" );
+        CHECK( stringformat("%d", -42) == "-42" );
+        CHECK( stringformat("%d", 42) == "42" );
+        CHECK( stringformat("%d", -42) == "-42" );
+        CHECK( stringformat("%d", 42.0) == "42" );
+        CHECK( stringformat("%o", 0) == "0" );
+        CHECK( stringformat("%o", 0) == "0" );
+        CHECK( stringformat("%d", 0) == "0" );
+        CHECK( stringformat("%d", 0) == "0" );
+        CHECK( stringformat("%x", 0x42) == "42" );
+        CHECK( stringformat("%x", 0x42) == "42" );
+        CHECK( stringformat("%o", 042) == "42" );
+        CHECK( stringformat("%o", 042) == "42" );
+#ifdef SUPPORT_NEGATIVE_HEX_OCT
+unittests.cpp:406: FAILED:	  CHECK( stringformat("%x", -0x42) == "-42" )	with expansion:	  "ffffffffffffffbe" == "-42"	
+unittests.cpp:408: FAILED:	  CHECK( stringformat("%x", -0x42) == "-42" )	with expansion:	  "ffffffffffffffbe" == "-42"	
+unittests.cpp:410: FAILED:	  CHECK( stringformat("%o", -042) == "-42" )	with expansion:	  "1777777777777777777736" == "-42"	
+unittests.cpp:412: FAILED:	  CHECK( stringformat("%o", -042) == "-42" )	with expansion:	  "1777777777777777777736" == "-42"	
+        CHECK( stringformat("%x", -0x42) == "-42" );
+        CHECK( stringformat("%x", -0x42) == "-42" );
+        CHECK( stringformat("%o", -042) == "-42" );
+        CHECK( stringformat("%o", -042) == "-42" );
+#endif
+        CHECK( stringformat("%g", 1.1) == "1.1" );
+    }
+    SECTION("fromwxmac") {
+        // tests taken from the 'wx for mac' library
+        CHECK( stringformat("%+d", 123456) == "+123456" );
+        CHECK( stringformat("%d", -123456) == "-123456" );
+#ifdef SUPPORT_SPACE_FOR_PLUS
+unittests.cpp:418: FAILED:	  CHECK( stringformat("% d", 123456) == " 123456" )	with expansion:	  "123456" == " 123456"	
+        CHECK( stringformat("% d", 123456) == " 123456" );
+#endif
+        CHECK( stringformat("%10d", 123456) == "    123456" );
+        CHECK( stringformat("%010d", 123456) == "0000123456" );
+        CHECK( stringformat("%-10d", -123456) == "-123456   " );
+        CHECK( stringformat("%X", 0xABCD) == "ABCD" );
+#ifdef SUPPORT_POUND_SIGN
+unittests.cpp:423: FAILED:	  CHECK( stringformat("%#X", 0xABCD) == "0XABCD" )	due to unexpected exception with message:	  unknown format char	
+unittests.cpp:424: FAILED:	  CHECK( stringformat("%#x", 0xABCD) == "0xabcd" )	due to unexpected exception with message:	  unknown format char	
+unittests.cpp:426: FAILED:	  CHECK( stringformat("%#o", 01234567) == "01234567" )	due to unexpected exception with message:	  unknown format char	
+
+
+        CHECK( stringformat("%#X", 0xABCD) == "0XABCD" );
+        CHECK( stringformat("%#x", 0xABCD) == "0xabcd" );
+        CHECK( stringformat("%o", 01234567) == "1234567" );
+        CHECK( stringformat("%#o", 01234567) == "01234567" );
+#endif
+#ifdef SUPPORT_POINTERS
+unittests.cpp:427: FAILED:	  CHECK( stringformat("%p", (void*)0xABCDEF) == "00ABCDEF" )	with expansion:	  "0xabcdef" == "00ABCDEF"	
+unittests.cpp:428: FAILED:	  CHECK( stringformat("%p", (void*)__null) == "00000000" )	with expansion:	  "0x0" == "00000000"	
+unittests.cpp:429: FAILED:	  CHECK( stringformat("%p", (void*)0xABCDEFABCDEF) == "0000ABCDEFABCDEF" )	with expansion:	  "0xabcdefabcdef" == "0000ABCDEFABCDEF"	
+unittests.cpp:430: FAILED:	  CHECK( stringformat("%p", (void*)__null) == "0000000000000000" )	with expansion:	  "0x0" == "0000000000000000"	
+unittests.cpp:432: FAILED:	  CHECK( stringformat("%p", (void*)__null) == "(nil)" )	with expansion:	  "0x0" == "(nil)"	
+
+
+        CHECK( stringformat("%p", (void*)0xABCDEF) == "00ABCDEF" );
+        CHECK( stringformat("%p", (void*)NULL) == "00000000" );
+        CHECK( stringformat("%p", (void*)0xABCDEFABCDEF) == "0000ABCDEFABCDEF" );
+        CHECK( stringformat("%p", (void*)NULL) == "0000000000000000" );
+        CHECK( stringformat("%p", (void*)0xABCDEF) == "0xabcdef" );
+        CHECK( stringformat("%p", (void*)NULL) == "(nil)" );
+#endif
+        CHECK( stringformat("%e",2.342E+112) == "2.342000e+112" );
+        CHECK( stringformat("%10.4e",-2.342E-112) == "-2.3420e-112" );
+        CHECK( stringformat("%11.4e",-2.342E-112) == "-2.3420e-112" );
+        CHECK( stringformat("%15.4e",-2.342E-112) == "   -2.3420e-112" );
+        CHECK( stringformat("%G",-2.342E-02) == "-0.02342" );
+        CHECK( stringformat("%G",3.1415e-116) == "3.1415E-116" );
+        CHECK( stringformat("%016e", 3141.5e100) == "0003.141500e+103" );
+        CHECK( stringformat("%16e", 3141.5e100) == "   3.141500e+103" );
+        CHECK( stringformat("%-16e", 3141.5e100) == "3.141500e+103   " );
+        CHECK( stringformat("%010.3e", 3141.5e100) == "3.142e+103" );
+        CHECK( stringformat("%5f", 3.3) == "3.300000" );
+        CHECK( stringformat("%5f", 3.0) == "3.000000" );
+        CHECK( stringformat("%5f", .999999E-4) == "0.000100" );
+        CHECK( stringformat("%5f", .99E-3) == "0.000990" );
+        CHECK( stringformat("%5f", 3333.0) == "3333.000000" );
+        CHECK( stringformat("%5g", 3.3) == "  3.3" );
+        CHECK( stringformat("%5g", 3.0) == "    3" );
+        CHECK( stringformat("%5g", .999999E-114) == "9.99999e-115" );
+        CHECK( stringformat("%5g", .99E-3) == "0.00099" );
+        CHECK( stringformat("%5g", 3333.0) == " 3333" );
+        CHECK( stringformat("%5g", 0.01) == " 0.01" );
+        //CHECK( stringformat("%5.g", 3.3) == "    3" );
+        CHECK( stringformat("%5.g", 3.0) == "    3" );
+        //CHECK( stringformat("%5.g", .999999E-114) == "1e-114" );
+        CHECK( stringformat("%5.g", 1.0E-4) == "0.0001" );
+        //CHECK( stringformat("%5.g", .99E-3) == "0.001" );
+        //CHECK( stringformat("%5.g", 3333.0E100) == "3e+103" );
+        CHECK( stringformat("%5.g", 0.01) == " 0.01" );
+        CHECK( stringformat("%5.2g", 3.3) == "  3.3" );
+        CHECK( stringformat("%5.2g", 3.0) == "    3" );
+        CHECK( stringformat("%5.2g", .999999E-114) == "1e-114" );
+        CHECK( stringformat("%5.2g", .99E-3) == "0.00099" );
+        CHECK( stringformat("%5.2g", 3333.0E100) == "3.3e+103" );
+        CHECK( stringformat("%5.2g", 0.01) == " 0.01" );
+        CHECK( stringformat("%5s", "abc") == "  abc" );
+        CHECK( stringformat("%5s", "a") == "    a" );
+        CHECK( stringformat("%5s", "abcdefghi") == "abcdefghi" );
+        CHECK( stringformat("%-5s", "abc") == "abc  " );
+        CHECK( stringformat("%-5s", "abcdefghi") == "abcdefghi" );
+#ifdef SUPPORT_STRING_TRUNCATION
+        CHECK( stringformat("%.5s", "abcdefghi") == "abcde" );
+#endif
+#ifdef SUPPORT_VARIABLE_WIDTH
+unittests.cpp:473: FAILED:	  CHECK( stringformat("%*.*f", 10, 1, 0.123) == "       0.1" )	due to unexpected exception with message:	  unknown format char	
+unittests.cpp:474: FAILED:	  CHECK( stringformat("%*.*f", 10, 4, 0.123) == "    0.1230" )	due to unexpected exception with message:	  unknown format char	
+unittests.cpp:475: FAILED:	  CHECK( stringformat("%*.*f", 3, 1, 0.123) == "0.1" )	due to unexpected exception with message:	  unknown format char	
+unittests.cpp:476: FAILED:	  CHECK( stringformat("%%%.*f", 3, 0.0023456789) == "%0.002" )	due to unexpected exception with message:	  unknown format char	
+unittests.cpp:477: FAILED:	  CHECK( stringformat("%*c", 8, 'a') == "       a" )	due to unexpected exception with message:	  unknown format char	
+unittests.cpp:478: FAILED:	  CHECK( stringformat("%*s", 8, "four") == "    four" )	due to unexpected exception with message:	  unknown format char	
+unittests.cpp:479: FAILED:	  CHECK( stringformat("%*s %*s", 8, "four", 6, "four") == "    four   four" )	due to unexpected exception with message:	  unknown format char	
+unittests.cpp:490: FAILED:	  CHECK( stringformat("%4$.3f %1$i - test - %2$li %3$d", 123, 444444444, 555, -0.666) == "-0.666 123 - test - 444444444 555" )	due to unexpected exception with message:	  unknown format char	
+        CHECK( stringformat("%*.*f", 10, 1, 0.123) == "       0.1" );
+        CHECK( stringformat("%*.*f", 10, 4, 0.123) == "    0.1230" );
+        CHECK( stringformat("%*.*f", 3, 1, 0.123) == "0.1" );
+        CHECK( stringformat("%%%.*f", 3, 0.0023456789) == "%0.002" );
+        CHECK( stringformat("%*c", 8, 'a') == "       a" );
+        CHECK( stringformat("%*s", 8, "four") == "    four" );
+        CHECK( stringformat("%*s %*s", 8, "four", 6, "four") == "    four   four" );
+#endif
+        CHECK( stringformat("%%") == "%" );
+        CHECK( stringformat("%%%%%%") == "%%%" );
+        CHECK( stringformat("%%%5s", "abc") == "%  abc" );
+        CHECK( stringformat("%%%5s%%", "abc") == "%  abc%" );
+        CHECK( stringformat("%lld", 123456789) == "123456789" );
+        CHECK( stringformat("%lld", -123456789) == "-123456789" );
+        CHECK( stringformat("%llu", 123456789) == "123456789" );
+        CHECK( stringformat("%I64d", 123456789) == "123456789" );
+        CHECK( stringformat("%I64x", 0x123456789abcdef) == "123456789abcdef" );
+        CHECK( stringformat("%i %li - test - %d %.3f", 123, 444444444, 555, -0.666) == "123 444444444 - test - 555 -0.666" );
+// todo: what does '$' mean?
+//        CHECK( stringformat("%4$.3f %1$i - test - %2$li %3$d", 123, 444444444, 555, -0.666) == "-0.666 123 - test - 444444444 555" );
+        CHECK( stringformat("unicode string: %ls %lc - ansi string: %hs %hc\n\n", L"unicode!!", L'W', "ansi!!", 'w') == "unicode string: unicode!! W - ansi string: ansi!! w\n\n" );
+
+    }
+    SECTION("reactos") {
+        // unittests taken from the reactos printf test suite
+        // - many commented out tests are in disaggreement with my format library
+//CHECK( stringformat("%I", 1) ==  "I" );
+#ifdef SUPPORT_POUND_SIGN
+unittests.cpp:496: FAILED:	  CHECK( stringformat("%#04.8x", 1) == "0x00000001" )	due to unexpected exception with message:	  unknown format char	
+unittests.cpp:497: FAILED:	  CHECK( stringformat("%#-08.2x", 1) == "0x01    " )	due to unexpected exception with message:	  unknown format char	
+unittests.cpp:498: FAILED:	  CHECK( stringformat("%#.0x", 1) == "0x1" )	due to unexpected exception with message:	  unknown format char	
+unittests.cpp:499: FAILED:	  CHECK( stringformat("%#08o", 1) == "00000001" )	due to unexpected exception with message:	  unknown format char	
+unittests.cpp:500: FAILED:	  CHECK( stringformat("%#o", 1) == "01" )	due to unexpected exception with message:	  unknown format char	
+CHECK( stringformat("%#04.8x", 1) == "0x00000001" );
+CHECK( stringformat("%#-08.2x", 1) == "0x01    " );
+CHECK( stringformat("%#.0x", 1) == "0x1" );
+CHECK( stringformat("%#08o", 1) == "00000001" );
+CHECK( stringformat("%#o", 1) == "01" );
+#endif
+wchar_t wide[] = { 'w','i','d','e',0};
+// 'w'  is a microsoft specific format size specifier.
+//'w'CHECK( stringformat("%ws",  wide) == "wide" );
+//'w'CHECK( stringformat("%-10ws",  wide ) == "wide      " );
+//'w'CHECK( stringformat("%10ws",  wide ) == "      wide" );
+//CHECK( stringformat("%#+ -03whlls",  wide ) == "wide" );
+//CHECK( stringformat("%w0s",  wide ) == "0s" );
+//CHECK( stringformat("%w-s",  wide ) == "-s" );
+CHECK( stringformat("%ls",  wide ) == "wide" );
+CHECK( stringformat("%Ls",  "not wide" ) == "not wide" );
+CHECK( stringformat("%3c", 'a') == "  a" );
+CHECK( stringformat("%3d", 1234) == "1234" );
+CHECK( stringformat("%-1d", 2) == "2" );
+CHECK( stringformat("%2.4f", 8.6) == "8.6000" );
+CHECK( stringformat("%0f", 0.6) == "0.600000" );
+CHECK( stringformat("%.0f", 0.6) == "1" );
+CHECK( stringformat("%2.4e", 8.6) == "8.6000e+00" );
+#ifdef SUPPORT_SPACE_FOR_PLUS
+CHECK( stringformat("% 2.4e", 8.6) == " 8.6000e+00" );
+CHECK( stringformat("% 014.4e", 8.6) == " 008.6000e+00" );
+CHECK( stringformat("% 2.4e", -8.6) == "-8.6000e+00" );
+#endif
+CHECK( stringformat("%+2.4e", 8.6) == "+8.6000e+00" );
+CHECK( stringformat("%2.4g", 8.6) == "8.6" );
+CHECK( stringformat("%-i", -1) == "-1" );
+CHECK( stringformat("%-i", 1) == "1" );
+CHECK( stringformat("%+i", 1) == "+1" );
+CHECK( stringformat("%o", 10) == "12" );
+//CHECK( stringformat("%s", 0) == "(null)" );
+CHECK( stringformat("%s", "%%%%") == "%%%%" );
+
+// ... 'u'  does not have a special meaning in formatter.h
+//CHECK( stringformat("%u", -1) == "4294967295" );
+//
+//  these are all invalid format strings
+//CHECK( stringformat("%w", -1) == "" );
+//CHECK( stringformat("%h", -1) == "" );
+//CHECK( stringformat("%z", -1) == "z" );
+//CHECK( stringformat("%j", -1) == "j" );
+//CHECK( stringformat("%F", -1) == "" );
+//CHECK( stringformat("%N", -1) == "" );
+//CHECK( stringformat("%H", -1) == "H" );
+
+// returns unicode string with formatter.h
+//CHECK( stringformat("x%cx",  0x100+'X') == "xXx" );
+
+// 'h' does not truncate it's argument.
+//CHECK( stringformat("%hx",  0x12345) == "2345" );
+//CHECK( stringformat("%hhx",  0x123) == "123" );
+//
+//these are all unicode chars
+//CHECK( stringformat("%c", 0x3031) == "1" );
+//CHECK( stringformat("%hc", 0x3031) == "1" );
+//CHECK( stringformat("%wc", 0x3031) == "?" );
+//CHECK( stringformat("%lc", 0x3031) == "?" );
+//CHECK( stringformat("%Lc", 0x3031) == "1" );
+//CHECK( stringformat("%Ic", 0x3031) == "Ic" );
+//CHECK( stringformat("%Iwc", 0x3031) == "Iwc" );
+//CHECK( stringformat("%I32c", 0x3031) == "1" );
+//CHECK( stringformat("%I64c", 0x3031) == "1" );
+//CHECK( stringformat("%4c", 0x3031) == "   1" );
+//CHECK( stringformat("%04c", 0x3031) == "0001" );
+//CHECK( stringformat("%+4c", 0x3031) == "   1" );
+CHECK( stringformat("%d", 1234567) == "1234567" );
+CHECK( stringformat("%d", -1234567) == "-1234567" );
+// 'h' does not truncate
+//CHECK( stringformat("%hd", 1234567) == "-10617" );
+CHECK( stringformat("%08d", 1234) == "00001234" );
+//  our '0' adds 0 padding to the end.
+//CHECK( stringformat("%-08d", 1234) == "1234    " );
+//TODO  our '+' ends up at the wrong location.
+//CHECK( stringformat("%+08d", 1234) == "+0001234" );
+CHECK( stringformat("%+3d", 1234) == "+1234" );
+CHECK( stringformat("%3.3d", 1234) == "1234" );
+//??? CHECK( stringformat("%3.6d", 1234) == "001234" );
+CHECK( stringformat("%8d", -1234) == "   -1234" );
+//TODO  our '+' ends up at the wrong location.
+//TODO: CHECK( stringformat("%08d", -1234) == "-0001234" );
+CHECK( stringformat("%ld", -1234) == "-1234" );
+//'w' CHECK( stringformat("%wd", -1234) == "-1234" );
+// 'l' does not truncate
+//CHECK( stringformat("%ld", -5149074030855LL) == "591757049" );
+//CHECK( stringformat("%lld", -5149074030855LL) == "591757049" );
+CHECK( stringformat("%I64d", -5149074030855LL) == "-5149074030855" );
+//CHECK( stringformat("%Ld", -5149074030855LL) == "591757049" );
+//'w' CHECK( stringformat("%lhwI64d", -5149074030855LL) == "-5149074030855" );
+//'w' CHECK( stringformat("%I64hlwd", -5149074030855LL) == "-5149074030855" );
+//'w' CHECK( stringformat("%hlwd", -5149074030855LL) == "32505" );
+//'I' CHECK( stringformat("%Ild", -5149074030855LL) == "Ild" );
+//'h' CHECK( stringformat("%hd", -5149074030855LL) == "32505" );
+//'h' CHECK( stringformat("%hhd", -5149074030855LL) == "32505" );
+//'h' CHECK( stringformat("%hI32hd", -5149074030855LL) == "32505" );
+//'w' CHECK( stringformat("%wd", -5149074030855LL) == "591757049" );
+CHECK( stringformat("%u", 1234) == "1234" );
+//'u' CHECK( stringformat("%u", -1234) == "4294966062" );
+//'u' CHECK( stringformat("%lu", -1234) == "4294966062" );
+//'u' CHECK( stringformat("%llu", -1234) == "4294966062" );
+//'u' CHECK( stringformat("%+u", 1234) == "1234" );
+//' ' CHECK( stringformat("% u", 1234) == "1234" );
+CHECK( stringformat("%x", 0x1234abcd) == "1234abcd" );
+CHECK( stringformat("%X", 0x1234abcd) == "1234ABCD" );
+//'#'CHECK( stringformat("%#x", 0x1234abcd) == "0x1234abcd" );
+//'#'CHECK( stringformat("%#X", 0x1234abcd) == "0X1234ABCD" );
+//notrunc CHECK( stringformat("%llx", 0x1234abcd5678ULL) == "abcd5678" );
+CHECK( stringformat("%I64x", 0x1234abcd5678ULL) == "1234abcd5678" );
+//CHECK( stringformat("%p", (void*)(ptrdiff_t)0x123abc) == "00123ABC" );
+//'#'CHECK( stringformat("%#p", (void*)(ptrdiff_t)0x123abc) == "0X00123ABC" );
+//'#'CHECK( stringformat("%#012p", (void*)(ptrdiff_t)0x123abc) == "  0X00123ABC" );
+//p CHECK( stringformat("%9p", (void*)(ptrdiff_t)0x123abc) == " 00123ABC" );
+//p CHECK( stringformat("%09p", (void*)(ptrdiff_t)0x123abc) == " 00123ABC" );
+//p CHECK( stringformat("% 9p", (void*)(ptrdiff_t)0x123abc) == " 00123ABC" );
+//p CHECK( stringformat("%-9p", (void*)(ptrdiff_t)0x123abc) == "00123ABC " );
+//p CHECK( stringformat("%4p", (void*)(ptrdiff_t)0x123abc) == "00123ABC" );
+//p CHECK( stringformat("%9.4p", (void*)(ptrdiff_t)0x123abc) == " 00123ABC" );
+//CHECK( stringformat("%I64p", 0x123abc456789ULL) == "123ABC456789" );
+//'h' CHECK( stringformat("%hp", 0x123abc) == "00003ABC" );
+CHECK( stringformat("%o", 1234) == "2322" );
+//CHECK( stringformat("%o", -1234) == "37777775456" );
+CHECK( stringformat("%s", "test") == "test" );
+//CHECK( stringformat("%S", L"test") == "test" );
+CHECK( stringformat("%ls", L"test") == "test" );
+//'w' CHECK( stringformat("%ws", L"test") == "test" );
+CHECK( stringformat("%hs", "test") == "test" );
+//CHECK( stringformat("%hS", "test") == "test" );
+CHECK( stringformat("%7s", "test") == "   test" );
+CHECK( stringformat("%07s", "test") == "000test" );
+//CHECK( stringformat("%.3s", "test") == "tes" );
+//CHECK( stringformat("%+7.3s", "test") == "    tes" );
+//CHECK( stringformat("%+4.0s", "test") == "    " );
+long double fpval = 1. / 3.;
+//?? CHECK( stringformat("%f", fpval) == "-0.000000" );
+//?? CHECK( stringformat("%lf", fpval) == "-0.000000" );
+//?? CHECK( stringformat("%llf", fpval) == "-0.000000" );
+//?? CHECK( stringformat("%Lf", fpval) == "-0.000000" );
+CHECK( stringformat("%f", (double)fpval) == "0.333333" );
+CHECK( stringformat("%f", (double)0.125) == "0.125000" );
+CHECK( stringformat("%3.7f", (double)fpval) == "0.3333333" );
+//CHECK( stringformat("%3.30f", (double)fpval) == "0.333333333333333310000000000000" );
+//CHECK( stringformat("%3.60f", (double)fpval) == "0.333333333333333310000000000000000000000000000000000000000000" );
+//CHECK( stringformat("%3.80f", (double)fpval) == "0.33333333333333331000000000000000000000000000000000000000000000000000000000000000" );
+//notypeconversion CHECK( stringformat("%.9f", 0x7ff8000000000000ULL) == "1.#QNAN0000" );
+CHECK( stringformat("%e", 33.54223) == "3.354223e+01" );
+//noportableCHECK( stringformat("%e", NAN) == "1.#QNAN0e+000" );
+//noportableCHECK( stringformat("%.9e", NAN) == "1.#QNAN0000e+000" );
+//noportableCHECK( stringformat("%e", INFINITY ) == "1.#INF00e+000" );
+//noportableCHECK( stringformat("%e", -INFINITY ) == "-1.#INF00e+000" );
+//unknown CHECK( stringformat("%Z", 0) == "(null)" );
+//'w' CHECK( stringformat("%lI64wQ", "test") == "Q" );
+
+    }
 }
 
 
