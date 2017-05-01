@@ -275,8 +275,11 @@ class Hexdumper : public Hexdumper_base {
                 os << std::setw(sizeof(T)*8);
                 output_bin(os, val);
             }
-            else
+            else {
+                // todo: avoid warning about shiftcount >= width of type.
+                // for sizeof(T)==8
                 os << (((unsigned)val)&((1LL<<(8*sizeof(T)))-1));
+            }
 
             ++p;
         }
