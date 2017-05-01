@@ -309,7 +309,7 @@ class Hexdumper : public Hexdumper_base {
         os.width(0);
         os.fill(0);
         os.precision(0);
-        os.flags(0);
+        os.flags(std::ios_base::fmtflags(0));
         return os;
     }
 

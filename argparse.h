@@ -87,7 +87,7 @@ class ArgParser {
          * returns -1 for non option arguments
          * returns 0  for single dash '-'
          */
-        char option()
+        int option()
         {
             if (i==argc)
                 throw std::range_error("arg out of range");
