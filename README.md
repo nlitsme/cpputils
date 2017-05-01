@@ -44,5 +44,11 @@ to a utf-8 string, the second line converts to utf-16.
 ### todo
 
  * add support for hexdumping data from streams.
+ * string alignment / width does not work correctly for unicode characters > 0x80.
+ * `"% d"` : space-for-positive is not supported.
+ * `"%*d"` : width from argument list is not supported.
+ * `"%+08d"`  produces the wrong result: the sign will be after the padding, instead of in front.
+ * `"%.8s"`  string truncation does not work.
+
 
 (C) 2016 Willem Hengeveld <itsme@xs4all.nl>

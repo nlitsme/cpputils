@@ -323,7 +323,7 @@ struct StringFormatter {
                     }
                     else if (*p==' ') {
                         p++;
-                        //blankforpositive= true;
+                        //blankforpositive= true;  // <-- todo
                     }
                     
                     // '0' means pad with zero
@@ -335,7 +335,8 @@ struct StringFormatter {
 
                     // width specification
                     char *q;
-                    // todo: support '*'
+                    // todo: support '*'  : take size from argumentlist.
+                    // todo: support '#'  : adds 0, 0x, 0X prefix to oct/hex numbers
                     int width= strtol(p, &q, 10);
                     bool havewidth= p!=q;
                     p= q;
@@ -389,25 +390,19 @@ struct StringFormatter {
                         os.precision(precision);
                     os.fill(padchar);
 
-
-                    // todo: solve problem with (const wchar_t*) L"xxx" argument
-                    //       -> currently this is represented as a pointer, instead of a unicode string.
                     if (type=='c')
                         add_wchar(os, value);
                     else if (type=='p')
                         add_pointer(os, value);
                     else if (type=='b')
                         hex_dump_data(os, value);
-                    else if (std::string("iduoxX").find(type)!=std::string::npos)
+                    else if (std::strchr("iduoxX", type))
                         output_int(os, value);
                     else
                         os << value;
 
                     used_value = true;
-                    // todo: make sure 'x', 'd' are outputted as integers.
 
-                    // problem with "%b", std::vector<double>{1,2,3}
-                    //     this will now be handled by hexdump, while i would like this to use operator<<
                     format(os, p, args...);
                     return;
                 }
@@ -451,13 +446,14 @@ struct StringFormatter {
     }
 
     template<typename T>
-    static std::enable_if_t<!std::is_integral<T>::value,void> output_int(std::ostream& os, T value) { }
+    static std::enable_if_t<!(std::is_integral<T>::value || std::is_floating_point<T>::value),void> output_int(std::ostream& os, T value) { }
     template<typename T>
-    static std::enable_if_t<std::is_integral<T>::value && std::is_signed<T>::value,void> output_int(std::ostream& os, T value) {
+    static std::enable_if_t<(std::is_integral<T>::value || std::is_floating_point<T>::value) && std::is_signed<T>::value,void> output_int(std::ostream& os, T value) {
+        // note: hex or octal numbers are not printed as signed numbers.
         os << (long long)value;
     }
     template<typename T>
-    static std::enable_if_t<std::is_integral<T>::value && std::is_unsigned<T>::value,void> output_int(std::ostream& os, T value) {
+    static std::enable_if_t<(std::is_integral<T>::value || std::is_floating_point<T>::value) && std::is_unsigned<T>::value,void> output_int(std::ostream& os, T value) {
         os << (unsigned long long)value;
     }
 
