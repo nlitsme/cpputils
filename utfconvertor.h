@@ -1,7 +1,10 @@
 #pragma once
-#include "utfcvutils.h"
 
 namespace {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
+#include "utfcvutils.cpp"
+#pragma clang diagnostic pop
 
     /* anonymous namespace for translating char types to types defined by utfcvutils.h */
 
