@@ -1126,6 +1126,7 @@ TEST_CASE("argparse") {
                     }
                     break;
                 case 0:
+                    CHECK( arg.getstr() == "-" );
                     foundstdin = true;
                     argmask |= 64;
                     nargs ++;
