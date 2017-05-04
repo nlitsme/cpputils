@@ -932,15 +932,28 @@ TEST_CASE("stringlibrary") {
                 // non octal digits are invalid
                 { 0, "012345678", 01234567,   8 },
                 { 8, "012345678", 01234567,   8 },
+
+
+                { 0, "0x12345678:", 0x12345678,   -2 },
+                { 10, "0x12345678:", 0,   1 },
+                { 0, ":0:", 0,   0 },
+                { 0, ":1:", 0,   0 },
+                { 0, "1234:", 1234,   4 },
+                { 0, "1234:5678", 1234,   4 },
+                { 0, "1234:", 1234,   -2 },
+                { 0, "1", 1,   -1 },
+                { 0, "0", 0,   -1 },
+                { 0, "", 0,   0 },
             };
 
             for (auto& t : tests) {
-                int delta = (t.endpos==-1) ? t.str.size() : t.endpos;
+                int delta = (t.endpos<0) ? t.endpos+t.str.size()+1 : t.endpos;
 
                 const auto pend = t.str.cbegin() + delta;
                 const auto *cend = t.str.c_str() + delta;
 
-                INFO( "test str=" << t.str << " base=" << t.base << " delta=" << delta );
+                auto res = parseunsigned(t.str.begin(), t.str.end(), t.base);
+                INFO( "test str=" << t.str << " base=" << t.base << " delta=" << delta << " -> " << res.first << ", " << res.second-t.str.begin());
                 CHECK( parseunsigned(t.str, t.base) == std::make_pair(t.value, pend) );
                 CHECK( parseunsigned(t.str.c_str(), t.base) == std::make_pair(t.value, cend) );
             }
@@ -990,7 +1003,7 @@ TEST_CASE("stringlibrary") {
             };
 
             for (const auto& t : tests) {
-                int delta = (t.endpos==-1) ? t.str.size() : t.endpos;
+                int delta = (t.endpos<0) ? t.endpos+t.str.size()+1 : t.endpos;
 
                 const auto pend = t.str.cbegin() + delta;
                 const auto *cend = t.str.c_str() + delta;
@@ -1042,7 +1055,7 @@ TEST_CASE("stringlibrary") {
             };
 
             for (const auto& t : tests) {
-                int delta = (t.endpos==-1) ? t.str.size() : t.endpos;
+                int delta = (t.endpos<0) ? t.endpos+t.str.size()+1 : t.endpos;
 
                 const auto pend = t.str.cbegin() + delta;
                 const auto *cend = t.str.c_str() + delta;
