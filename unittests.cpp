@@ -944,6 +944,19 @@ TEST_CASE("stringlibrary") {
                 { 0, "1", 1,   -1 },
                 { 0, "0", 0,   -1 },
                 { 0, "", 0,   0 },
+
+                // a valid hex number.
+                { 16, "0b", 11,   2 },
+
+                // these are all valid decimal nrs followed by a letter.
+                { 10, "0b", 0,   1 },
+                { 10, "0x", 0,   1 },
+                { 10, "0y", 0,   1 },
+
+                // these should all be invalid numbers
+                { 0, "0b", 0,   0 },
+                { 0, "0x", 0,   0 },
+                { 0, "0y", 0,   0 },
             };
 
             for (auto& t : tests) {

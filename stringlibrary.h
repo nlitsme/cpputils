@@ -96,7 +96,8 @@ int char2nyble(T c)
 template<typename P>
 std::pair<uint64_t, P> parseunsigned(P first, P last, int base)
 {
-    int state = 0;
+    int state = 0;    // 3 = foundbase, 2 = invalid, 1 = found '0', 0 = initial state.
+    int digits = 0;
     uint64_t num = 0;
     auto p = first;
     while (p<last)
@@ -106,7 +107,9 @@ std::pair<uint64_t, P> parseunsigned(P first, P last, int base)
             if (state==0) {
                 if (1<=n && n<=9) {
                     base = 10;
-                    num = n;  // is first real digit
+                    state = 3;
+                    num = n;  // this is the first real digit
+                    digits = 1;
                 }
                 else if (n==0) {
                     // expect 0<octal>, 0b<binary>, 0x<hex>
@@ -121,13 +124,17 @@ std::pair<uint64_t, P> parseunsigned(P first, P last, int base)
             else if (state==1) {
                 if (*p == 'x') {
                     base = 16;
+                    state = 3;
                 }
                 else if (*p == 'b') {
                     base = 2;
+                    state = 3;
                 }
                 else if (0<=n && n<=7) {
                     base = 8;
-                    num = n;  // is first real digit
+                    state = 3;
+                    num = n;  // this is the first real digit
+                    digits = 1;
                 }
                 else if (n>=8) {
                     // invalid
@@ -148,6 +155,7 @@ std::pair<uint64_t, P> parseunsigned(P first, P last, int base)
             }
             num *= base;
             num += n;
+            digits++;
         }
 
         ++p;
@@ -155,7 +163,10 @@ std::pair<uint64_t, P> parseunsigned(P first, P last, int base)
     if (state==2)
         return std::make_pair(0, first);
 
-    // todo: currently  "0x" and "0b" are valid numbers too.
+    if (state==3 && digits==0) {
+        // "0x" and "0b" are invalid numbers.
+        return std::make_pair(0, first);
+    }
     return std::make_pair(num, p);
 }
 template<typename P>
