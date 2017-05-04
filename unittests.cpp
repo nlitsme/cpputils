@@ -945,6 +945,10 @@ TEST_CASE("stringlibrary") {
                 { 0, "0", 0,   -1 },
                 { 0, "", 0,   0 },
 
+                { 0, "0:0x123:16", 0,   1 },
+                { 0, "1:0x123:16", 1,   1 },
+                { 0, "0x123:16", 0x123,   5 },
+
                 // a valid hex number.
                 { 16, "0b", 11,   2 },
 
@@ -959,7 +963,7 @@ TEST_CASE("stringlibrary") {
                 { 0, "0y", 0,   0 },
             };
 
-            for (auto& t : tests) {
+            for (const auto& t : tests) {
                 int delta = (t.endpos<0) ? t.endpos+t.str.size()+1 : t.endpos;
 
                 const auto pend = t.str.cbegin() + delta;
@@ -969,63 +973,15 @@ TEST_CASE("stringlibrary") {
                 INFO( "test str=" << t.str << " base=" << t.base << " delta=" << delta << " -> " << res.first << ", " << res.second-t.str.begin());
                 CHECK( parseunsigned(t.str, t.base) == std::make_pair(t.value, pend) );
                 CHECK( parseunsigned(t.str.c_str(), t.base) == std::make_pair(t.value, cend) );
+
+                CHECK( parsesigned(t.str, t.base) == std::make_pair((int64_t)t.value, pend) );
+                CHECK( parsesigned(t.str.c_str(), t.base) == std::make_pair((int64_t)t.value, cend) );
+
             }
         }
     }
 
     SECTION("parsesigned") {
-        SECTION("positivenumbers") {
-            struct testvalues {
-                int base;
-                std::string str;
-                int64_t value;
-
-                int endpos;
-            };
-            std::vector<testvalues> tests= {
-                { 0, "12345678", 12345678,   -1 },
-                { 0, "1234567812345678", 1234567812345678LL,   -1 },
-                { 0, "01234567", 01234567,   -1 },
-                { 0, "0123456712345671234567", 0123456712345671234567LL,   -1 },
-                { 0, "0x12345678", 0x12345678,   -1 },
-                { 0, "0x123456789abcdef", 0x123456789abcdef,   -1 },
-                { 0, "0b010101010101010101", 87381,   -1 },
-
-                { 10, "12345678", 12345678,   -1 },
-                { 10, "1234567812345678", 1234567812345678LL,   -1 },
-                { 8, "1234567", 01234567,   -1 },
-                { 8, "123456712345671234567", 0123456712345671234567LL,   -1 },
-                { 16, "12345678", 0x12345678,   -1 },
-                { 16, "123456789abcdef", 0x123456789abcdef,   -1 },
-                { 2, "010101010101010101", 87381,   -1 },
-
-                // check that non digits cause parsing to stop at the right pos.
-                { 0, "12345678,test", 12345678,   8 },
-                { 0, "01234567,test", 01234567,   8 },
-                { 0, "0x12345678,test", 0x12345678,   10 },
-                { 0, "0b010101010101010101,test", 87381,   20 },
-
-                { 10, "12345678,test", 12345678,   8 },
-                { 8, "1234567,test", 01234567,   7 },
-                { 16, "12345678,test", 0x12345678,   8 },
-                { 2, "010101010101010101,test", 87381,   18 },
-
-                // non octal digits are invalid
-                { 0, "012345678", 01234567,   8 },
-                { 8, "012345678", 01234567,   8 },
-            };
-
-            for (const auto& t : tests) {
-                int delta = (t.endpos<0) ? t.endpos+t.str.size()+1 : t.endpos;
-
-                const auto pend = t.str.cbegin() + delta;
-                const auto *cend = t.str.c_str() + delta;
-
-                INFO( "test str=" << t.str << " base=" << t.base << " delta=" << delta );
-                CHECK( parsesigned(t.str, t.base) == std::make_pair(t.value, pend) );
-                CHECK( parsesigned(t.str.c_str(), t.base) == std::make_pair(t.value, cend) );
-            }
-        }
         SECTION("negativenumbers") {
             struct testvalues {
                 int base;
@@ -1065,6 +1021,9 @@ TEST_CASE("stringlibrary") {
                 // non octal digits are invalid
                 { 0, "-012345678", -01234567,   8+1 },
                 { 8, "-012345678", -01234567,   8+1 },
+
+                { 0, "-1:0x123:16", -1,   2 },
+                { 0, "-0x123:16", -0x123,   6 },
             };
 
             for (const auto& t : tests) {
