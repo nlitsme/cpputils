@@ -92,7 +92,8 @@ class ArgParser {
             if (i==argc)
                 throw std::range_error("arg out of range");
             if (*p=='-') {
-                isoption = true;
+                // a single '-' by itself is not considered an option.
+                isoption = p[1]!=0;
                 return p[1];
             }
             isoption = false;
