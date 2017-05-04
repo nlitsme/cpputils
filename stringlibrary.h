@@ -113,7 +113,7 @@ std::pair<uint64_t, P> parseunsigned(P first, P last, int base)
                 }
                 else if (n==0) {
                     // expect 0<octal>, 0b<binary>, 0x<hex>
-                    state++;
+                    state = 1;
                 }
                 else {
                     // invalid
@@ -130,6 +130,11 @@ std::pair<uint64_t, P> parseunsigned(P first, P last, int base)
                     base = 2;
                     state = 3;
                 }
+                else if (n==-1) {
+                    // just a single '0' followed by a non digit
+                    // -> return '0'
+                    break;
+                }
                 else if (0<=n && n<=7) {
                     base = 8;
                     state = 3;
@@ -137,7 +142,7 @@ std::pair<uint64_t, P> parseunsigned(P first, P last, int base)
                     digits = 1;
                 }
                 else if (n>=8) {
-                    // invalid
+                    // invalid octal digit
                     state = 2;
                     break;
                 }
