@@ -37,6 +37,8 @@
 #include "utfconvertor.h"
 #endif
 
+#include <string>
+
 namespace string {
 
 namespace z {
