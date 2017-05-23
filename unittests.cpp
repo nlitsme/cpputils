@@ -1,8 +1,14 @@
-
+#ifdef WITH_CATCH
 #define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
 #include "contrib/catch.hpp"
+#elif defined(WITH_DOCTEST)
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "contrib/doctest.h"
+#define SECTION SUBCASE
+#endif
 
 #include "stringconvert.h"
+#include <vector>
 
 TEST_CASE("stringconvert") {
     SECTION("strlen") {
@@ -970,7 +976,8 @@ TEST_CASE("stringlibrary") {
                 const auto *cend = t.str.c_str() + delta;
 
                 auto res = parseunsigned(t.str.begin(), t.str.end(), t.base);
-                INFO( "test str=" << t.str << " base=" << t.base << " delta=" << delta << " -> " << res.first << ", " << res.second-t.str.begin());
+                auto pos = res.second-t.str.begin();  // in seperate variable for doctest.h
+                INFO( "test str=" << t.str << " base=" << t.base << " delta=" << delta << " -> " << res.first << ", " << pos);
                 CHECK( parseunsigned(t.str, t.base) == std::make_pair(t.value, pend) );
                 CHECK( parseunsigned(t.str.c_str(), t.base) == std::make_pair(t.value, cend) );
 

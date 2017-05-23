@@ -1,4 +1,10 @@
+#ifdef WITH_CATCH
 #include "contrib/catch.hpp"
+#elif defined(WITH_DOCTEST)
+#include "contrib/doctest.h"
+#define SECTION SUBCASE
+#endif
+
 
 // this second unit exists mostly  to guard against duplicate symbol linker errors
 #include "stringconvert.h"
