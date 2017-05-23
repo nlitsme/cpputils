@@ -92,7 +92,8 @@ class ArgParser {
             if (i==argc)
                 throw std::range_error("arg out of range");
             if (*p=='-') {
-                // a single '-' by itself is not considered an option.
+                // a single '-' by itself is not considered an option,
+                // so 'getstr()' will return "-"
                 isoption = p[1]!=0;
                 return p[1];
             }
@@ -127,6 +128,20 @@ class ArgParser {
         }
 
         /*
+         * checks for '--', usually used to end option processing
+         */
+        bool optionterminator()
+        {
+            if (i==argc)
+                throw std::range_error("arg out of range");
+
+            if (p+2!=pend)
+                return false;
+
+            return p[0]=='-' && p[1]=='-';
+        }
+
+        /*
          * gets the next argument string
          *
          * long arguments can have a '=' after the option name
@@ -138,13 +153,21 @@ class ArgParser {
         {
             if (i==argc)
                 throw std::range_error("arg out of range");
-            if (isoption && !longmatch)
+            if (isoption && !longmatch) {
+                // skips '-' + optionchar
                 p += 2;
-            else if (longmatch && *p=='=')
-                p++;
+            }
+            else if (longmatch) {
+                // long match need not match the full word.
+                p = std::find(p, pend, '=');
+                if (p!=pend)
+                    p++;
+            }
 
-            if (*p == 0)
+            if (*p == 0) {
+                // next arg when at the end of a word
                 operator++();
+            }
 
             return p;
         }
