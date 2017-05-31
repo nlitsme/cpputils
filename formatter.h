@@ -182,6 +182,12 @@ struct is_container<std::basic_string<T> > : std::true_type {};
 template<typename T, int N>
 struct is_container<std::array<T,N> > : std::true_type {};
 
+template<typename T>
+struct is_hexdumper : std::false_type {};
+
+template<typename T>
+struct is_hexdumper<hex::Hexdumper<T> > : std::true_type {};
+
 }
 
 /*****************************************************************************
@@ -434,7 +440,7 @@ struct StringFormatter {
 
     // make sure we call hex::dumper only for bytevectors or arrays
     template<typename T>
-    static std::enable_if_t<!is_container<T>::value,void> hex_dump_data(std::ostream& os, const T& value) { }
+    static std::enable_if_t<!(is_container<T>::value || is_hexdumper<T>::value),void> hex_dump_data(std::ostream& os, const T& value) { }
     template<typename T>
     static std::enable_if_t<is_container<T>::value && std::is_same<typename T::value_type,double>::value,void> hex_dump_data(std::ostream& os, const T& value) { }
 
@@ -443,6 +449,13 @@ struct StringFormatter {
         if (os.fill()=='0')
             os.fill(0);
         os << std::hex << hex::dumper(value);
+    }
+
+    template<typename T>
+    static std::enable_if_t<is_hexdumper<T>::value,void> hex_dump_data(std::ostream& os, const T& value) { 
+        if (os.fill()=='0')
+            os.fill(0);
+        os << std::hex << value;
     }
 
     template<typename T>

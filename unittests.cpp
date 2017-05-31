@@ -294,6 +294,9 @@ TEST_CASE("formatter") {
         // hexdump other types
         CHECK( stringformat("%b", std::vector<uint8_t>{1,2,3}) == "01 02 03  ..." );
         CHECK( stringformat("%b", std::vector<uint16_t>{1,2,3}) == "0001 0002 0003  ......" );
+
+        // printing a hexdumper
+        CHECK( stringformat("%-b", hex::dumper("abc", 3)) == "61 62 63" );
     }
     SECTION("inttypes") {
         CHECK( stringformat("%I64d", 1) == "1" );
