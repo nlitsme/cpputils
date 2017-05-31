@@ -1062,6 +1062,7 @@ TEST_CASE("argparse") {
             "-vvv",                  // mask 0x0400, counted in nargs, multiplicity checked
             "-pTEST",                // mask 0x0008, counted in nargs, value checked
             "--apple=test",          // mask 0x0010, counted in nargs, value checked
+            "--equal==test",         // mask 0x2000, counted in nargs, value checked
             "--bigword",             // mask 0x0200, counted in nbig
             "--long", "999",         // mask 0x0020, counted in nargs, value checked
             "firstfile",             // mask 0x0080, counted in nfiles, value checked
@@ -1130,6 +1131,11 @@ TEST_CASE("argparse") {
                         argmask |= 0x0010;
                         nargs ++;
                     }
+                    else if (arg.match("--equal")) {
+                        CHECK( std::string(arg.getstr()) == "=test" );
+                        argmask |= 0x2000;
+                        nargs ++;
+                    }
                     else if (arg.match("--long")) {
                         CHECK( arg.getint() == 999 );
                         argmask |= 0x0020;
@@ -1173,8 +1179,8 @@ TEST_CASE("argparse") {
         CHECK( nrends == 1 );
         CHECK( nfiles == 2 );
         CHECK( nextra == 3 );
-        CHECK( nargs == 7 );
+        CHECK( nargs == 8 );
         CHECK( nbig == 2 );
-        CHECK( argmask == 0x1FFF );
+        CHECK( argmask == 0x3FFF );
     }
 }
