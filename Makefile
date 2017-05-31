@@ -1,4 +1,5 @@
-CXXFLAGS=-O3 -std=c++1z -Wall
+CXXFLAGS=-g $(if $(D),-O0,-O3) -std=c++1z -Wall
+LDFLAGS=-g
 CDEFS?=-DWITH_CATCH
 all: unittests
 
