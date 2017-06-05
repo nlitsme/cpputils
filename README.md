@@ -50,12 +50,15 @@ This example will parse: `cmd -apple  -a 1234   first  second  -`
 for (auto& arg : ArgParser(argc, argv))
    switch (arg.option())
    {
-   case 'a': if (arg.match("apple")) {
+   case 'a': if (arg.match("-apple")) {
                  /*...*/
              }
              else {
                  a_arg = arg.getint();
              }
+             break;
+   case '-': if (arg.match("--verbose"))
+                 verbosity = 1;
              break;
    case 'v': verbosity = arg.count();
              break;
