@@ -24,6 +24,10 @@
                    a_arg = arg.getint();
                }
                break;
+           case '-':
+               if (arg.match("--long"))
+                   a_long = true;
+               break;
            case 0:
                usestdin = true;
                break;
