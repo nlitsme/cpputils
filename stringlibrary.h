@@ -217,4 +217,41 @@ std::pair<int64_t, typename T::const_iterator> parsesigned(const T& str, int bas
     return parsesigned(std::begin(str), std::end(str), base);
 }
 
+template<typename P1,typename P2>
+size_t hex2binary(P1 strfirst, P1 strlast, P2 first, P2 last)
+{
+    typedef typename std::iterator_traits<P2>::value_type value_type;
+    int shift = 0;
+    value_type word=0;
+    auto o= first;
+    for (auto i= strfirst ; i!=strlast && o!=last ; i++)
+    {
+        int n= char2nyble(*i);
+        if (n>=0 && n<16) {
+            if (shift==0) {
+                word= value_type(n);
+                shift += 4;
+            }
+            else {
+                word <<= 4;
+                word |= n;
+                shift += 4;
+            }
+            if (shift==sizeof(word)*8) {
+                *o++ = word;
 
+                shift = 0;
+            }
+        }
+    }
+    return o-first;
+}
+
+std::vector<uint8_t> hex2binary(const std::string& hexstr)
+{
+    std::vector<uint8_t> v(hexstr.size() / 2);
+    size_t n = hex2binary(hexstr.begin(), hexstr.end(), v.begin(), v.end());
+    v.resize(n);
+
+    return v;
+}
