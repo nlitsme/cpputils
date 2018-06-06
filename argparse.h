@@ -11,33 +11,33 @@
 
 /*
 
- cmd -apple  -a 1234   first  second  -
+    // cmd -apple  -a 1234   first  second  -
 
-   for (auto& arg : ArgParser(argc, argv))
-       switch (arg.option())
-       {
-           case 'a':
-               if (arg.match("apple")) {
-  
-               }
-               else {
-                   a_arg = arg.getint();
-               }
-               break;
-           case '-':
-               if (arg.match("--long"))
-                   a_long = true;
-               break;
-           case 0:
-               usestdin = true;
-               break;
-           case -1:
-               switch(n++)
-               {
-               case 0: first = arg.getstr(); break;
-               case 1: second = arg.getstr(); break;
-               }
-       }
+    for (auto& arg : ArgParser(argc, argv))
+        switch (arg.option())
+        {
+            case 'a':
+                if (arg.match("apple")) {
+   
+                }
+                else {
+                    a_arg = arg.getint();
+                }
+                break;
+            case '-':
+                if (arg.match("--long"))
+                    a_long = true;
+                break;
+            case 0:
+                usestdin = true;
+                break;
+            case -1:
+                switch(n++)
+                {
+                case 0: first = arg.getstr(); break;
+                case 1: second = arg.getstr(); break;
+                }
+        }
 
  */
 class ArgParser {
