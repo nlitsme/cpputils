@@ -18,6 +18,8 @@
 // fixed to UTFCV
 #define USE_UTFCV 1
 
+#include <string>
+
 
 // stringconver can use three different libraries for the actual conversions:
 //    boost/locale.hpp, libstdc++ codecvt, or my own utfconvertor.h
@@ -36,8 +38,6 @@
 #elif defined(USE_UTFCV)
 #include "utfconvertor.h"
 #endif
-
-#include <string>
 
 namespace string {
 
