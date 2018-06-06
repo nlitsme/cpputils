@@ -3,7 +3,7 @@ LDFLAGS=-g
 CDEFS?=-DWITH_CATCH
 all: unittests
 
-unittests: unittests.o unittests2.o
+unittests: unittests.o unittests2.o test-asn1.o
 	$(CXX) $(LDFLAGS) -o $@  $^
 
 %.o: %.cpp
