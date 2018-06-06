@@ -1,6 +1,7 @@
 #pragma once
 
 #include <utility>
+#include <iterator>
 
 // todo: strip, lstrip, rstrip
 //       split, join
@@ -247,9 +248,10 @@ size_t hex2binary(P1 strfirst, P1 strlast, P2 first, P2 last)
     return o-first;
 }
 
-std::vector<uint8_t> hex2binary(const std::string& hexstr)
+template<typename S, typename V>
+auto hex2binary(const S& hexstr)
 {
-    std::vector<uint8_t> v(hexstr.size() / 2);
+    V v(hexstr.size() / 2);
     size_t n = hex2binary(hexstr.begin(), hexstr.end(), v.begin(), v.end());
     v.resize(n);
 
