@@ -296,7 +296,7 @@ TEST_CASE("formatter") {
         CHECK( stringformat("%b", std::vector<uint16_t>{1,2,3}) == "0001 0002 0003  ......" );
 
         // printing a hexdumper
-        CHECK( stringformat("%-b", hex::dumper("abc", 3)) == "61 62 63" );
+        CHECK( stringformat("%-b", Hex::dumper("abc", 3)) == "61 62 63" );
     }
     SECTION("inttypes") {
         CHECK( stringformat("%I64d", 1) == "1" );
@@ -713,33 +713,33 @@ CHECK( stringformat("%e", 33.54223) == "3.354223e+01" );
 TEST_CASE("hexdumper") {
     SECTION("hex") {
         std::stringstream buf;
-        buf << hex::hexstring << std::setfill(' ') << hex::dumper("abcde", 5);
+        buf << Hex::hexstring << std::setfill(' ') << Hex::dumper("abcde", 5);
         CHECK( buf.str() == "61 62 63 64 65" );
     }
     SECTION("left") {
         std::stringstream buf;
-        buf << hex::singleline << std::left <<  hex::dumper("abcde", 5);
+        buf << Hex::singleline << std::left <<  Hex::dumper("abcde", 5);
         CHECK( buf.str() == "61 62 63 64 65" );
     }
     SECTION("right") {
         std::stringstream buf;
-        buf << hex::singleline << std::right <<  hex::dumper("abcde", 5);
+        buf << Hex::singleline << std::right <<  Hex::dumper("abcde", 5);
         CHECK( buf.str() == "abcde" );
     }
     SECTION("bin") {
         std::stringstream buf;
-        buf << hex::bin << std::left << hex::dumper(std::vector<uint8_t>{123});
+        buf << Hex::bin << std::left << Hex::dumper(std::vector<uint8_t>{123});
 
         CHECK( buf.str() == "01111011" );
     }
     SECTION("hexstring") {
         std::stringstream buf;
-        buf << hex::hexstring << hex::dumper("abcde", 5);
+        buf << Hex::hexstring << Hex::dumper("abcde", 5);
         CHECK( buf.str() == "6162636465" );
     }
     SECTION("ascstring") {
         std::stringstream buf;
-        buf << hex::ascstring << hex::dumper("abcde\r\n", 7);
+        buf << Hex::ascstring << Hex::dumper("abcde\r\n", 7);
         CHECK( buf.str() == "abcde.." );
     }
 
@@ -752,25 +752,25 @@ TEST_CASE("hexdumper") {
         }
 
         std::stringstream buf;
-        buf << hex::ascstring << hex::dumper(bv);
+        buf << Hex::ascstring << Hex::dumper(bv);
 
         CHECK( buf.str() == asc );
     }
     SECTION("singleline") {
         std::stringstream buf;
-        buf << hex::singleline <<  hex::dumper("abcde", 5);
+        buf << Hex::singleline <<  Hex::dumper("abcde", 5);
         CHECK( buf.str() == "61 62 63 64 65  abcde" );
     }
     SECTION("multiline") {
         std::stringstream buf;
-        buf << hex::multiline <<  hex::dumper("0123456789abcdefghijklmnopq", 27);
+        buf << Hex::multiline <<  Hex::dumper("0123456789abcdefghijklmnopq", 27);
         CHECK( buf.str() == 
 "30 31 32 33 34 35 36 37 38 39 61 62 63 64 65 66  0123456789abcdef\n"
 "67 68 69 6a 6b 6c 6d 6e 6f 70 71                 ghijklmnopq\n");
     }
     SECTION("offset") {
         std::stringstream buf;
-        buf << hex::offset(0xa000) << hex::multiline <<  hex::dumper("0123456789abcdefghijklmnopq", 27);
+        buf << Hex::offset(0xa000) << Hex::multiline <<  Hex::dumper("0123456789abcdefghijklmnopq", 27);
         CHECK( buf.str() == 
 "0000a000: 30 31 32 33 34 35 36 37 38 39 61 62 63 64 65 66  0123456789abcdef\n"
 "0000a010: 67 68 69 6a 6b 6c 6d 6e 6f 70 71                 ghijklmnopq\n");
@@ -778,7 +778,7 @@ TEST_CASE("hexdumper") {
     SECTION("step") {
         // this test currently fails
         std::stringstream buf;
-        buf << hex::offset(0xa000) << hex::step(3) << std::setw(2) <<  hex::dumper("0123456789abcdefghijklmnopq", 27);
+        buf << Hex::offset(0xa000) << Hex::step(3) << std::setw(2) <<  Hex::dumper("0123456789abcdefghijklmnopq", 27);
         CHECK( buf.str() == 
 "0000a000: 30 31  01\n"
 "0000a003: 33 34  34\n"
@@ -793,27 +793,27 @@ TEST_CASE("hexdumper") {
     SECTION("values") {
         std::stringstream buf;
         SECTION("byte") {
-            buf << hex::singleline << std::left << hex::dumper(std::vector<uint8_t>{0, 0x55, 127, 128, 0xAA, 255});
+            buf << Hex::singleline << std::left << Hex::dumper(std::vector<uint8_t>{0, 0x55, 127, 128, 0xAA, 255});
             CHECK( buf.str() == "00 55 7f 80 aa ff" );
         }
         SECTION("char") {
-            buf << hex::singleline << std::left << hex::dumper(std::vector<char>{0, 0x55, 127, -128, -0x56, -1});
+            buf << Hex::singleline << std::left << Hex::dumper(std::vector<char>{0, 0x55, 127, -128, -0x56, -1});
             CHECK( buf.str() == "00 55 7f 80 aa ff" );
         }
         SECTION("hword") {
-            buf << hex::singleline << std::left << hex::dumper(std::vector<uint16_t>{0, 127, 128, 255, 0x5555, 0x7fff, 0x8000, 0xAAAA, 0xFFFF});
+            buf << Hex::singleline << std::left << Hex::dumper(std::vector<uint16_t>{0, 127, 128, 255, 0x5555, 0x7fff, 0x8000, 0xAAAA, 0xFFFF});
             CHECK( buf.str() == "0000 007f 0080 00ff 5555 7fff 8000 aaaa ffff");
         }
         SECTION("short") {
-            buf << hex::singleline << std::left << hex::dumper(std::vector<int16_t>{0, 127, 128, 255, 0x5555, 0x7fff, -0x8000, -0x5556, -1});
+            buf << Hex::singleline << std::left << Hex::dumper(std::vector<int16_t>{0, 127, 128, 255, 0x5555, 0x7fff, -0x8000, -0x5556, -1});
             CHECK( buf.str() == "0000 007f 0080 00ff 5555 7fff 8000 aaaa ffff");
         }
         SECTION("dword") {
-            buf << hex::singleline << std::left << hex::dumper(std::vector<uint32_t>{0, 127, 128, 255, 0x7fff, 0x8000, 0xFFFF, 0x55555555, 0x7FFFFFFF, 0x80000000, 0xAAAAAAAA, 0xFFFFFFFF});
+            buf << Hex::singleline << std::left << Hex::dumper(std::vector<uint32_t>{0, 127, 128, 255, 0x7fff, 0x8000, 0xFFFF, 0x55555555, 0x7FFFFFFF, 0x80000000, 0xAAAAAAAA, 0xFFFFFFFF});
             CHECK( buf.str() == "00000000 0000007f 00000080 000000ff 00007fff 00008000 0000ffff 55555555 7fffffff 80000000 aaaaaaaa ffffffff" );
         }
         SECTION("long") {
-            buf << hex::singleline << std::left << hex::dumper(std::vector<int32_t>{0, 127, 128, 255, 0x7fff, 0x8000, 0xFFFF, 0x55555555, 0x7FFFFFFF, -0x7fffffff-1, -0x55555556, -1});
+            buf << Hex::singleline << std::left << Hex::dumper(std::vector<int32_t>{0, 127, 128, 255, 0x7fff, 0x8000, 0xFFFF, 0x55555555, 0x7FFFFFFF, -0x7fffffff-1, -0x55555556, -1});
             CHECK( buf.str() == "00000000 0000007f 00000080 000000ff 00007fff 00008000 0000ffff 55555555 7fffffff 80000000 aaaaaaaa ffffffff" );
         }
     }

@@ -60,7 +60,7 @@
 //  step(s)          -- 00000000: .... \n 00001000: .... \n ...
 //  
 
-namespace hex {
+namespace Hex {
 
 struct Hexdumper_base  {
     static int __baseofs() { static int value = std::ostream::xalloc(); return value; }
@@ -321,7 +321,7 @@ class Hexdumper : public Hexdumper_base {
 // **************************************** //
 
 
-// os << hex::hexstring << hex::dumper(v);
+// os << Hex::hexstring << Hex::dumper(v);
 // will output the convents of v, in one line, without separators.
 template <class _CharT, class _Traits>
 std::basic_ostream<_CharT, _Traits>&
@@ -334,7 +334,7 @@ hexstring(std::basic_ostream<_CharT, _Traits>&os)
     return os;
 }
 
-// os << hex::ascstring << hex::dumper(v);
+// os << Hex::ascstring << Hex::dumper(v);
 // will output the convents of v, in one line, as simplified ascii.
 template <class _CharT, class _Traits>
 std::basic_ostream<_CharT, _Traits>&
@@ -347,7 +347,7 @@ ascstring(std::basic_ostream<_CharT, _Traits>&os)
     return os;
 }
 
-// os << hex::multiline << hex::dumper(v);
+// os << Hex::multiline << Hex::dumper(v);
 // will output the contents of v, in a traditional multiline hexdump.
 template <class _CharT, class _Traits>
 std::basic_ostream<_CharT, _Traits>&
@@ -379,7 +379,7 @@ bin(std::basic_ostream<_CharT, _Traits>&os)
     return os;
 }
 
-//  use os << hex::offset(0x1234000) << hex::dumper(v) << endl;
+//  use os << Hex::offset(0x1234000) << Hex::dumper(v) << endl;
 //  will output a hexdump, with each line prefixed with an offset
 struct offset {
     uint64_t ofs;

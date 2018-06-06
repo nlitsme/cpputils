@@ -142,7 +142,6 @@ std::ostream& operator<<(std::ostream&os, const std::vector<T, A>& buf)
     return os;
 }
 
-
 // convert all none <char> strings to a char string
 // before outputting to the stream
 template<typename CHAR>
@@ -186,7 +185,7 @@ template<typename T>
 struct is_hexdumper : std::false_type {};
 
 template<typename T>
-struct is_hexdumper<hex::Hexdumper<T> > : std::true_type {};
+struct is_hexdumper<Hex::Hexdumper<T> > : std::true_type {};
 
 }
 
@@ -254,7 +253,7 @@ struct StringFormatter {
         // unused type/size chars: b k m n r v w y
         switch(type)
         {
-            case 'b': // 'b' for hex::dumper
+            case 'b': // 'b' for Hex::dumper
                 // '-':  only hex, otherwise: hex + ascii
                 // '0':  no spaces
                 break;
@@ -438,7 +437,7 @@ struct StringFormatter {
     template<typename T>
     static std::enable_if_t<!std::is_integral<T>::value, void> add_wchar(std::ostream& os, const T& value) { }
 
-    // make sure we call hex::dumper only for bytevectors or arrays
+    // make sure we call Hex::dumper only for bytevectors or arrays
     template<typename T>
     static std::enable_if_t<!(is_container<T>::value || is_hexdumper<T>::value),void> hex_dump_data(std::ostream& os, const T& value) { }
     template<typename T>
@@ -448,7 +447,7 @@ struct StringFormatter {
     static std::enable_if_t<is_container<T>::value && !std::is_same<typename T::value_type,double>::value,void> hex_dump_data(std::ostream& os, const T& value) { 
         if (os.fill()=='0')
             os.fill(0);
-        os << std::hex << hex::dumper(value);
+        os << std::hex << Hex::dumper(value);
     }
 
     template<typename T>
