@@ -3,9 +3,11 @@ LDFLAGS=/debug
 CDEFS?=/DWITH_CATCH
 CXX=cl.exe
 LD=cl.exe
-all: unittests
 
-unittests.exe: unittests.obj unittests2.obj test-asn1.obj
+all: unittests.exe
+
+unittests.exe: unittests.obj unittests2.obj
+	#	test-asn1.obj
 	$(LD) $(LDFLAGS) /Fe:$@  $^
 
 %.obj: %.cpp
