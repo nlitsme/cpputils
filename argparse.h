@@ -5,6 +5,7 @@
 #ifndef __ARGS_H__
 
 #include <string>
+#include <algorithm>
 #include <stdlib.h>
 
 #include "stringlibrary.h"
@@ -60,7 +61,7 @@ class ArgParser {
                 return;
             }
             p = argv[i];
-            pend = p + strlen(p);
+            pend = p + stringlength(p);
         }
 
         ArgIterator(const char **argv, int i, int argc)
@@ -120,10 +121,10 @@ class ArgParser {
         {
             if (i==argc)
                 throw std::range_error("arg out of range");
-            int namelen = strlen(name);
-            if (namelen > strlen(p))
+            int namelen = stringlength(name);
+            if (namelen > stringlength(p))
                 return false;
-            if (strncmp(name, p, namelen)==0) {
+            if (stringcompare(name, p)==0) {
                 p += namelen;
                 longmatch = true;
                 return true;
