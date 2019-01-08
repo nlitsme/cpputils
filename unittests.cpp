@@ -5,6 +5,8 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "contrib/doctest.h"
 #define SECTION SUBCASE
+#else
+#error define either WITH_CATCH or WITH_DOCTEST
 #endif
 
 #include "stringconvert.h"
