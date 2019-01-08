@@ -244,6 +244,17 @@ class Hexdumper : public Hexdumper_base {
             os << bits[i];
     }
 
+    template<typename INT>
+    static std::enable_if_t<(sizeof(INT)<8), void> output_hex_int(std::ostream& os, INT val)
+    {
+        os << (((unsigned)val)&((1LL<<(8*sizeof(T)))-1));
+    }
+    template<typename INT>
+    static std::enable_if_t<(sizeof(INT)==8), void> output_hex_int(std::ostream& os, INT val)
+    {
+        os << (uint64_t)val;
+    }
+
     static void output_hex(std::ostream& os, const T*first, const T*last, char filler, int numberbase, bool showbase, bool uppercasehex)
     {
         const T* p = first;
@@ -276,12 +287,7 @@ class Hexdumper : public Hexdumper_base {
                 output_bin(os, val);
             }
             else {
-                if constexpr (sizeof(T)<8) {
-                    os << (((unsigned)val)&((1LL<<(8*sizeof(T)))-1));
-                }
-                else {
-                    os << (uint64_t)val;
-                }
+                output_hex_int(os, val);
             }
 
             ++p;
