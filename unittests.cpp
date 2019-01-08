@@ -910,7 +910,7 @@ TEST_CASE("stringlibrary") {
     SECTION("parseunsigned") {
         SECTION("empty") {
             std::string empty;
-            CHECK( parseunsigned(empty, 0) == std::make_pair(0ULL, empty.cbegin()) );
+            CHECK( parseunsigned(empty, 0) == std::make_pair(uint64_t(0), empty.cbegin()) );
         }
         SECTION("conversions") {
             struct testvalues {
