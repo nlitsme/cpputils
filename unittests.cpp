@@ -816,6 +816,14 @@ TEST_CASE("hexdumper") {
             buf << Hex::singleline << std::left << Hex::dumper(std::vector<int32_t>{0, 127, 128, 255, 0x7fff, 0x8000, 0xFFFF, 0x55555555, 0x7FFFFFFF, -0x7fffffff-1, -0x55555556, -1});
             CHECK( buf.str() == "00000000 0000007f 00000080 000000ff 00007fff 00008000 0000ffff 55555555 7fffffff 80000000 aaaaaaaa ffffffff" );
         }
+        SECTION("longlong") {
+            buf << Hex::singleline << std::left << Hex::dumper(std::vector<int64_t>{0, 127, 128, 255, 0x7fff, 0x8000, 0xFFFF, 0x55555555, 0x7FFFFFFF, -0x7fffffff-1, -0x55555556, -1, 0x5555555555555555, -0x5555555555555556, 0x7FFFFFFFFFFFFFFF, -0x7FFFFFFFFFFFFFFF-1});
+            CHECK( buf.str() == "0000000000000000 000000000000007f 0000000000000080 00000000000000ff 0000000000007fff 0000000000008000 000000000000ffff 0000000055555555 000000007fffffff ffffffff80000000 ffffffffaaaaaaaa ffffffffffffffff 5555555555555555 aaaaaaaaaaaaaaaa 7fffffffffffffff 8000000000000000" );
+        }
+        SECTION("ulonglong") {
+            buf << Hex::singleline << std::left << Hex::dumper(std::vector<uint64_t>{0, 127, 128, 255, 0x7fff, 0x8000, 0xFFFF, 0x55555555, 0x7FFFFFFF, 0x80000000, 0xAAAAAAAA, 0xFFFFFFFF, 0x5555555555555555, 0xAAAAAAAAAAAAAAAA, 0x7FFFFFFFFFFFFFFF, 0x8000000000000000, 0xFFFFFFFFFFFFFFFF});
+            CHECK( buf.str() == "0000000000000000 000000000000007f 0000000000000080 00000000000000ff 0000000000007fff 0000000000008000 000000000000ffff 0000000055555555 000000007fffffff 0000000080000000 00000000aaaaaaaa 00000000ffffffff 5555555555555555 aaaaaaaaaaaaaaaa 7fffffffffffffff 8000000000000000 ffffffffffffffff" );
+        }
     }
 }
 #include "stringlibrary.h"
