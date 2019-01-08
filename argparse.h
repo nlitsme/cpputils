@@ -124,7 +124,7 @@ class ArgParser {
             int namelen = stringlength(name);
             if (namelen > stringlength(p))
                 return false;
-            if (stringcompare(name, p)==0) {
+            if (std::equal(name, name+namelen, p)) {
                 p += namelen;
                 longmatch = true;
                 return true;
