@@ -512,7 +512,7 @@ QString qstringformat(const char *fmt, ARGS&&...args)
 template<typename...ARGS>
 void debug(const char *fmt, ARGS&&...args)
 {
-    OutputDebugString(string::convert<TCHAR>(stringformat(fmt, std::forward<ARGS>(args)...).c_str());
+    OutputDebugString(string::convert<TCHAR>(stringformat(fmt, std::forward<ARGS>(args)...).c_str()));
 }
 #ifdef __cplusplus_winrt 
 Platform::String^ ToString()
