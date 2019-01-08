@@ -799,7 +799,7 @@ TEST_CASE("hexdumper") {
             CHECK( buf.str() == "00 55 7f 80 aa ff" );
         }
         SECTION("char") {
-            buf << Hex::singleline << std::left << Hex::dumper(std::vector<char>{0, 0x55, 127, -128, -0x56, -1});
+            buf << Hex::singleline << std::left << Hex::dumper(std::vector<char>{0, 0x55, 127, (char)-128, (char)-0x56, (char)-1});
             CHECK( buf.str() == "00 55 7f 80 aa ff" );
         }
         SECTION("hword") {
