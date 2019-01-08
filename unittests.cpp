@@ -114,7 +114,9 @@ TEST_CASE("stringconvert") {
         SECTION("codepoints") {
             auto u32 = std::basic_string<uint32_t>(u32pts, u32pts+u32len);
             auto i32 = std::basic_string<int32_t>(u32pts, u32pts+u32len);
-            auto w = std::basic_string<wchar_t>(u32pts, u32pts+u32len);
+            auto w = (sizeof(wchar_t)==2)
+                ? std::basic_string<wchar_t>(u16pts, u16pts+u16len)
+                : std::basic_string<wchar_t>(u32pts, u32pts+u32len);
             auto u16 = std::basic_string<uint16_t>(u16pts, u16pts+u16len);
             auto i16 = std::basic_string<int16_t>(u16pts, u16pts+u16len);
             auto s16 = std::basic_string<short>(u16pts, u16pts+u16len);
@@ -231,10 +233,13 @@ TEST_CASE("formatter") {
         CHECK( stringformat("%G", 123.4567) == "123.457" );
         CHECK( stringformat("%g", 1234567.89) == "1.23457e+06" );
         CHECK( stringformat("%G", 1234567.89) == "1.23457E+06" );
-
+#ifdef _WIN32
+        CHECK( stringformat("%a", 123.45) == "0x1.edcccdp+6" );
+        CHECK( stringformat("%A", 123.45) == "0X1.EDCCCDP+6" );
+#else
         CHECK( stringformat("%a", 123.45) == "0x1.edccccccccccdp+6" );
         CHECK( stringformat("%A", 123.45) == "0X1.EDCCCCCCCCCCDP+6" );
-
+#endif
         CHECK( stringformat("%e", 123.45) == "1.234500e+02" );
         CHECK( stringformat("%E", 123.45) == "1.234500E+02" );
         CHECK( stringformat("%c", 122) == "z" );
