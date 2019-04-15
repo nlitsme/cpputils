@@ -121,7 +121,7 @@ class ArgParser {
         {
             if (i==argc)
                 throw std::range_error("arg out of range");
-            int namelen = stringlength(name);
+            auto namelen = stringlength(name);
             if (namelen > stringlength(p))
                 return false;
             if (std::equal(name, name+namelen, p)) {
