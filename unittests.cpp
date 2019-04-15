@@ -303,7 +303,23 @@ TEST_CASE("formatter") {
         CHECK( stringformat("%b", std::vector<uint16_t>{1,2,3}) == "0001 0002 0003  ......" );
 
         // printing a hexdumper
-        CHECK( stringformat("%-b", Hex::dumper("abc", 3)) == "61 62 63" );
+        CHECK( stringformat("%-b", Hex::dumper("abc\x01\x02", 5)) == "61 62 63 01 02" );
+        CHECK( stringformat("%+b", Hex::dumper("abc\x01\x02", 5)) == "abc.." );
+        CHECK( stringformat("% b", Hex::dumper("abc\x01\x02", 5)) == "61 62 63 01 02  abc.." );
+        CHECK( stringformat("%0b", Hex::dumper("abc\x01\x02", 5)) == "6162630102  abc.." );
+
+        CHECK_THROWS( stringformat("%0-b", Hex::dumper("abc\x01\x02", 5)) );
+        CHECK_THROWS( stringformat("%0+b", Hex::dumper("abc\x01\x02", 5)) );
+        CHECK_THROWS( stringformat("%0 b", Hex::dumper("abc\x01\x02", 5)) );
+        CHECK( stringformat("% 0b", Hex::dumper("abc\x01\x02", 5)) == "6162630102  abc.." );
+        CHECK_THROWS( stringformat("% +b", Hex::dumper("abc\x01\x02", 5)) );
+        CHECK_THROWS( stringformat("% -b", Hex::dumper("abc\x01\x02", 5)) );
+        CHECK( stringformat("%+0b", Hex::dumper("abc\x01\x02", 5)) == "abc.." );
+        CHECK_THROWS( stringformat("%+-b", Hex::dumper("abc\x01\x02", 5)) );
+        CHECK_THROWS( stringformat("%+ b", Hex::dumper("abc\x01\x02", 5)) );
+        CHECK( stringformat("%-0b", Hex::dumper("abc\x01\x02", 5)) == "6162630102" );
+        CHECK( stringformat("%-+b", Hex::dumper("abc\x01\x02", 5)) == "" );
+        CHECK( stringformat("%- b", Hex::dumper("abc\x01\x02", 5)) == "61 62 63 01 02" );
     }
     SECTION("inttypes") {
         CHECK( stringformat("%I64d", 1) == "1" );
@@ -730,7 +746,7 @@ TEST_CASE("hexdumper") {
     }
     SECTION("right") {
         std::stringstream buf;
-        buf << Hex::singleline << std::right <<  Hex::dumper("abcde", 5);
+        buf << Hex::singleline << std::showpos <<  Hex::dumper("abcde", 5);
         CHECK( buf.str() == "abcde" );
     }
     SECTION("bin") {
