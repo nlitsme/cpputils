@@ -17,7 +17,7 @@
 //       ostream& custom(ostream& os)
 //    there are at least 16 bits of fmt flags left.
 //
-// hex:ascdump  ... but i could use std::left, std::right for that.
+// hex:ascdump  ... but i could use std::left ('-'), std::showpos ('+') for that.
 //
 //
 // you can set arbitrary values in a stream using
@@ -27,8 +27,8 @@
 //
 //
 // adjustfield
-//     left =  only hexdump 
-//     right =  only ascdump
+//     '-' left =  only hexdump 
+//     '+' showpos =  only ascdump
 //     internal  = ??
 // basefield
 //     hex/dec/oct  = numeric base representation
@@ -149,6 +149,7 @@ class Hexdumper : public Hexdumper_base {
         int numberbase = os.flags() & os.basefield;
 
         bool showbase = os.flags() & os.showbase;
+        bool showpos = os.flags() & os.showpos;
         bool showoffset = os.flags() & os.showpoint;
         bool uppercasehex = os.flags() & os.uppercase;
         bool summarize = os.flags() & os.skipws;
@@ -156,10 +157,16 @@ class Hexdumper : public Hexdumper_base {
         uint64_t ofs = showoffset ? getbaseofs(os) : 0;
         uint64_t step = getstep(os);
 
+        // showpos adjust
+        //   yes     left    %+-b     ...    invalid
+        //   yes     right   %+b     asc only
+        //   no      left    %-b     hex only
+        //   no      right   %b      hex + asc
+
         if (unitsperline==-1) {
             if (adjust == os.left)
                 unitsperline = 32 / sizeof(T);
-            else if (adjust == os.right)
+            else if (showpos)
                 unitsperline = 64 / sizeof(T);
             else
                 unitsperline = 16 / sizeof(T);
@@ -192,13 +199,13 @@ class Hexdumper : public Hexdumper_base {
 
             if (showoffset)
                 os << std::setw(8) << std::setfill('0') << std::hex << ofs << ": ";
-            if (adjust != os.right) {
+            if (!showpos) {
                 output_hex(os, curline.first, curline.second, filler, numberbase, showbase, uppercasehex);
                 if (unitsperline && pend-p != unitsperline)
                     output_padding(os, unitsperline-(pend-p), filler);
             }
 
-            if (adjust == 0)
+            if (!showpos && adjust != os.left)
                 os << "  ";   // separate left from right
             if (adjust != os.left)
                 output_asc(os, curline.first, curline.second);
@@ -351,7 +358,7 @@ ascstring(std::basic_ostream<_CharT, _Traits>&os)
 {
     os.fill(0);        // no separator
     os.width(0);       // one line
-    os << std::right;  // only ascii
+    os << std::showpos;  // only ascii
     os << std::hex;
     return os;
 }
