@@ -248,7 +248,7 @@ size_t hex2binary(P1 strfirst, P1 strlast, P2 first, P2 last)
     return o-first;
 }
 
-template<typename S, typename V>
+template<typename V, typename S>
 auto hex2binary(const S& hexstr)
 {
     V v(hexstr.size() / 2);
