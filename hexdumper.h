@@ -65,6 +65,7 @@ namespace Hex {
 struct Hexdumper_base  {
     static int __baseofs() { static int value = std::ostream::xalloc(); return value; }
     static int __step() { static int value = std::ostream::xalloc(); return value; }
+    static int __threshold() { static int value = std::ostream::xalloc(); return value; }
     static int __flags() { static int value = std::ostream::xalloc(); return value; }
     enum { AS_BINARY = 1 };
 
@@ -74,11 +75,15 @@ struct Hexdumper_base  {
     static uint64_t getstep(std::ostream& os) { return os.iword(__step()); }
     static void setstep(std::ostream& os, uint64_t ofs) { os.iword(__step()) = ofs; }
 
+    static uint64_t getthreshold(std::ostream& os) { return os.iword(__threshold()); }
+    static void setthreshold(std::ostream& os, uint64_t ofs) { os.iword(__threshold()) = ofs; }
+
     static bool getbin(std::ostream& os) { return os.iword(__flags()) & AS_BINARY; }
     static void setbin(std::ostream& os) { os.iword(__flags()) |= AS_BINARY; }
     static void clearflags(std::ostream& os) {
         os.iword(__flags()) = 0;
         os.iword(__step()) = 0;
+        os.iword(__threshold()) = 2;
     }
 };
 
@@ -157,6 +162,8 @@ class Hexdumper : public Hexdumper_base {
         uint64_t ofs = showoffset ? getbaseofs(os) : 0;
         uint64_t step = getstep(os);
 
+        int threshold = getthreshold(os);
+
         // showpos adjust
         //   yes     left    %+-b     ...    invalid
         //   yes     right   %+b     asc only
@@ -185,7 +192,7 @@ class Hexdumper : public Hexdumper_base {
             if (summarize) {
                 if (data_is_equal(prevline, curline)) {
                     int count = count_identical_lines(p, _last, unitsperline);
-                    if (count > 2) {
+                    if (count > threshold) {
                         os << "* " << count << " lines\n";
                         pend = p + count * unitsperline;
 
@@ -419,7 +426,16 @@ struct step {
         return os;
     }
 };
+struct summarize_threshold {
+    int th;
+    summarize_threshold(int th) : th(th) { }
 
+    friend std::ostream& operator<<(std::ostream&os, summarize_threshold sth)
+    {
+        Hexdumper_base::setthreshold(os, sth.th);
+        return os;
+    }
+};
 
 // ******************************************************* //
 // **  convenience functions creating Hexdumper objects ** //
