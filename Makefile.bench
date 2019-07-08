@@ -1,0 +1,27 @@
+
+all: fmt_bench-boost fmt_bench-fmt fmt_bench-fmt2 fmt_bench-formatter fmt_bench-printf 
+
+test:
+	/usr/bin/time -l ./fmt_bench-boost | uniq
+	/usr/bin/time -l ./fmt_bench-fmt | uniq
+	/usr/bin/time -l ./fmt_bench-fmt2 | uniq
+	/usr/bin/time -l ./fmt_bench-formatter | uniq
+	/usr/bin/time -l ./fmt_bench-printf | uniq
+
+CFLAGS+=-std=c++17
+CFLAGS+=-I /usr/local/include -I .
+LDFLAGS+=-L/usr/local/lib
+
+%.o: %.cpp
+	/usr/bin/time -l $(CXX) -c $(CFLAGS) -g $(if $(D),-O0,-O3) -Wall -o $@ $^
+%: %.o
+	$(CXX) -g $(LDFLAGS) -o $@ $^  $(ldflags_$(basename $@))
+
+fmt_bench-boost: fmt_bench-boost.o
+fmt_bench-fmt: fmt_bench-fmt.o
+ldflags_fmt_bench-fmt=-lfmt
+fmt_bench-fmt2: fmt_bench-fmt2.o
+ldflags_fmt_bench-fmt2=-lfmt
+
+fmt_bench-formatter: fmt_bench-formatter.o
+fmt_bench-printf: fmt_bench-printf.o
