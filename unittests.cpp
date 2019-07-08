@@ -1,10 +1,15 @@
 #ifdef WITH_CATCH
 #define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
+#define CATCH_CONFIG_ENABLE_TUPLE_STRINGMAKER
 #include "contrib/catch.hpp"
+#define SKIPTEST  , "[!hide]"
+
 #elif defined(WITH_DOCTEST)
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "contrib/doctest.h"
-#define SECTION SUBCASE
+#define SECTION(...) SUBCASE(__VA_ARGS__)
+#define SKIPTEST  * doctest::skip(true)
+#define CHECK_THAT(a, b) 
 #else
 #error define either WITH_CATCH or WITH_DOCTEST
 #endif
@@ -1076,6 +1081,33 @@ TEST_CASE("stringlibrary") {
                 INFO( "test str=" << t.str << " base=" << t.base << " delta=" << delta );
                 CHECK( parsesigned(t.str, t.base) == std::make_pair(t.value, pend) );
                 CHECK( parsesigned(t.str.c_str(), t.base) == std::make_pair(t.value, cend) );
+            }
+        }
+    }
+    SECTION("splitter") {
+        SECTION("stdstring") {
+            using namespace std::string_literals;
+
+            std::vector<std::tuple<std::string, std::string, std::vector<std::string>>> testcases = {
+                { "abc/def"s,     "/"s, { "abc"s, "def"s } },
+                { "abc/def/klm"s, "/"s, { "abc"s, "def"s, "klm"s } },
+//              { "abc/"s,        "/"s, { "abc"s, ""s, } },
+//              { "/"s,           "/"s, { ""s, ""s, } },
+                { ""s,            "/"s, { } },
+                { "abc"s,         "/"s, { "abc"s } },
+                { "ditis, een,test"s, ", "s, { "ditis"s, "een"s, "test"s } },
+            };
+
+            for (auto& tcase : testcases) {
+                auto& result = std::get<2>(tcase);
+                auto first = result.begin();
+                auto last = result.end();
+                INFO("testing " << ::Catch::Detail::stringify(tcase));
+                for (auto item : stringsplitter(std::get<0>(tcase), std::get<1>(tcase))) {
+                    REQUIRE(first != last);
+                    CHECK(item == *first++);
+                }
+                CHECK(first==last);
             }
         }
     }
