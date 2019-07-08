@@ -16,7 +16,6 @@
 #include <unistd.h>
 #endif
 
-
 // wrap posix file handle in a c++ class,
 // so it will be closed when it leaves the current scope.
 // This is most useful for making code exception safe.
@@ -24,7 +23,6 @@ struct filehandle {
     int f=-1;
     filehandle(int f) : f(f) { 
         if (f==-1) {
-            perror("open");
             throw std::runtime_error("invalid filehandle");
         }
     }
@@ -35,38 +33,29 @@ struct filehandle {
     int64_t size()
     {
         struct stat st;
-        if (fstat(f, &st)) {
-            print("ERROR: lstat");
+        if (fstat(f, &st))
             return -1;
-        }
         if (st.st_mode&S_IFREG)
             return st.st_size;
         else if (st.st_mode&S_IFBLK) {
 #ifdef DKIOCGETBLOCKCOUNT
             uint64_t bkcount;
             uint32_t bksize;
-            if (-1==ioctl(f, DKIOCGETBLOCKCOUNT, &bkcount)) {
-                print("ERROR: ioctl(DKIOCGETBLOCKCOUNT)");
+            if (-1==ioctl(f, DKIOCGETBLOCKCOUNT, &bkcount))
                 return -1;
-            }
-            if (-1==ioctl(f, DKIOCGETBLOCKSIZE, &bksize)) {
-                print("ERROR: ioctl(DKIOCGETBLOCKSIZE)");
+            if (-1==ioctl(f, DKIOCGETBLOCKSIZE, &bksize))
                 return -1;
-            }
             return bkcount*bksize;
 #endif
 #ifdef BLKGETSIZE64
             uint64_t devsize;
-            if (-1==ioctl(f, BLKGETSIZE64, &devsize)) {
-                print("ERROR: ioctl(BLKGETSIZE64)");
+            if (-1==ioctl(f, BLKGETSIZE64, &devsize))
                 return -1;
-            }
             return devsize;
 #endif
         }
         else {
             // pipe or socket
-            printf("could not get size for device\n");
             return -1;
         }
     }
