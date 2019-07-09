@@ -14,7 +14,7 @@ LDFLAGS+=-L/usr/local/lib
 
 %.o: %.cpp
 	/usr/bin/time -l $(CXX) -c $(CFLAGS) -g $(if $(D),-O0,-O3) -Wall -o $@ $^
-%: %.o
+%: fmtbench/%.o
 	$(CXX) -g $(LDFLAGS) -o $@ $^  $(ldflags_$(basename $@))
 
 fmt_bench-boost: fmt_bench-boost.o
