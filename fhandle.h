@@ -1,4 +1,6 @@
 #pragma once
+#include <stdexcept>
+
 #ifdef _WIN32
 #include <io.h>
 #endif
@@ -19,6 +21,9 @@
 // wrap posix file handle in a c++ class,
 // so it will be closed when it leaves the current scope.
 // This is most useful for making code exception safe.
+
+// NOTE: this object should not be copied.
+
 struct filehandle {
     int f=-1;
     filehandle(int f) : f(f) { 
@@ -26,6 +31,10 @@ struct filehandle {
             throw std::runtime_error("invalid filehandle");
         }
     }
+
+    // disallow copying - there may only be one owner.
+    filehandle(const filehandle & fh) = delete;
+
     ~filehandle() { if (f!=-1) close(f); }
     filehandle& operator=(int fh) { f= fh; return *this; }
     operator int () const { return f; }
