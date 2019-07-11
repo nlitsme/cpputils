@@ -27,6 +27,8 @@ Example:
 
 You can stringify custom types by defining a suitable `operator<<(os, customtype)`.
 
+Compared to alternatives like fmtlib, boost::format, this implementation creates very small binaries. Performance is below that of fmtlib, but well about boost::format.
+
 
 ## stringconvert
 
@@ -76,10 +78,29 @@ for (auto& arg : ArgParser(argc, argv))
 
 Several utility functions for handling NUL terminated char and wchar strings, 
 and std::strings:
- * stringcopy, stringlength, stringcompare, stringicompare
+ * stringcopy, stringlength, stringcompare, stringicompare, stringsplitter
 
 Parsing integers from strings:
  * parseunsigned, parsesigned
+
+## datapacking
+
+Classes for packing and unpacking fixed width numeric data, in either little or big-endian format.
+
+
+## fhandle
+
+Exeption safe wrapper for posix filehandles.
+
+## mmem
+
+class for using mem-mapped files.
+
+
+## fslibrary
+
+A Recursive file iterator, which can be used from a ranged-for-loop.
+
 
 ### todo
 
