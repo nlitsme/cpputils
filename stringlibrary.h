@@ -2,6 +2,7 @@
 
 #include <utility>
 #include <iterator>
+#include <algorithm>
 
 // todo: strip, lstrip, rstrip
 //       split, join
