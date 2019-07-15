@@ -45,6 +45,12 @@ auto makerange(V & v)
     return range<typename V::iterator>(v.begin(), v.end());
 }
 
+template<typename V>
+auto makerange(const V & v)
+{
+    return range<typename V::const_iterator>(v.begin(), v.end());
+}
+
 template<typename R, typename S>
 bool equalrange(const R& r, const S& s)
 {
