@@ -25,7 +25,7 @@ struct asn1tlv {
     {
         P p = first;
         if (last-p<2)
-            throw "not enough data";
+            throw std::runtime_error("not enough data");
 
         auto tag_start = p;
 
@@ -45,7 +45,7 @@ struct asn1tlv {
         tagrange = makerange(tag_start, tag_end);
 
         if (p==last)
-            throw "not enough data";
+            throw std::runtime_error("not enough data");
 
         auto len_start = p;
         auto len_end = p;
@@ -60,8 +60,8 @@ struct asn1tlv {
         }
         else {
             len_end = p+(lbyte&0x7F);
-            if (len_end>=last)
-                throw "not enough data";
+            if (len_end>last)
+                throw std::runtime_error("not enough data");
             length = readfixed(p, len_end);
             p = len_end;
         }
@@ -85,7 +85,7 @@ struct asn1tlv {
         }
 
         if (!done)
-            throw "not enough data";
+            throw std::runtime_error("not enough data");
         return std::make_tuple(value, p);
     }
     auto readfixed(P first, P last)
@@ -127,7 +127,7 @@ struct asn1tlv<std::istream::pos_type> {
         while (!done && bitcount < bitlimit) {
             uint8_t byte = is.get();
             if (byte<0)
-                throw "truncated integer";
+                throw std::runtime_error("truncated integer");
             value <<= 7;
             value |= byte&0x7F;
             done = (byte&0x80)==0;
@@ -136,7 +136,7 @@ struct asn1tlv<std::istream::pos_type> {
         }
 
         if (!done)
-            throw "not enough data";
+            throw std::runtime_error("not enough data");
         return value;
     }
     auto readfixed(std::istream& is, int n)
@@ -147,7 +147,7 @@ struct asn1tlv<std::istream::pos_type> {
         {
             auto byte = is.get();
             if (byte<0)
-                throw "truncated integer";
+                throw std::runtime_error("truncated integer");
             value <<= 8;
             value |= byte;
         }
@@ -160,7 +160,7 @@ struct asn1tlv<std::istream::pos_type> {
 
         auto hbyte = is.get();
         if (hbyte < 0)
-            throw "truncated header";
+            throw std::runtime_error("truncated header");
 
         constructed = (hbyte&0x20) != 0;
         cls = hbyte>>6;
@@ -179,7 +179,7 @@ struct asn1tlv<std::istream::pos_type> {
         auto len_end = is.tellg();
         auto lbyte = is.get();
         if (lbyte < 0)
-            throw "truncated length";
+            throw std::runtime_error("truncated length");
 
         if (lbyte < 0x80) {
             len_end = is.tellg();
@@ -277,7 +277,7 @@ ASNOBJ get_nth_tlv(ASNOBJ obj, int n)
                 return tlv;
         }
     }
-    throw "missing item";
+    throw std::runtime_error("missing item");
 }
 
 /*
