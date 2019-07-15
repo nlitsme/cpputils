@@ -145,7 +145,7 @@ std::ostream& operator<<(std::ostream&os, const std::vector<T, A>& buf)
 // convert all none <char> strings to a char string
 // before outputting to the stream
 template<typename CHAR>
-inline std::enable_if_t<!std::is_same<CHAR,char>::value, std::ostream&> operator<<(std::ostream&os, const std::basic_string<CHAR>& s)
+inline std::enable_if_t<!std::is_same_v<CHAR,char>, std::ostream&> operator<<(std::ostream&os, const std::basic_string<CHAR>& s)
 {
     return os << string::convert<char>(s);
 }
@@ -181,12 +181,15 @@ struct is_container<std::basic_string<T> > : std::true_type {};
 template<typename T, int N>
 struct is_container<std::array<T,N> > : std::true_type {};
 
+template<typename T> constexpr bool is_container_v = is_container<T>::value;
+
 template<typename T>
 struct is_hexdumper : std::false_type {};
 
 template<typename T>
 struct is_hexdumper<Hex::Hexdumper<T> > : std::true_type {};
 
+template<typename T> constexpr bool is_hexdumper_v = is_hexdumper<T>::value;
 }
 
 /*****************************************************************************
@@ -293,7 +296,7 @@ struct StringFormatter {
             case 'p': // pointer value - cast to (void*)
                 break;
             default:
-                throw "unknown format char";
+                throw std::runtime_error("unknown format char");
         }
         if ('A'<=type && type<='Z')
                 os << std::uppercase;
@@ -341,7 +344,7 @@ struct StringFormatter {
                     // width specification
                     char *q;
                     // todo: support '*'  : take size from argumentlist.
-                    // todo: support '#'  : adds 0, 0x, 0X prefix to oct/hex numbers
+                    // todo: support '#'  : adds 0, 0x, 0X prefix to oct/hex numbers -> 'showbase'
                     int width= strtol(p, &q, 10);
                     bool havewidth= p!=q;
                     p= q;
@@ -424,51 +427,52 @@ struct StringFormatter {
     // otherwise the compiler would fail when trying to 
     // cast a non-pointer T to const void*
     template<typename T>
-    static std::enable_if_t<std::is_pointer<T>::value, void> add_pointer(std::ostream& os, const T& value) { os << (const void*)value; }
-    template<typename T>
-    static std::enable_if_t<!std::is_pointer<T>::value, void> add_pointer(std::ostream& os, const T& value) { }
+    static void add_pointer(std::ostream& os, const T& value)
+    { 
+        if constexpr (std::is_pointer_v<T>) {
+            os << (const void*)value;
+        }
+    }
 
     // make sure we don't call string::convert with non char types.
     template<typename T>
-    static std::enable_if_t<std::is_integral<T>::value, void> add_wchar(std::ostream& os, const T& value) { 
-        std::basic_string<wchar_t> wc(1, wchar_t(value));
-        os << string::convert<char>(wc);
+    static void add_wchar(std::ostream& os, const T& value)
+    { 
+        if constexpr (std::is_integral_v<T>) {
+            std::basic_string<wchar_t> wc(1, wchar_t(value));
+            os << string::convert<char>(wc);
+        }
     }
-    template<typename T>
-    static std::enable_if_t<!std::is_integral<T>::value, void> add_wchar(std::ostream& os, const T& value) { }
 
     // make sure we call Hex::dumper only for bytevectors or arrays
     template<typename T>
-    static std::enable_if_t<!(is_container<T>::value || is_hexdumper<T>::value),void> hex_dump_data(std::ostream& os, const T& value) { }
-    template<typename T>
-    static std::enable_if_t<is_container<T>::value && std::is_same<typename T::value_type,double>::value,void> hex_dump_data(std::ostream& os, const T& value) { }
-
-    template<typename T>
-    static std::enable_if_t<is_container<T>::value && !std::is_same<typename T::value_type,double>::value,void> hex_dump_data(std::ostream& os, const T& value) { 
-        if (os.fill()=='0')
-            os.fill(0);
-        os << std::hex << Hex::dumper(value);
+    static void hex_dump_data(std::ostream& os, const T& value)
+    { 
+        if constexpr (is_hexdumper_v<T>) {
+            if (os.fill()=='0')
+                os.fill(0);
+            os << std::hex << value;
+        }
+        else if constexpr (is_container_v<T>) {
+            if constexpr (!std::is_same_v<typename T::value_type,double>) {
+                if (os.fill()=='0')
+                    os.fill(0);
+                os << std::hex << Hex::dumper(value);
+            }
+        }
     }
 
     template<typename T>
-    static std::enable_if_t<is_hexdumper<T>::value,void> hex_dump_data(std::ostream& os, const T& value) { 
-        if (os.fill()=='0')
-            os.fill(0);
-        os << std::hex << value;
+    static void output_int(std::ostream& os, T value)
+    {
+        if constexpr ((std::is_integral_v<T> || std::is_floating_point_v<T>) && std::is_signed_v<T>) {
+            // note: hex or octal numbers are not printed as signed numbers.
+            os << (long long)value;
+        }
+        else if constexpr ( (std::is_integral_v<T> || std::is_floating_point_v<T>) && std::is_unsigned_v<T>) {
+            os << (unsigned long long)value;
+        }
     }
-
-    template<typename T>
-    static std::enable_if_t<!(std::is_integral<T>::value || std::is_floating_point<T>::value),void> output_int(std::ostream& os, T value) { }
-    template<typename T>
-    static std::enable_if_t<(std::is_integral<T>::value || std::is_floating_point<T>::value) && std::is_signed<T>::value,void> output_int(std::ostream& os, T value) {
-        // note: hex or octal numbers are not printed as signed numbers.
-        os << (long long)value;
-    }
-    template<typename T>
-    static std::enable_if_t<(std::is_integral<T>::value || std::is_floating_point<T>::value) && std::is_unsigned<T>::value,void> output_int(std::ostream& os, T value) {
-        os << (unsigned long long)value;
-    }
-
 
 };
 
