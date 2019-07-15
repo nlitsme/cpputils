@@ -1,8 +1,15 @@
 #ifdef WITH_CATCH
+
+#define CATCH_CONFIG_ENABLE_TUPLE_STRINGMAKER
 #include "contrib/catch.hpp"
+#define SKIPTEST  , "[!hide]"
+
 #elif defined(WITH_DOCTEST)
+
 #include "contrib/doctest.h"
-#define SECTION SUBCASE
+#define SECTION(...) SUBCASE(__VA_ARGS__)
+#define SKIPTEST  * doctest::skip(true)
+#define CHECK_THAT(a, b) 
 #else
 #error define either WITH_CATCH or WITH_DOCTEST
 #endif
@@ -15,7 +22,8 @@
  * alternative for:
  *  CHECK( equalrange(y.datarange, std::vector<uint8_t>{ 0x39,0x36,0x31,0x30,0x32,0x33,0x32,0x30,0x35,0x36,0x30,0x33,0x5a}) == true );
  */
-
+#ifdef WITH_CATCH
+// note: matchers will probably be added to doctest in v2.4
 template<typename RANGE>
 class EqualsVector : public Catch::MatcherBase<RANGE> {
     std::vector<uint8_t> rhs;
@@ -74,6 +82,7 @@ TEST_CASE("asn1parser") {
     CHECK_THAT( traverse(x, { 1 }).datarange,       equalsvector(0x06,0x09,0x2a,0x86,0x48,0x86,0xf7,0x0d,0x01,0x01,0x04,0x05,0x00)                                                                                                                                                                                                                                                                                                                                                                                                                                                        );         // sig.algorithm
 
 }
+#endif
 
 TEST_CASE("asn1iter1") {
     auto data = std::vector<uint8_t> { 
@@ -163,6 +172,49 @@ TEST_CASE("asn1iter2") {
     CHECK( c.tagvalue == 3 );
     CHECK( c.length== 65 );
 }
+TEST_CASE("invaliddata") {
+    CHECK_THROWS(asn1tlv(makerange(std::vector<uint8_t>{})));
+
+    // missing length
+    CHECK_THROWS(asn1tlv(makerange(std::vector<uint8_t>{0x30})));
+
+    // missing content
+    CHECK_NOTHROW(asn1tlv(makerange(std::vector<uint8_t>{0x30,0x01})));
+
+    // missing length part
+    CHECK_THROWS(asn1tlv(makerange(std::vector<uint8_t>{0x30,0x81     })));
+
+    // missing content
+    CHECK_NOTHROW(asn1tlv(makerange(std::vector<uint8_t>{0x30,0x81,0x80})));
+
+    // missing content part
+    CHECK_NOTHROW(asn1tlv(makerange(std::vector<uint8_t>{0x30,0x02,0x05})));
+
+    // missing extented tag
+    CHECK_THROWS(asn1tlv(makerange(std::vector<uint8_t>{0x1f     })));
+
+    // missing extented tag part
+    CHECK_THROWS(asn1tlv(makerange(std::vector<uint8_t>{0x1f,0x80})));
+    // extended tag, missing length
+    CHECK_THROWS(asn1tlv(makerange(std::vector<uint8_t>{0x1f,0x80,0x01})));
+    // extended tag, missing content
+    CHECK_NOTHROW(asn1tlv(makerange(std::vector<uint8_t>{0x1f,0x80,0x01,0x01})));
+    // extended tag, missing length part
+    CHECK_THROWS(asn1tlv(makerange(std::vector<uint8_t>{0x1f,0x80,0x01,0x81     })));
+
+    // extended tag, missing content
+    CHECK_NOTHROW(asn1tlv(makerange(std::vector<uint8_t>{0x1f,0x80,0x01,0x81,0x80})));
+    // extended tag, missing content part
+    CHECK_NOTHROW(asn1tlv(makerange(std::vector<uint8_t>{0x1f,0x80,0x01,0x02,0x05})));
+
+    auto x = asn1tlv(makerange(std::vector<uint8_t>{0x1f,0x80,0x01,0x00}));
+
+    CHECK(x.tagvalue == 1);
+    CHECK(x.length == 0);
+}
+
+// todo: get_nth_tlv
+
 #if 0
 TEST_CASE("asn1iter2r") {
     auto data = std::vector<uint8_t> { 
