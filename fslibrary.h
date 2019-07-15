@@ -80,7 +80,7 @@ struct fileenumerator {
                 cur = nextent();
             }
             if (!cur)
-                throw "eof";
+                throw std::runtime_error("eof");
             return path.join(cur->d_name);
         }
         // return true for '.' and '..'

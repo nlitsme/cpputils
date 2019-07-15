@@ -13,7 +13,7 @@ struct packer_base {
     void require(int n)
     {
         if (!have(n))
-            throw "not enough data";
+            throw std::runtime_error("not enough data");
     }
     bool have(int n)
     {
