@@ -18,6 +18,27 @@
 #include <unistd.h>
 #endif
 
+/*
+ * NOTE: problem on macosx: you can't mmap a block or char device.
+ *
+ * see https://stackoverflow.com/questions/24520474/mmap-a-block-device-on-mac-os-x
+ *
+ * the problem is in the mmap kernel driver:
+https://opensource.apple.com/source/xnu/xnu-2422.1.72/bsd/kern/kern_mman.c
+
+        if (vp->v_type != VREG && vp->v_type != VCHR) {
+			(void)vnode_put(vp);
+			error = EINVAL;
+			goto bad;
+		}
+        ...
+		if (vp->v_type == VCHR || vp->v_type == VSTR) {
+			(void)vnode_put(vp);
+			error = ENODEV;
+			goto bad;
+		} 
+
+ */
 // wrap posix file handle in a c++ class,
 // so it will be closed when it leaves the current scope.
 // This is most useful for making code exception safe.
