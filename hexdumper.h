@@ -139,6 +139,12 @@ class Hexdumper : public Hexdumper_base {
         std::string padding(n*oneunit, ' ');
         os << padding;
     }
+    static void output_asc_padding(std::ostream& os, int n)
+    {
+        int oneunit = sizeof(T);
+        std::string padding(n*oneunit, ' ');
+        os << padding;
+    }
 
 
 //   make it all happen
@@ -215,7 +221,11 @@ class Hexdumper : public Hexdumper_base {
             if (!showpos && adjust != os.left)
                 os << "  ";   // separate left from right
             if (adjust != os.left)
+            {
                 output_asc(os, curline.first, curline.second);
+                if (unitsperline && pend-p != unitsperline)
+                    output_asc_padding(os, unitsperline-(pend-p));
+            }
 
             if (unitsperline)
                 os << "\n";
@@ -297,6 +307,8 @@ class Hexdumper : public Hexdumper_base {
             }
 
             if (getbin(os)) {
+                if (showbase)
+                    os << "0b";
                 os << std::setw(sizeof(T)*8);
                 output_bin(os, val);
             }
