@@ -256,6 +256,11 @@ TEST_CASE("formatter") {
         CHECK_FALSE( stringformat("%i", 123) != "123" );
         CHECK_FALSE( stringformat("%i", 123) == "321" );
     }
+    SECTION("charcv") {
+        CHECK( stringformat("%c", char(122)) == "z" );
+        CHECK( stringformat("%c", wchar_t(122)) == "z" );
+        CHECK( stringformat("%c", wchar_t(0x20ac)) == "\xE2\x82\xAC" );
+    }
     SECTION("hexints") {
         CHECK( stringformat("%02x", uint8_t(123)) == "7b" );
         CHECK( stringformat("%04x", uint8_t(123)) == "007b" );
@@ -325,6 +330,10 @@ TEST_CASE("formatter") {
         CHECK( stringformat("%-0b", Hex::dumper("abc\x01\x02", 5)) == "6162630102" );
         CHECK( stringformat("%-+b", Hex::dumper("abc\x01\x02", 5)) == "" );
         CHECK( stringformat("%- b", Hex::dumper("abc\x01\x02", 5)) == "61 62 63 01 02" );
+
+        CHECK( stringformat("%- b", Hex::dumper("", 0)) == "" );
+        CHECK( stringformat("%+0b", Hex::dumper("", 0)) == "" );
+        CHECK( stringformat("% b", Hex::dumper("", 0)) == "" );
     }
     SECTION("inttypes") {
         CHECK( stringformat("%I64d", 1) == "1" );
@@ -334,6 +343,14 @@ TEST_CASE("formatter") {
         CHECK( stringformat("%d", 1) == "1" );
         CHECK( stringformat("%d", 1L) == "1" );
         CHECK( stringformat("%d", 1U) == "1" );
+        CHECK( stringformat("%d", '\x01') == "1" );
+        CHECK( stringformat("%d", char(1)) == "1" );
+        CHECK( stringformat("%d", uint8_t(1)) == "1" );
+        CHECK( stringformat("%d", int8_t(1)) == "1" );
+        CHECK( stringformat("%d", short(1)) == "1" );
+        CHECK( stringformat("%d", uint16_t(1)) == "1" );
+        CHECK( stringformat("%d", int16_t(1)) == "1" );
+
         CHECK( stringformat("%d", size_t(1)) == "1" );
         CHECK( stringformat("%d", uint64_t(1)) == "1" );
         CHECK( stringformat("%d", uint32_t(1)) == "1" );
@@ -479,19 +496,21 @@ unittests.cpp:426: FAILED:	  CHECK( stringformat("%#o", 01234567) == "01234567" 
         CHECK( stringformat("%#o", 01234567) == "01234567" );
 #endif
 #ifdef SUPPORT_POINTERS
-unittests.cpp:427: FAILED:	  CHECK( stringformat("%p", (void*)0xABCDEF) == "00ABCDEF" )	with expansion:	  "0xabcdef" == "00ABCDEF"	
-unittests.cpp:428: FAILED:	  CHECK( stringformat("%p", (void*)__null) == "00000000" )	with expansion:	  "0x0" == "00000000"	
-unittests.cpp:429: FAILED:	  CHECK( stringformat("%p", (void*)0xABCDEFABCDEF) == "0000ABCDEFABCDEF" )	with expansion:	  "0xabcdefabcdef" == "0000ABCDEFABCDEF"	
-unittests.cpp:430: FAILED:	  CHECK( stringformat("%p", (void*)__null) == "0000000000000000" )	with expansion:	  "0x0" == "0000000000000000"	
-unittests.cpp:432: FAILED:	  CHECK( stringformat("%p", (void*)__null) == "(nil)" )	with expansion:	  "0x0" == "(nil)"	
+//unittests.cpp:427: FAILED:	  CHECK( stringformat("%p", (void*)0xABCDEF) == "00ABCDEF" )	with expansion:	  "0xabcdef" == "00ABCDEF"	
+//unittests.cpp:428: FAILED:	  CHECK( stringformat("%p", (void*)__null) == "00000000" )	with expansion:	  "0x0" == "00000000"	
+//unittests.cpp:429: FAILED:	  CHECK( stringformat("%p", (void*)0xABCDEFABCDEF) == "0000ABCDEFABCDEF" )	with expansion:	  "0xabcdefabcdef" == "0000ABCDEFABCDEF"	
+//unittests.cpp:430: FAILED:	  CHECK( stringformat("%p", (void*)__null) == "0000000000000000" )	with expansion:	  "0x0" == "0000000000000000"	
+//unittests.cpp:432: FAILED:	  CHECK( stringformat("%p", (void*)__null) == "(nil)" )	with expansion:	  "0x0" == "(nil)"	
 
 
-        CHECK( stringformat("%p", (void*)0xABCDEF) == "00ABCDEF" );
-        CHECK( stringformat("%p", (void*)NULL) == "00000000" );
-        CHECK( stringformat("%p", (void*)0xABCDEFABCDEF) == "0000ABCDEFABCDEF" );
-        CHECK( stringformat("%p", (void*)NULL) == "0000000000000000" );
         CHECK( stringformat("%p", (void*)0xABCDEF) == "0xabcdef" );
-        CHECK( stringformat("%p", (void*)NULL) == "(nil)" );
+        CHECK( stringformat("%p", (void*)NULL) == "0x0" );
+        CHECK( stringformat("%p", (void*)0xABCDEFABCDEF) == "0xabcdefabcdef" );
+        CHECK( stringformat("%p", (void*)NULL) == "0x0" );
+        CHECK( stringformat("%p", (void*)0xABCDEF) == "0xabcdef" );
+        CHECK( stringformat("%p", (void*)NULL) == "0x0" );
+        CHECK( stringformat("%p", (char*)0xABCDEF) == "0xabcdef" );
+        CHECK( stringformat("%p", (const char*)0xABCDEF) == "0xabcdef" );
 #endif
         CHECK( stringformat("%e",2.342E+112) == "2.342000e+112" );
         CHECK( stringformat("%10.4e",-2.342E-112) == "-2.3420e-112" );
@@ -765,6 +784,53 @@ TEST_CASE("hexdumper") {
         buf << Hex::hexstring << Hex::dumper("abcde", 5);
         CHECK( buf.str() == "6162636465" );
     }
+    SECTION("case") {
+        std::stringstream buf;
+        SECTION("lower") {
+            buf << Hex::hexstring << std::nouppercase << Hex::dumper("jklmn", 5);
+            CHECK( buf.str() == "6a6b6c6d6e" );
+        }
+        SECTION("upper") {
+            buf << Hex::hexstring << std::uppercase << Hex::dumper("jklmn", 5);
+            CHECK( buf.str() == "6A6B6C6D6E" );
+        }
+    }
+    SECTION("numberbase") {
+        std::stringstream buf;
+        SECTION("hex") {
+            buf << Hex::singleline << std::left << std::hex << Hex::dumper("abcde", 5);
+            CHECK( buf.str() == "61 62 63 64 65" );
+        }
+        SECTION("dec") {
+            buf << Hex::singleline << std::left << std::dec << Hex::dumper("abcde", 5);
+            CHECK( buf.str() == "97 98 99 100 101" );
+        }
+        SECTION("oct") {
+            buf << Hex::singleline << std::left << std::oct << Hex::dumper("abcde", 5);
+            CHECK( buf.str() == "141 142 143 144 145" );
+        }
+        SECTION("bin") {
+            buf << Hex::singleline << std::left << Hex::bin << Hex::dumper("abcde", 5);
+            CHECK( buf.str() == "01100001 01100010 01100011 01100100 01100101" );
+        }
+        SECTION("hex.showbase") {
+            buf << Hex::singleline << std::left << std::hex << std::showbase << Hex::dumper("abcde", 5);
+            CHECK( buf.str() == "0x61 0x62 0x63 0x64 0x65" );
+        }
+        SECTION("dec.showbase") {
+            buf << Hex::singleline << std::left << std::dec << std::showbase << Hex::dumper("abcde", 5);
+            CHECK( buf.str() == "97 98 99 100 101" );
+        }
+        SECTION("oct.showbase") {
+            buf << Hex::singleline << std::left << std::oct << std::showbase << Hex::dumper("abcde", 5);
+            CHECK( buf.str() == "0141 0142 0143 0144 0145" );
+        }
+        SECTION("bin.showbase") {
+            buf << Hex::singleline << std::left << Hex::bin << std::showbase << Hex::dumper("abcde", 5);
+            CHECK( buf.str() == "0b01100001 0b01100010 0b01100011 0b01100100 0b01100101" );
+        }
+
+    }
     SECTION("ascstring") {
         std::stringstream buf;
         buf << Hex::ascstring << Hex::dumper("abcde\r\n", 7);
@@ -794,14 +860,14 @@ TEST_CASE("hexdumper") {
         buf << Hex::multiline <<  Hex::dumper("0123456789abcdefghijklmnopq", 27);
         CHECK( buf.str() == 
 "30 31 32 33 34 35 36 37 38 39 61 62 63 64 65 66  0123456789abcdef\n"
-"67 68 69 6a 6b 6c 6d 6e 6f 70 71                 ghijklmnopq\n");
+"67 68 69 6a 6b 6c 6d 6e 6f 70 71                 ghijklmnopq     \n");
     }
     SECTION("offset") {
         std::stringstream buf;
         buf << Hex::offset(0xa000) << Hex::multiline <<  Hex::dumper("0123456789abcdefghijklmnopq", 27);
         CHECK( buf.str() == 
 "0000a000: 30 31 32 33 34 35 36 37 38 39 61 62 63 64 65 66  0123456789abcdef\n"
-"0000a010: 67 68 69 6a 6b 6c 6d 6e 6f 70 71                 ghijklmnopq\n");
+"0000a010: 67 68 69 6a 6b 6c 6d 6e 6f 70 71                 ghijklmnopq     \n");
     }
     SECTION("step") {
         // this test currently fails
@@ -817,6 +883,60 @@ TEST_CASE("hexdumper") {
 "0000a012: 69 6a  ij\n"
 "0000a015: 6c 6d  lm\n"
 "0000a018: 6f 70  op\n");
+    }
+    SECTION("summarize") {
+        // this test currently fails
+        std::stringstream buf;
+        SECTION("plain summary") {
+            buf << Hex::offset(0) << std::setw(2) <<  Hex::dumper("012323232323cdefghghghghopq", 27);
+            CHECK( buf.str() == 
+    "00000000: 30 31  01\n"
+    "00000002: 32 33  23\n"
+    "* 4 lines\n"
+    "0000000c: 63 64  cd\n"
+    "0000000e: 65 66  ef\n"
+    "00000010: 67 68  gh\n"
+    "* 3 lines\n"
+    "00000018: 6f 70  op\n"
+    "0000001a: 71     q \n"
+    );
+        }
+        SECTION("summary,th=3") {
+            buf << Hex::offset(0) << std::setw(2) << Hex::summarize_threshold(3) <<  Hex::dumper("012323232323cdefghghghghopq", 27);
+            CHECK( buf.str() == 
+    "00000000: 30 31  01\n"
+    "00000002: 32 33  23\n"
+    "* 4 lines\n"
+    "0000000c: 63 64  cd\n"
+    "0000000e: 65 66  ef\n"
+    "00000010: 67 68  gh\n"
+    "00000012: 67 68  gh\n"
+    "00000014: 67 68  gh\n"
+    "00000016: 67 68  gh\n"
+    "00000018: 6f 70  op\n"
+    "0000001a: 71     q \n"
+    );
+        }
+        SECTION("noskip") {
+            buf << Hex::offset(0) << std::setw(2) << std::noskipws <<  Hex::dumper("012323232323cdefghghghghopq", 27);
+            CHECK( buf.str() == 
+    "00000000: 30 31  01\n"
+    "00000002: 32 33  23\n"
+    "00000004: 32 33  23\n"
+    "00000006: 32 33  23\n"
+    "00000008: 32 33  23\n"
+    "0000000a: 32 33  23\n"
+    "0000000c: 63 64  cd\n"
+    "0000000e: 65 66  ef\n"
+    "00000010: 67 68  gh\n"
+    "00000012: 67 68  gh\n"
+    "00000014: 67 68  gh\n"
+    "00000016: 67 68  gh\n"
+    "00000018: 6f 70  op\n"
+    "0000001a: 71     q \n"
+    );
+        }
+
     }
     SECTION("values") {
         std::stringstream buf;
@@ -953,6 +1073,7 @@ TEST_CASE("stringlibrary") {
                 { 0, "0123456712345671234567", 0123456712345671234567LL,   -1 },
                 { 0, "0x12345678", 0x12345678,   -1 },
                 { 0, "0x123456789abcdef", 0x123456789abcdef,   -1 },
+                { 0, "0x123456789ABCDEF", 0x123456789abcdef,   -1 },
                 { 0, "0b010101010101010101", 87381,   -1 },
 
                 { 10, "12345678", 12345678,   -1 },
@@ -965,6 +1086,8 @@ TEST_CASE("stringlibrary") {
 
                 // check that non digits cause parsing to stop at the right pos.
                 { 0, "12345678,test", 12345678,   8 },
+                { 0, "12345678=test", 12345678,   8 },
+                { 0, "12345678|test", 12345678,   8 },
                 { 0, "01234567,test", 01234567,   8 },
                 { 0, "0x12345678,test", 0x12345678,   10 },
                 { 0, "0b010101010101010101,test", 87381,   20 },
@@ -1102,7 +1225,9 @@ TEST_CASE("stringlibrary") {
                 auto& result = std::get<2>(tcase);
                 auto first = result.begin();
                 auto last = result.end();
+#ifdef WITH_CATCH
                 INFO("testing " << ::Catch::Detail::stringify(tcase));
+#endif
                 for (auto item : stringsplitter(std::get<0>(tcase), std::get<1>(tcase))) {
                     REQUIRE(first != last);
                     CHECK(item == *first++);
@@ -1118,11 +1243,12 @@ TEST_CASE("argparse") {
     SECTION("test") {
         const char*argv[] = {
             "pgmname",               // not counted in the option list
-            "-a", "123",             // mask 0x0001, counted in nargs,  value checked
+            "-a", "-123",            // mask 0x0001, counted in nargs,  value checked
             "--bigword",             // mask 0x0200, counted in nbig
             "-b123",                 // mask 0x0002, counted in nargs
             "-pear", "0x1234",       // mask 0x0004, counted in nargs,  value checked
             "-vvv",                  // mask 0x0400, counted in nargs, multiplicity checked
+            "-xxy",                  // mask 0x4000, counted in nargs, failed multiplicity checked
             "-pTEST",                // mask 0x0008, counted in nargs, value checked
             "--apple=test",          // mask 0x0010, counted in nargs, value checked
             "--equal==test",         // mask 0x2000, counted in nargs, value checked
@@ -1150,13 +1276,13 @@ TEST_CASE("argparse") {
             else switch(arg.option())
             {
                 case 'a':
-                    CHECK( arg.getint() == 123 );
+                    CHECK( arg.getint() == -123 );
                     argmask |= 0x0001;
                     nargs ++;
                     break;
 
                 case 'b':
-                    CHECK( arg.getint() == 123 );
+                    CHECK( arg.getuint() == 123 );
                     argmask |= 0x0002;
                     nargs ++;
                     break;
@@ -1177,9 +1303,16 @@ TEST_CASE("argparse") {
                     argmask |= 0x0400;
                     nargs ++;
                     break;
+                case 'x':
+                    CHECK_THROWS( arg.count() );   // counted options must all be equal
+                    argmask |= 0x4000;
+                    nargs ++;
+                    break;
+
                 case '-':
                     if (arg.match("--big")) {
                         nbig++;
+                        CHECK_THROWS( arg.count() );  // can't count a long option
                         argmask |= 0x0200;
                     }
                     else if (arg.match("--bigword")) {
@@ -1242,10 +1375,33 @@ TEST_CASE("argparse") {
         CHECK( nrends == 1 );
         CHECK( nfiles == 2 );
         CHECK( nextra == 3 );
-        CHECK( nargs == 8 );
+        CHECK( nargs == 9 );
         CHECK( nbig == 2 );
-        CHECK( argmask == 0x3FFF );
+        CHECK( argmask == 0x7FFF );
     }
+    SECTION("testerrors") {
+        const char*argv[] = {
+            "pgmname",               // not counted in the option list
+            "-a"        };
+        int argc = sizeof(argv)/sizeof(*argv);
+        int argmask = 0;
+        int nargs = 0;
+        for (auto& arg : ArgParser(argc, argv))
+            switch(arg.option())
+            {
+                case 'a':
+                    CHECK_THROWS( arg.getint() );
+                    argmask |= 0x0001;
+                    nargs ++;
+                    break;
+                default:
+                    INFO( "unexpected option" );
+                    CHECK( false );
+            }
+        CHECK( nargs == 1 );
+        CHECK( argmask == 0x0001 );
+    }
+
 }
 
 #include "datapacking.h"
