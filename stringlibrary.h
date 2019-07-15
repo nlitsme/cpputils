@@ -4,8 +4,7 @@
 #include <iterator>
 #include <algorithm>
 
-// todo: strip, lstrip, rstrip
-//       split, join
+// todo: strip, lstrip, rstrip, join
 
 
 template<typename T>
