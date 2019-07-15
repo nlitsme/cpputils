@@ -79,7 +79,8 @@ class ArgParser {
         ArgIterator& operator++()
         {
             if (i==argc)
-                throw std::range_error("arg out of range");
+                // calller should throw when nescesary.
+                return *this;
 
             i++;
             setcurrent();
@@ -174,6 +175,9 @@ class ArgParser {
                 operator++();
             }
 
+            // check again if we are out of options
+            if (i==argc)
+                throw std::range_error("arg out of range");
             return p;
         }
         /*
