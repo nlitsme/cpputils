@@ -5,6 +5,17 @@ various c++ utility classes
 * string formatter using variadic templates instead of varargs,
   making use of iostreams for formatting.
 * utf-X string converter.
+* c++17 required.
+* a argc/argv argument parsing library: `argparse.h`
+* `arrayview.h` - provide an interface similar to std::stringview, or boost::span
+* `asn1parser: decodes BER encoded data
+* datapacking: big/little endian data extraction
+* fhandle: c++ wrapper for a POSIX file handle.
+* fslibrary: enumerates files recursively.
+* mmem: memory mapped files.
+* stringconvert: utf-N conversion tools.
+* stringlibrary: type independent string functions.
+
 
 
 ## hexdumper
@@ -28,6 +39,26 @@ Example:
 You can stringify custom types by defining a suitable `operator<<(os, customtype)`.
 
 Compared to alternatives like fmtlib, boost::format, this implementation creates very small binaries. Performance is below that of fmtlib, but well about boost::format.
+
+The code is centered around the `StringFormatter` class. Several functions use this
+to provide formatting:
+ * `std::string stringformat(const char *fmt, ...)`
+    * print to a stl string
+ * `QString qstringformat(const char *fmt, ...)`
+    * print to a QT string
+ * `fprint(FILE *out, const char*fmt, ...)`
+    * print to a file
+ * `print(const char*fmt, ...)`
+    * print to stdout
+ * `debug(const char*fmt, ...)`
+    * print to windows debug log
+
+
+
+### benchmarks
+
+Makefile.bench builds several small programs for comparing my formatter to several other
+similar libraries.
 
 
 ## stringconvert
@@ -100,6 +131,20 @@ class for using mem-mapped files.
 ## fslibrary
 
 A Recursive file iterator, which can be used from a ranged-for-loop.
+
+## asn1parser
+
+Provides several methods of accessing items in an asn.1 BER encoded object.
+ * `asn1tlv` is an object which decodes the Type + Length fields, and 
+   Provides the 'range' where the Data is located.
+ * `enumtlvs` iterates over all BER objects found in the given range.
+ * `traverse` extracts a specific part from a BER encoded object.
+
+
+## unittests
+
+A Makefile is provided for building the unittests. These can be build 'normally', 
+and also with options for code coverage testing.
 
 
 ### todo
