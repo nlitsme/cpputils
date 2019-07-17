@@ -4,9 +4,14 @@
 #include <iterator>
 #include <algorithm>
 
-// todo: strip, lstrip, rstrip, join
+#include "string-strip.h"
+
+// todo: stringjoin
 
 
+/*
+ * Returns the byte length of a NUL terminated string.
+ */
 template<typename T>
 size_t stringlength(const T *str)
 {
@@ -16,8 +21,11 @@ size_t stringlength(const T *str)
     return len;
 }
 
-template<typename T>
-int stringcompare(const T *a, const T *b)
+/*
+ * case sensitive compare of two NUL terminated strings.
+ */
+template<typename TA, typename TB>
+int stringcompare(const TA *a, const TB *b)
 {
     while (*a && *b && *a == *b) 
     {
@@ -31,26 +39,45 @@ int stringcompare(const T *a, const T *b)
     return 0;
 }
 
-template<typename T>
-T *stringcopy(T *a, const T *b)
+/*
+ * Copy a NUL terminated string.
+ * Returns a pointer to the last element copied.
+ */
+template<typename TA, typename TB>
+TA *stringcopy(TA *a, const TB *b)
 {
     while ((*a++ = *b++)!=0)
         ;
     return a-1;
 }
 
-template<typename T>
-int charicompare(T a,T b)
+/*
+ * case insensitive character compare
+ */
+template<typename TA, typename TB>
+int charicompare(TA a, TB b)
 {
-    a=(T)tolower(a);
-    b=(T)tolower(b);
+    a=(TA)tolower(a);
+    b=(TB)tolower(b);
     if (a<b) return -1;
     if (a>b) return 1;
     return 0;
 }
-
-template<class P>
-int stringicompare(const P* a, const P* b)
+/*
+ * case sensitive character compare
+ */
+template<typename TA, typename TB>
+int charcompare(TA a, TB b)
+{
+    if (a<b) return -1;
+    if (a>b) return 1;
+    return 0;
+}
+/*
+ * case insensitive compare of two NUL terminated strings.
+ */
+template<class PA, class PB>
+int stringicompare(const PA* a, const PB* b)
 {
     while (*a && *b && charicompare(*a, *b)==0)
     {
@@ -60,13 +87,21 @@ int stringicompare(const P* a, const P* b)
     return charicompare(*a, *b);
 }
 
-template<class T>
-int stringicompare(const T& a, const T& b)
+/*
+ * case insensitive compare of two stl string types.
+ *
+ * arguments can be anything which has begin and end, like:
+ *      vector, array, string, string_view, span, etc.
+ */
+template<class TA, class TB>
+int stringicompare(const TA& a, const TB& b)
 {
-    typename T::const_iterator pa= a.begin();
-    typename T::const_iterator pa_end= a.end();
-    typename T::const_iterator pb= b.begin();
-    typename T::const_iterator pb_end= b.end();
+    auto pa= std::begin(a);
+    auto pa_end= std::end(a);
+
+    auto pb= std::begin(b);
+    auto pb_end= std::end(b);
+
     while (pa!=pa_end && pb!=pb_end && charicompare(*pa, *pb)==0)
     {
         pa++;
@@ -81,7 +116,42 @@ int stringicompare(const T& a, const T& b)
         return 1;
     return charicompare(*pa, *pb);
 }
+/*
+ * case sensitive compare of two stl string types.
+ *
+ * arguments can be anything which has begin and end, like:
+ *      vector, array, string, string_view, span, etc.
+ */
+template<class TA, class TB>
+int stringcompare(const TA& a, const TB& b)
+{
+    auto pa= std::begin(a);
+    auto pa_end= std::end(a);
 
+    auto pb= std::begin(b);
+    auto pb_end= std::end(b);
+
+    while (pa!=pa_end && pb!=pb_end && *pa == *pb)
+    {
+        pa++;
+        pb++;
+    }
+
+    if (pa==pa_end && pb==pb_end)
+        return 0;
+    if (pa==pa_end)
+        return -1;
+    if (pb==pb_end)
+        return 1;
+    return charcompare(*pa, *pb);
+}
+
+/*
+ * convert a ascii digit to a number, for any base up to 36.
+ *
+ * digits are taken to be: 0..9, a..z 
+ *    or 0..9, A..Z
+ */
 template<typename T>
 int char2nyble(T c)
 {
