@@ -109,7 +109,7 @@ for (auto& arg : ArgParser(argc, argv))
 
 Several utility functions for handling NUL terminated char and wchar strings, 
 and std::strings:
- * stringcopy, stringlength, stringcompare, stringicompare, stringsplitter
+ * stringcopy, stringlength, stringcompare, stringicompare, stringsplitter, (lr)strip
 
 Parsing integers from strings:
  * parseunsigned, parsesigned
