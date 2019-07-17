@@ -30,7 +30,7 @@ clean:
 	$(RM) unittests $(wildcard *.o) $(wildcard *.profdata *.profraw)
 
 # list of files checked for coverage
-COVERAGEFILES=argparse.h arrayview.h asn1parser.h datapacking.h fhandle.h formatter.h fslibrary.h hexdumper.h mmem.h stringconvert.h stringlibrary.h utfconvertor.h
+COVERAGEFILES=argparse.h arrayview.h asn1parser.h datapacking.h fhandle.h formatter.h fslibrary.h hexdumper.h mmem.h stringconvert.h stringlibrary.h utfconvertor.h string-base.h string-parse.h string-split.h string-strip.h
 
 COVOPTIONS+=-show-instantiation-summary
 #COVOPTIONS+=-show-functions
