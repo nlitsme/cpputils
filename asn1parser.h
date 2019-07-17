@@ -102,6 +102,13 @@ struct asn1tlv {
     }
 };
 
+namespace std {
+template<>
+struct iterator_traits<std::istream::pos_type>
+{
+    typedef std::istream::off_type difference_type;
+};
+}
 
 /*
  *  reads an asn1 object from a stream, without reading the actual data bytes.

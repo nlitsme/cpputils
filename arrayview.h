@@ -12,6 +12,12 @@ public:
         : first(first), last(last)
     {
     }
+    array_view(P first, typename std::iterator_traits<P>::difference_type size)
+        : first(first), last(first)
+    {
+        std::advance(last, size);
+    }
+
     P begin() { return first; }
     P end() { return last; }
 
