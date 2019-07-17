@@ -261,6 +261,9 @@ public:
 
 /*
  * get one path item from the 'asn1-tree'
+ *
+ *    n >= 0  --> take the n-th class0 item
+ *    n < 0   --> take the item where tagvalue == -(n+1)
  */
 template<typename ASNOBJ>
 ASNOBJ get_nth_tlv(ASNOBJ obj, int n)
