@@ -199,7 +199,7 @@ class Hexdumper : public Hexdumper_base {
                 if (data_is_equal(prevline, curline)) {
                     int count = count_identical_lines(p, _last, unitsperline);
                     if (count > threshold) {
-                        os << "* " << count << " lines\n";
+                        os << "* [ 0x" << std::hex << count << " lines ]\n";
                         pend = p + count * unitsperline;
 
                         goto next;
