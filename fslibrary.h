@@ -3,7 +3,7 @@
 #include "stringlibrary.h"
 #include <dirent.h>
 
-#define dbgprint(...) 
+#define dbgprint(...)
 
 struct pathvector {
     std::vector<std::string> _v;
@@ -23,6 +23,10 @@ struct pathvector {
     void pop_back()
     {
         _v.pop_back();
+    }
+    auto size()
+    {
+        return _v.size();
     }
     std::string join() const
     {
@@ -76,7 +80,7 @@ struct fileenumerator {
         {
             dbgprint("deref\n");
             if (!cur && recurse!=DONE) {
-                push();
+                //push();
                 cur = nextent();
             }
             if (!cur)
@@ -115,20 +119,23 @@ struct fileenumerator {
                 return false;
             }
             stack.push_back(p);
-            dbgprint("opened dir %p\n", p);
+            dbgprint("opened (%d ; %d) dir %p\n", stack.size(), path.size(), p);
 
             return true;
         }
         void pop()
         {
-            dbgprint("pop\n");
+            dbgprint("pop (%d ; %d)\n", stack.size(), path.size());
             if (-1==closedir(stack.back()))
                 dbgprint("ERROR in closedir: %s\n", strerror(errno));
             dbgprint("closed dir %p\n", stack.back());
             stack.pop_back();
             path.pop_back();
             if (stack.empty())
+            {
                 recurse = DONE;
+                dbgprint("DONE\n");
+            }
         }
         dirent *nextent()
         {
@@ -161,6 +168,8 @@ struct fileenumerator {
         bool operator!=(const iter& rhs)
         {
             dbgprint("op!=\n");
+            if (recurse == DONE && rhs.recurse == DONE)
+                return false;
             if (!cur) {
                 push();
                 cur = nextent();
