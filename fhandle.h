@@ -49,7 +49,7 @@ struct filehandle {
     int f=-1;
     filehandle(int f) : f(f) { 
         if (f==-1) {
-            throw std::runtime_error("invalid filehandle");
+            throw std::system_error(std::error_code(errno, std::system_category()));
         }
     }
 
