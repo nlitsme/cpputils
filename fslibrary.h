@@ -3,7 +3,7 @@
 #include "stringlibrary.h"
 #include <dirent.h>
 
-#define dbgprint(...)
+#define dbgprint(...) 
 
 struct pathvector {
     std::vector<std::string> _v;
@@ -103,18 +103,21 @@ struct fileenumerator {
             dbgprint("push\n");
             if (!name.empty())
                 path.push_back(name);
-            push();
+            if (!push())
+                path.pop_back();
         }
-        void push()
+        bool push()
         {
             dbgprint("push -> opendir: %s\n", path.join());
             auto p = opendir(path.join().c_str());
             if (p==NULL) {
                 dbgprint("ERROR in opendir: %s\n", strerror(errno));
-                return;
+                return false;
             }
             stack.push_back(p);
             dbgprint("opened dir %p\n", p);
+
+            return true;
         }
         void pop()
         {
