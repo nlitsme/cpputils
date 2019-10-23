@@ -357,7 +357,7 @@ class Hexdumper : public Hexdumper_base {
 
 
 // os << Hex::hexstring << Hex::dumper(v);
-// will output the convents of v, in one line, without separators.
+// will output the contents of v, in one line, without separators.
 template <class _CharT, class _Traits>
 std::basic_ostream<_CharT, _Traits>&
 hexstring(std::basic_ostream<_CharT, _Traits>&os)
@@ -370,7 +370,7 @@ hexstring(std::basic_ostream<_CharT, _Traits>&os)
 }
 
 // os << Hex::ascstring << Hex::dumper(v);
-// will output the convents of v, in one line, as simplified ascii.
+// will output the contents of v, in one line, as simplified ascii.
 template <class _CharT, class _Traits>
 std::basic_ostream<_CharT, _Traits>&
 ascstring(std::basic_ostream<_CharT, _Traits>&os)
@@ -467,7 +467,7 @@ Hexdumper<T> dumper(const T*data, size_t size)
     return Hexdumper<T>(data, data+size);
 }
 
-// hexdump the convents of a sequence.
+// hexdump the contents of a sequence.
 template<typename V>
 Hexdumper<typename V::value_type> dumper(const V& v)
 {
