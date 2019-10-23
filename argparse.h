@@ -162,16 +162,22 @@ class ArgParser {
             if (isoption && !longmatch) {
                 // skips '-' + optionchar
                 p += 2;
+                if (*p==0) {
+                    //  -opt <space> argument
+                    operator++();
+                }
+
+                // -opt<argument>
             }
             else if (longmatch) {
                 // long match need not match the full word.
                 p = std::find(p, pend, '=');
-                if (p!=pend)
-                    p++;
-            }
+                if (p!=pend) {
+                    // --longopt '=' argument
+                    return p+1;
+                }
 
-            if (*p == 0) {
-                // next arg when at the end of a word
+                // --longopt <space> argument
                 operator++();
             }
 
