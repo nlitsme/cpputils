@@ -1,5 +1,6 @@
 #pragma once
 #include <stdexcept>
+#include <system_error>
 
 #ifdef _WIN32
 #include <io.h>
@@ -49,7 +50,7 @@ struct filehandle {
     int f=-1;
     filehandle(int f) : f(f) { 
         if (f==-1) {
-            throw std::system_error(std::error_code(errno, std::system_category()));
+            throw std::system_error(errno, std::generic_category());
         }
     }
 
