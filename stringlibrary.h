@@ -9,6 +9,6 @@
 #include "string-split.h"
 #include "string-parse.h"
 
-// todo: stringjoin
+#include "string-join.h"
 
 
