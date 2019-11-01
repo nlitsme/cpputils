@@ -171,6 +171,8 @@ template<int ...S> struct gens<0, S...>{ typedef seq<S...> type; };
 /*
  * some template utilities, used to determine when to use hexdump
  */
+
+/**  test if T is a container type */
 template<typename T>
 struct is_container : std::false_type {};
 
@@ -180,16 +182,34 @@ template<typename T>
 struct is_container<std::basic_string<T> > : std::true_type {};
 template<typename T, int N>
 struct is_container<std::array<T,N> > : std::true_type {};
+template<typename T>
+constexpr bool is_container_v = is_container<T>::value;
 
-template<typename T> constexpr bool is_container_v = is_container<T>::value;
-
+/**  test if T is a hexdumper type */
 template<typename T>
 struct is_hexdumper : std::false_type {};
 
 template<typename T>
 struct is_hexdumper<Hex::Hexdumper<T> > : std::true_type {};
+template<typename T>
+constexpr bool is_hexdumper_v = is_hexdumper<T>::value;
 
-template<typename T> constexpr bool is_hexdumper_v = is_hexdumper<T>::value;
+/** test if T can be inserted in a std::ostream */
+template<typename T>
+class is_stream_insertable {
+    template<typename SS, typename TT>
+    static auto test(int)
+        -> decltype(std::declval<SS&>() << std::declval<TT>(), std::true_type());
+
+    template<typename, typename>
+    static auto test(...)->std::false_type;
+
+public:
+    static const bool value = decltype(test<std::ostream, const T&>(0))::value;
+};
+template<typename T>
+constexpr bool is_stream_insertable_v = is_stream_insertable<T>::value;
+
 }
 
 /*****************************************************************************
@@ -398,16 +418,28 @@ struct StringFormatter {
                         os.precision(precision);
                     os.fill(padchar);
 
-                    if (type=='c')
-                        add_wchar(os, value);
-                    else if (type=='p')
-                        add_pointer(os, value);
-                    else if (type=='b')
-                        hex_dump_data(os, value);
-                    else if (std::strchr("iduoxX", type))
-                        output_int(os, value);
-                    else
-                        os << value;
+                    if (type=='c' && output_wchar(os, value))
+                    {
+                        // nop
+                    }
+                    else if (type=='p' && output_pointer(os, value))
+                    {
+                        // nop
+                    }
+                    else if (type=='b' && output_hex_data(os, value))
+                    {
+                        // nop
+                    }
+                    else if (std::strchr("iduoxX", type) && output_int(os, value))
+                    {
+                        // nop
+                    }
+                    else if (output_using_operator(os, value)) {
+                        // nop
+                    }
+                    else {
+                        os << "<?>";
+                    }
 
                     used_value = true;
 
@@ -427,31 +459,45 @@ struct StringFormatter {
     // otherwise the compiler would fail when trying to 
     // cast a non-pointer T to const void*
     template<typename T>
-    static void add_pointer(std::ostream& os, const T& value)
+    static bool output_pointer(std::ostream& os, const T& value)
     { 
         if constexpr (std::is_pointer_v<T>) {
             os << (const void*)value;
+            return true;
         }
+        return false;
+    }
+    template<typename T>
+    static bool output_using_operator(std::ostream& os, const T& value)
+    {
+        if constexpr (is_stream_insertable_v<T>) {
+            os << value;
+            return true;
+        }
+        return false;
     }
 
     // make sure we don't call string::convert with non char types.
     template<typename T>
-    static void add_wchar(std::ostream& os, const T& value)
+    static bool output_wchar(std::ostream& os, const T& value)
     { 
         if constexpr (std::is_integral_v<T>) {
             std::basic_string<wchar_t> wc(1, wchar_t(value));
             os << string::convert<char>(wc);
+            return true;
         }
+        return false;
     }
 
     // make sure we call Hex::dumper only for bytevectors or arrays
     template<typename T>
-    static void hex_dump_data(std::ostream& os, const T& value)
+    static bool output_hex_data(std::ostream& os, const T& value)
     { 
         if constexpr (is_hexdumper_v<T>) {
             if (os.fill()=='0')
                 os.fill(0);
             os << std::hex << value;
+            return true;
         }
         else if constexpr (is_container_v<T>) {
             if constexpr (!std::is_same_v<typename T::value_type,double>) {
@@ -459,19 +505,25 @@ struct StringFormatter {
                     os.fill(0);
                 os << std::hex << Hex::dumper(value);
             }
+            return true;
         }
+        return false;
     }
 
     template<typename T>
-    static void output_int(std::ostream& os, T value)
+    static bool output_int(std::ostream& os, T value)
     {
         if constexpr ((std::is_integral_v<T> || std::is_floating_point_v<T>) && std::is_signed_v<T>) {
             // note: hex or octal numbers are not printed as signed numbers.
             os << (long long)value;
+            return true;
         }
         else if constexpr ( (std::is_integral_v<T> || std::is_floating_point_v<T>) && std::is_unsigned_v<T>) {
             os << (unsigned long long)value;
+            return true;
         }
+
+        return false;
     }
 
 };
