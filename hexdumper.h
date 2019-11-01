@@ -59,6 +59,11 @@
 //  
 //  step(s)          -- 00000000: .... \n 00001000: .... \n ...
 //  
+//  
+// TODO:
+//   * support dumping streams
+//   * support dumping container types, ranges, iterators.
+//  
 
 namespace Hex {
 
