@@ -335,6 +335,21 @@ TEST_CASE("formatter") {
         CHECK( stringformat("%b", std::vector<uint8_t>{1,2,3}) == "01 02 03  ..." );
         CHECK( stringformat("%b", std::vector<uint16_t>{1,2,3}) == "0001 0002 0003  ......" );
 
+        CHECK( stringformat("%-b", std::vector<uint8_t>{1,2,3}) == "01 02 03" );
+        CHECK( stringformat("%-b", std::vector<uint16_t>{1,2,3}) == "0001 0002 0003" );
+
+        CHECK( stringformat("%s", std::vector<uint8_t>{1,2,3}) == "1 2 3" );
+        CHECK( stringformat("%s", std::vector<uint16_t>{1,2,3}) == "1 2 3" );
+
+        CHECK( stringformat("%b", std::vector<uint8_t>{0x10,0x20,0x30}) == "10 20 30  . 0" );
+        CHECK( stringformat("%b", std::vector<uint16_t>{0x10,0x20,0x30}) == "0010 0020 0030  .. .0." );
+
+        CHECK( stringformat("%-b", std::vector<uint8_t>{0x10,0x20,0x30}) == "10 20 30" );
+        CHECK( stringformat("%-b", std::vector<uint16_t>{0x10,0x20,0x30}) == "0010 0020 0030" );
+
+        CHECK( stringformat("%s", std::vector<uint8_t>{0x10,0x20,0x30}) == "16 32 48" );
+        CHECK( stringformat("%s", std::vector<uint16_t>{0x10,0x20,0x30}) == "16 32 48" );
+
         // printing a hexdumper
         CHECK( stringformat("%-b", Hex::dumper("abc\x01\x02", 5)) == "61 62 63 01 02" );
         CHECK( stringformat("%+b", Hex::dumper("abc\x01\x02", 5)) == "abc.." );
