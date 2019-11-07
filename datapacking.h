@@ -10,6 +10,11 @@ struct packer_base {
     {
     }
 
+    bool eof() const
+    {
+        return p == last;
+    }
+
     void require(int n)
     {
         if (!have(n))
@@ -75,6 +80,8 @@ struct unchecked_unpacker : packer_base<P> {
     }
     std::string getstr(int n) { this->p += n; return std::string(this->p-n, this->p); }
     std::vector<uint8_t> getbytes(int n) { this->p += n; return std::vector<uint8_t>(this->p-n, this->p); }
+
+    const uint8_t *getdata(int n) { this->p += n; return &*(this->p-n); }
 };
 template<typename P>
 struct unpacker : unchecked_unpacker<P> {
@@ -93,6 +100,8 @@ struct unpacker : unchecked_unpacker<P> {
 
     std::string getstr(int n) { this->require(n); return unchecked_unpacker<P>::getstr(n); }
     std::vector<uint8_t> getbytes(int n) { this->require(n); return unchecked_unpacker<P>::getbytes(n); }
+
+    const uint8_t *getdata(int n) { this->require(n); return unchecked_unpacker<P>::getdata(n); }
 };
 template<typename T, typename A>
 auto makeunpacker(std::vector<T, A>& v)
