@@ -186,6 +186,10 @@ class ArgParser {
                 throw std::range_error("arg out of range");
             return p;
         }
+        const char*getfullarg()
+        {
+            return argv[i];
+        }
         /*
          * return count for a repeated option:
          *
