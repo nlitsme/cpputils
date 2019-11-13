@@ -4,6 +4,16 @@
 #include <dirent.h>
 
 #define dbgprint(...)
+/*
+ * Usage:
+ *
+ *  for (auto [fn, ent] : fileenumerator(path))
+ *     handlefile(fn)
+ *
+ *  for (auto [fn, ent] : fileenumerator(path, 1<<DT_DIR))
+ *     handledir(fn)
+ *
+ */
 
 struct pathvector {
     std::vector<std::string> _v;
@@ -46,6 +56,10 @@ struct pathvector {
  *  TODO: implement search strategies
  *
  *  TODO: implement directory filter.
+ *
+ *  TODO: add flag specifying which entries to yield.
+ *
+ *  TODO: yield struct with path/filename + dirent instead of filename.
  */
 struct fileenumerator {
     pathvector path;
@@ -57,6 +71,7 @@ struct fileenumerator {
         DEPTHFIRST,
     };
     RecursionType recurse;
+    int filter;  // bitmask of (1<<DT_nnn) values
 
     struct iter {
         pathvector path;
@@ -65,8 +80,10 @@ struct fileenumerator {
 
         dirent *cur;
 
-        iter(pathvector path, RecursionType recurse)
-            : path(path), recurse(recurse), cur(nullptr)
+        int filter;  // bitmask of (1<<DT_nnn) values
+
+        iter(pathvector path, RecursionType recurse, int filter)
+            : path(path), recurse(recurse), cur(nullptr), filter(filter)
         {
             dbgprint("iter.start\n");
         }
@@ -76,7 +93,7 @@ struct fileenumerator {
             dbgprint("iter.default\n");
         }
 
-        std::string operator*()
+        auto operator*()
         {
             dbgprint("deref\n");
             if (!cur && recurse!=DONE) {
@@ -85,7 +102,7 @@ struct fileenumerator {
             }
             if (!cur)
                 throw std::runtime_error("eof");
-            return path.join(cur->d_name);
+            return std::make_tuple(path.join(cur->d_name), cur);
         }
         // return true for '.' and '..'
         bool isdirlink(dirent * ent)
@@ -149,10 +166,10 @@ struct fileenumerator {
                 }
                 else if (!isdirlink(ent))
                 {
-                    if (ent->d_type==DT_REG) {
+                    if (filter & (1<<ent->d_type))
                         return ent;
-                    }
-                    else if (ent->d_type==DT_DIR) {
+
+                    if (ent->d_type==DT_DIR) {
                         push(ent->d_name);
                     }
                 }
@@ -178,13 +195,13 @@ struct fileenumerator {
         }
     };
 
-    fileenumerator(const std::string& path, RecursionType recurse=SINGLE)
-        : path{path}, recurse(recurse)
+    fileenumerator(const std::string& path, int filter=(1<<DT_REG), RecursionType recurse=SINGLE)
+        : path{path}, recurse(recurse), filter(filter)
     {
     }
     iter begin() const
     {
-        return iter(path, recurse);
+        return iter(path, recurse, filter);
     }
     iter end() const
     {
