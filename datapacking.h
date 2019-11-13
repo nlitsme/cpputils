@@ -1,5 +1,7 @@
 #pragma once
 #include <stdint.h>
+#include <vector>
+#include <string>
 
 template<typename P>
 struct packer_base {
