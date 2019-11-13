@@ -11,6 +11,17 @@
  *
  * the conversion result is always a suitable std::string variant.
  *
+ *
+ * Usage:
+ *
+ *     std::string utf8 = "utf8 text";
+ *     char u8[8];
+ *
+ *     auto utf16 = string::convert<short>>(utf8);
+ *     auto u16a = string::convert<short>(u8, 8);
+ *     auto u16b = string::convert<short>(u8, u8+8);
+ *
+ *
  * (C) 2016  Willem Hengeveld <itsme@xs4all.nl>
  *
  */
