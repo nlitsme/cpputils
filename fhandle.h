@@ -48,6 +48,9 @@ https://opensource.apple.com/source/xnu/xnu-2422.1.72/bsd/kern/kern_mman.c
 
 struct filehandle {
     int f=-1;
+
+    filehandle() { }
+
     filehandle(int f) : f(f) { 
         if (f==-1) {
             throw std::system_error(errno, std::generic_category());
@@ -57,9 +60,10 @@ struct filehandle {
     // disallow copying - there may only be one owner.
     filehandle(const filehandle & fh) = delete;
 
-    ~filehandle() { if (f!=-1) close(f); }
+    ~filehandle() { close(); }
     filehandle& operator=(int fh) { f= fh; return *this; }
     operator int () const { return f; }
+    void close() { if (f!=-1) ::close(f); }
 
     int64_t size()
     {
