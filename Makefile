@@ -8,6 +8,7 @@
 #    clean             - delete objects and executables
 #    coverage          - run coverage test
 #
+DOCTEST?=1
 CXXFLAGS=-g $(if $(D),-O0,-O3) -std=c++1z -Wall
 CXXFLAGS+=-I .
 LDFLAGS=-g
