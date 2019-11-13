@@ -140,4 +140,11 @@ int stringcompare(const TA& a, const TB& b)
     return charcompare(*pa, *pb);
 }
 
+/* returns true when sequence 'v' starts with the same elements as 'w' */
+template<typename T, typename U>
+bool beginswith(const T& v, const U& w)
+{
+    return v.size()>=w.size() && std::equal(w.begin(), w.end(), v.begin());
+    //return std::size(v)>=std::size(w) && std::equal(std::begin(w), std::end(w), std::begin(v));
+}
 
