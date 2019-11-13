@@ -1,5 +1,7 @@
 #pragma once
-
+/*
+ *  like string_view, but takes an iterator-pair.
+ */
 template<typename P>
 class array_view {
     P first, last;
@@ -45,6 +47,12 @@ auto makerange(P first, P last)
 {
     return range<P>(first, last);
 }
+template<typename P>
+auto makerange(P first, size_t size)
+{
+    return range<P>(first, size);
+}
+
 template<typename V>
 auto makerange(V & v)
 {
