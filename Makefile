@@ -20,7 +20,7 @@ LDFLAGS+=$(if $(COVERAGE),-fprofile-instr-generate -fcoverage-mapping)
 
 CXXFLAGS+=-DSUPPORT_POINTERS
 
-unittests: unittests.o unittests2.o test-asn1.o test-strip.o
+unittests: unittests.o unittests2.o unittests3.o test-asn1.o test-strip.o
 	$(CXX) $(LDFLAGS) -o $@  $^
 
 %.o: tests/%.cpp
