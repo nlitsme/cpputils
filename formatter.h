@@ -23,9 +23,12 @@
 #endif
 #include <vector>
 #include <array>
+#include <set>
+#include <map>
 
 #include "stringconvert.h"
 #include "hexdumper.h"
+
 
 /******************************************************************************
  * add StringFormatter support for various types by implementing a operatoer<<:
@@ -35,7 +38,7 @@
  *  windows managed c++ Windows::Storage::Streams::IBuffer
  *  windows GUID
  *  Qt  QString
- *  std::vector, std::array
+ *  std::vector, std::array, std::set, std::map
  *  non-char std::string ( does unicode conversion )
  *  objects containing a 'ToString' method
  *  P
@@ -121,7 +124,14 @@ std::ostream& operator<<(std::ostream&os, const std::array<T,N>& buf)
     for (const auto& b : buf) {
         os.copyfmt(state);
         if (!first && fillchar) os << fillchar;
-        os << unsigned(b);
+        if constexpr (std::is_integral_v<T> && sizeof(T)==1) {
+            os << +b;
+        }
+        else {
+            // todo: why does is_stream_insertable_v not work here,
+            // then suddenly all arrays and vectors print as <?>
+            os << b;
+        }
         first= false;
     }
     return os;
@@ -136,11 +146,151 @@ std::ostream& operator<<(std::ostream&os, const std::vector<T, A>& buf)
     for (const auto& b : buf) {
         os.copyfmt(state);
         if (!first && fillchar) os << fillchar;
-        os << unsigned(b);
+        if constexpr (std::is_integral_v<T> && sizeof(T)==1) {
+            os << +b;
+        }
+        else {
+            os << b;
+        }
         first= false;
     }
     return os;
 }
+
+template<typename T, typename COMP, typename A>
+std::ostream& operator<<(std::ostream&os, const std::set<T, COMP, A>& buf)
+{
+    auto fillchar = os.fill();
+    std::ios state(NULL);  state.copyfmt(os);
+
+    bool first= true;
+    for (const auto& b : buf) {
+        os.copyfmt(state);
+        if (!first && fillchar) os << fillchar;
+        if constexpr (std::is_integral_v<T> && sizeof(T)==1) {
+            os << +b;
+        }
+        else {
+            os << b;
+        }
+        first= false;
+    }
+    return os;
+}
+
+template<typename K, typename V, typename COMP, typename A>
+std::ostream& operator<<(std::ostream&os, const std::map<K, V, COMP, A>& buf)
+{
+    auto fillchar = os.fill();
+    std::ios state(NULL);  state.copyfmt(os);
+
+    bool first= true;
+    for (const auto& kv : buf) {
+        os.copyfmt(state);
+        if (!first && fillchar) os << fillchar;
+        if constexpr (std::is_integral_v<K> && sizeof(K)==1) {
+            os << +kv.first;
+        }
+        else {
+            os << kv.first;
+        }
+
+        os << ':';
+
+        if constexpr (std::is_integral_v<V> && sizeof(V)==1) {
+            os << +kv.second;
+        }
+        else {
+            os << kv.second;
+        }
+        first= false;
+    }
+    return os;
+}
+
+template<typename OSTREAM>
+OSTREAM& operator<<(OSTREAM&os, __int128_t num)
+{
+    if (num == 0)
+        return os << '0';
+
+    std::string txt(40, char(0));
+    auto p = txt.end();
+
+    bool isneg = false;
+    __uint128_t unum;
+    if (num < 0) {
+        isneg = true;
+        unum = -num;
+    }
+    else {
+        unum = num;
+    }
+
+    while (unum) {
+        int digit = unum % 10;
+        unum /= 10;
+        *--p = '0' + digit;
+    }
+    if (isneg)
+        *--p = '-';
+
+    txt.erase(txt.begin(), p);
+
+    return os << txt;
+}
+template<typename OSTREAM>
+OSTREAM& operator<<(OSTREAM&os, __uint128_t num)
+{
+    if (num == 0)
+        return os << '0';
+
+    std::string txt(40, char(0));
+    auto p = txt.end();
+
+    while (num) {
+        int digit = num % 10;
+        num /= 10;
+        *--p = '0' + digit;
+    }
+
+    txt.erase(txt.begin(), p);
+
+    return os << txt;
+}
+
+
+#if 0
+namespace {
+    template<typename Tuple, std::size_t...N>
+    auto extract_tuple(const Tuple& tup, std::index_sequence<N...> )
+    {
+        return std::make_tuple( std::get<N+1>(tup)... );
+    }
+    template<typename Tuple>
+    auto tuple_tail(const Tuple& tup)
+    {
+        return extract_tuple(tup, std::make_index_sequence<std::tuple_size_v<Tuple>-1>{} );
+    }
+}
+template<typename T, typename...ARGS>
+std::ostream& operator<<(std::ostream&os, const std::tuple<T, ARGS...>& value)
+{
+    if constexpr (std::is_integral_v<T> && sizeof(T)==1) {
+        os << +std::get<0>(value);
+    }
+    else {
+        os << std::get<0>(value);
+    }
+
+    if constexpr (sizeof...(ARGS) > 0) {
+        os << tuple_tail(value);
+    }
+
+    return os;
+}
+#endif
+
 
 // convert all none <char> strings to a char string
 // before outputting to the stream
@@ -404,10 +554,15 @@ struct StringFormatter {
 
                     if (leftadjust)
                         os << std::left;
+                    else if (forcesign) {
+                        // exception: when forcing display of sign
+                        // we need to use 'internal fill'
+                        os << std::internal;
+                    }
 
                     if (havewidth) {
                         os.width(width);
-                        if (!leftadjust)
+                        if (!leftadjust && !forcesign)
                             os << std::right;
                     }
                     else {
@@ -500,7 +655,7 @@ struct StringFormatter {
             return true;
         }
         else if constexpr (is_container_v<T>) {
-            if constexpr (!std::is_same_v<typename T::value_type,double>) {
+            if constexpr (std::is_integral_v<typename T::value_type>) {
                 if (os.fill()=='0')
                     os.fill(0);
                 os << std::hex << Hex::dumper(value);
@@ -513,13 +668,12 @@ struct StringFormatter {
     template<typename T>
     static bool output_int(std::ostream& os, T value)
     {
-        if constexpr ((std::is_integral_v<T> || std::is_floating_point_v<T>) && std::is_signed_v<T>) {
-            // note: hex or octal numbers are not printed as signed numbers.
-            os << (long long)value;
+        if constexpr ((std::is_integral_v<T> && sizeof(T) == 1) || std::is_same_v<T, wchar_t>) {
+            os << (unsigned long)value;
             return true;
         }
-        else if constexpr ( (std::is_integral_v<T> || std::is_floating_point_v<T>) && std::is_unsigned_v<T>) {
-            os << (unsigned long long)value;
+        else if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
+            os << value;
             return true;
         }
 
