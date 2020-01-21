@@ -63,8 +63,10 @@ typedef uint32_t utf32char_t;
 //  count 
 // =========
 namespace {
+#ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-function"
+#endif
 size_t utf32toutf8bytesneeded(utf32char_t c)
 {
     if (c<0x80) return 1;
@@ -72,7 +74,9 @@ size_t utf32toutf8bytesneeded(utf32char_t c)
     if (c<0x10000) return 3;
     return 4; // < 0x110000
 }
+#ifdef __clang__
 #pragma clang diagnostic pop
+#endif
 }
 template<typename P>
 size_t utf32toutf8bytesneeded(P p, P pend)
