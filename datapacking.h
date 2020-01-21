@@ -31,6 +31,11 @@ struct packer_base {
         // usually this is the case with the back_insert_iterator.
         return true;
     }
+    void skip(int n)
+    {
+        require(n);
+        p += n;
+    }
 };
 
 template<typename P>
@@ -105,21 +110,12 @@ struct unpacker : unchecked_unpacker<P> {
 
     const uint8_t *getdata(int n) { this->require(n); return unchecked_unpacker<P>::getdata(n); }
 };
-template<typename T, typename A>
-auto makeunpacker(std::vector<T, A>& v)
+template<typename CONTAINER, typename dummy = std::enable_if_t<std::is_class_v<CONTAINER> > >
+auto makeunpacker(CONTAINER& v)
 {
     return unpacker(v.begin(), v.end());
 }
-template<typename T, int N>
-auto makeunpacker(std::array<T, N>& v)
-{
-    return unpacker(v.begin(), v.end());
-}
-template<typename T, typename A>
-auto makeunpacker(std::basic_string<T, A>& v)
-{
-    return unpacker(v.begin(), v.end());
-}
+
 template<typename P>
 struct unchecked_packer : packer_base<P> {
     unchecked_packer(P first, P last)
@@ -235,8 +231,8 @@ template<typename P>
 template<typename P>
     static void set64be(P p, uint64_t x) { unchecked_packer<P>(p, p).set64be(x); }
 template<typename P>                                                      
-    static void setstr(P p, const std::string& txt) { return unchecked_unpacker<P>(p, p).setstr(txt); }
+    static void setstr(P p, const std::string& txt) { return unchecked_packer<P>(p, p).setstr(txt); }
 template<typename P>                                                      
-    static void setbytes(P p, const std::vector<uint8_t>& data) { return unchecked_unpacker<P>(p, p).setbytes(data); }
+    static void setbytes(P p, const std::vector<uint8_t>& data) { return unchecked_packer<P>(p, p).setbytes(data); }
 
 };
