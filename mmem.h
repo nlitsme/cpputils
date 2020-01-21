@@ -13,6 +13,29 @@ extern "C" void*  __mmap2(void*, size_t, int, int, int, size_t);
 #define mmapoffset(x) (x)
 #endif
 
+/*
+ * NOTE: problem on macosx: you can't mmap a block or char device.
+ *
+ * see https://stackoverflow.com/questions/24520474/mmap-a-block-device-on-mac-os-x
+ *
+ * the problem is in the mmap kernel driver:
+https://opensource.apple.com/source/xnu/xnu-2422.1.72/bsd/kern/kern_mman.c
+
+        if (vp->v_type != VREG && vp->v_type != VCHR) {
+			(void)vnode_put(vp);
+			error = EINVAL;
+			goto bad;
+		}
+        ...
+		if (vp->v_type == VCHR || vp->v_type == VSTR) {
+			(void)vnode_put(vp);
+			error = ENODEV;
+			goto bad;
+		} 
+
+ */
+
+
 // class for creating a memory mapped file.
 struct mappedmem {
     uint8_t *pmem;
