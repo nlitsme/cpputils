@@ -245,6 +245,8 @@ TEST_CASE("stringconvert") {
 struct mytype { };
 inline std::ostream& operator<<(std::ostream&os, const mytype& s) { return os << "MYTYPE"; }
 
+struct Unprintable { };
+
 TEST_CASE("formatter") {
     SECTION("singleformats") {
         CHECK( stringformat("%%") == "%" );
@@ -347,8 +349,8 @@ TEST_CASE("formatter") {
         CHECK( stringformat("%-b", std::vector<uint8_t>{0x10,0x20,0x30}) == "10 20 30" );
         CHECK( stringformat("%-b", std::vector<uint16_t>{0x10,0x20,0x30}) == "0010 0020 0030" );
 
-        CHECK( stringformat("%s", std::vector<uint8_t>{0x10,0x20,0x30}) == "16 32 48" );
-        CHECK( stringformat("%s", std::vector<uint16_t>{0x10,0x20,0x30}) == "16 32 48" );
+        CHECK( stringformat("%s", std::vector<uint8_t>{0, 0x10,0x20,0x30, 0x7f,0x80,0xff}) == "0 16 32 48 127 128 255" );
+        CHECK( stringformat("%s", std::vector<uint16_t>{0, 0x10,0x20,0x30,0xff,0xffff}) == "0 16 32 48 255 65535" );
 
         // printing a hexdumper
         CHECK( stringformat("%-b", Hex::dumper("abc\x01\x02", 5)) == "61 62 63 01 02" );
@@ -405,6 +407,15 @@ TEST_CASE("formatter") {
         CHECK( stringformat("%+d", 1) == "+1" );
         CHECK( stringformat("%+d", -1) == "-1" );
 
+        CHECK( stringformat("%+3d", 1) == "+ 1" );
+        CHECK( stringformat("%+3d", 10) == "+10" );
+        CHECK( stringformat("%+3d", 0) == "+ 0" );
+        CHECK( stringformat("%+3d", -1) == "- 1" );
+        CHECK( stringformat("%+3d", -10) == "-10" );
+
+        CHECK( stringformat("%+03d", -1) == "-01" );
+        CHECK( stringformat("%+03d",  1) == "+01" );
+
 
         CHECK( stringformat("%-3s", "") == "   " );
         CHECK( stringformat("%-3s", "a") == "a  " );
@@ -458,11 +469,25 @@ TEST_CASE("formatter") {
         CHECK( stringformat("%s", u32) == c8 );
     }
     SECTION("vectors") {
-        CHECK( stringformat("%s", std::vector<int>{1,2,3,4}) == "1 2 3 4" );
+        CHECK( stringformat("%s", std::vector<int>{-1,0,1,2,3,4}) == "-1 0 1 2 3 4" );
         CHECK( stringformat("%,s", std::vector<int>{1,2,3,4}) == "1,2,3,4" );
 
         CHECK( stringformat("%s", std::vector<double>{1,2,3,4}) == "1 2 3 4" );
         CHECK( stringformat("%s", std::vector<uint8_t>{1,2,3,4}) == "1 2 3 4" );
+
+        CHECK( stringformat("%s", std::vector<char>{-0x80,-1,0,1,2,3,4,0x7f}) == "-128 -1 0 1 2 3 4 127" );
+        CHECK( stringformat("%s", std::vector<short>{-0x8000,-1,0,1,2,3,4, 0x7fff}) == "-32768 -1 0 1 2 3 4 32767" );
+        CHECK( stringformat("%s", std::vector<long>{-1,0,1,2,3,4}) == "-1 0 1 2 3 4" );
+        CHECK( stringformat("%,s", std::vector<std::string>{"abc", "def", "xyz"}) == "abc,def,xyz" );
+    }
+    SECTION("unprintable") {
+        CHECK( stringformat("%s", Unprintable{}) == "<?>" );
+#if 0
+        // todo - make formatter support this:
+        CHECK( stringformat("%s", std::vector<Unprintable>{Unprintable{}}) == "<?>" );
+        CHECK( stringformat("%s", std::vector<Unprintable>{Unprintable{},Unprintable{}}) == "<?> <?>" );
+        CHECK( stringformat("%,s", std::vector<Unprintable>{Unprintable{},Unprintable{}}) == "<?>,<?>" );
+#endif
     }
     SECTION("arrays") {
         CHECK( stringformat("%s", std::array<int, 4>{{1,2,3,4}}) == "1 2 3 4" );
@@ -473,6 +498,8 @@ TEST_CASE("formatter") {
     }
     SECTION("custom") {
         CHECK( stringformat("%s", mytype()) == "MYTYPE" );
+        CHECK( stringformat("%s", std::vector{mytype{}}) == "MYTYPE" );
+        CHECK( stringformat("%s", std::vector{mytype{}, mytype{}}) == "MYTYPE MYTYPE" );
     }
     SECTION("fromcpython") {
         CHECK( stringformat("%.1d", 1) == "1" );
@@ -1703,3 +1730,4 @@ E|D, "//79/Pv6+fj39vX08/Lx8O/u7ezr6uno5+bl5OPi4eDf3t3c29rZ2NfW1dTT0tHQz87NzMvKyc
         }
     }
 }
+
