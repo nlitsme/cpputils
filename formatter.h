@@ -16,6 +16,7 @@
  * (C) 2016 Willem Hengeveld <itsme@xs4all.nl>
  */
 #include <sstream>
+#include <ostream>
 #include <string>
 #include <cstring>      // strchr
 #ifdef _WIN32
