@@ -1,3 +1,6 @@
+#include <tuple>
+#include <vector>
+#include <string>
 /*
 /Users/itsme/myprj/itslib/include/itslib/basexxdecoder.h
 /Users/itsme/myprj/itslib/include/itslib/str/b64.h
@@ -92,7 +95,7 @@ std::tuple<S, P, bool> base64_decode(S ifirst, S ilast, P ofirst, P olast)
     S p = ifirst;
     P o = ofirst;
 
-    uint8_t b;
+    uint8_t b = 0;
     int i = 0;
     while (p < ilast && o < olast)
     {
