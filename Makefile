@@ -9,8 +9,9 @@
 #    coverage          - run coverage test
 #
 DOCTEST?=1
-CXXFLAGS=-g $(if $(D),-O0,-O3) -std=c++1z -Wall
+CXXFLAGS=-g $(if $(D),-O0,-O3) -std=c++17 -Wall
 CXXFLAGS+=-I .
+CXXFLAGS+=-I /usr/local/include
 LDFLAGS=-g
 CDEFS?=$(if $(DOCTEST),-DWITH_DOCTEST,-DWITH_CATCH)
 all: unittests
@@ -20,7 +21,7 @@ LDFLAGS+=$(if $(COVERAGE),-fprofile-instr-generate -fcoverage-mapping)
 
 CXXFLAGS+=-DSUPPORT_POINTERS
 
-unittests: unittests.o unittests2.o unittests3.o test-asn1.o test-strip.o
+unittests: $(notdir $(subst .cpp,.o,$(wildcard tests/*.cpp)))
 	$(CXX) $(LDFLAGS) -o $@  $^
 
 %.o: tests/%.cpp
@@ -31,7 +32,7 @@ clean:
 	$(RM) unittests $(wildcard *.o) $(wildcard *.profdata *.profraw)
 
 # list of files checked for coverage
-COVERAGEFILES=argparse.h arrayview.h asn1parser.h datapacking.h fhandle.h formatter.h fslibrary.h hexdumper.h mmem.h stringconvert.h stringlibrary.h utfconvertor.h string-base.h string-parse.h string-split.h string-strip.h
+COVERAGEFILES=argparse.h arrayview.h asn1parser.h datapacking.h fhandle.h formatter.h fslibrary.h hexdumper.h mmem.h stringconvert.h string-join.h stringlibrary.h utfconvertor.h string-base.h string-parse.h string-split.h string-strip.h base64encoder.h utfcvutils.h
 
 COVOPTIONS+=-show-instantiation-summary
 #COVOPTIONS+=-show-functions
