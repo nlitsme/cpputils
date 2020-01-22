@@ -1,20 +1,4 @@
-#ifdef WITH_CATCH
-
-#define CATCH_CONFIG_ENABLE_TUPLE_STRINGMAKER
-#include "contrib/catch.hpp"
-#define SKIPTEST  , "[!hide]"
-
-#elif defined(WITH_DOCTEST)
-
-#include "contrib/doctest.h"
-#define SECTION(...) SUBCASE(__VA_ARGS__)
-#define SKIPTEST  * doctest::skip(true)
-#define CHECK_THAT(a, b) 
-#else
-#error define either WITH_CATCH or WITH_DOCTEST
-#endif
-
-
+#include "unittestframework.h"
 
 #include "fhandle.h"
 #include <vector>
