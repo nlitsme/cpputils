@@ -42,6 +42,33 @@ TEST_CASE("formatter") {
         CHECK_FALSE( stringformat("%i", 123) != "123" );
         CHECK_FALSE( stringformat("%i", 123) == "321" );
     }
+    SECTION("doubleformat") {
+ CHECK( stringformat("%.10f %.10f", 123.45, 123.45) == "123.4500000000 123.4500000000");
+ CHECK( stringformat("%.10f %d", 123.45, 123) == "123.4500000000 123");
+ CHECK( stringformat("%.10f %5d", 123.45, 123) == "123.4500000000   123");
+ CHECK( stringformat("%.10f %5s", 123.45, "xyz") == "123.4500000000   xyz");
+ CHECK( stringformat("%.10f %s", 123.45, "xyz") == "123.4500000000 xyz");
+ CHECK( stringformat("%d %.10f", 123, 123.45) == "123 123.4500000000");
+ CHECK( stringformat("%d %d", 123, 123) == "123 123");
+ CHECK( stringformat("%d %5d", 123, 123) == "123   123");
+ CHECK( stringformat("%d %5s", 123, "xyz") == "123   xyz");
+ CHECK( stringformat("%d %s", 123, "xyz") == "123 xyz");
+ CHECK( stringformat("%5d %.10f", 123, 123.45) == "  123 123.4500000000");
+ CHECK( stringformat("%5d %d", 123, 123) == "  123 123");
+ CHECK( stringformat("%5d %5d", 123, 123) == "  123   123");
+ CHECK( stringformat("%5d %5s", 123, "xyz") == "  123   xyz");
+ CHECK( stringformat("%5d %s", 123, "xyz") == "  123 xyz");
+ CHECK( stringformat("%5s %.10f", "xyz", 123.45) == "  xyz 123.4500000000");
+ CHECK( stringformat("%5s %d", "xyz", 123) == "  xyz 123");
+ CHECK( stringformat("%5s %5d", "xyz", 123) == "  xyz   123");
+ CHECK( stringformat("%5s %5s", "xyz", "xyz") == "  xyz   xyz");
+ CHECK( stringformat("%5s %s", "xyz", "xyz") == "  xyz xyz");
+ CHECK( stringformat("%s %.10f", "xyz", 123.45) == "xyz 123.4500000000");
+ CHECK( stringformat("%s %d", "xyz", 123) == "xyz 123");
+ CHECK( stringformat("%s %5d", "xyz", 123) == "xyz   123");
+ CHECK( stringformat("%s %5s", "xyz", "xyz") == "xyz   xyz");
+ CHECK( stringformat("%s %s", "xyz", "xyz") == "xyz xyz");
+    }
     SECTION("charcv") {
         CHECK( stringformat("%c", char(122)) == "z" );
         CHECK( stringformat("%c", wchar_t(122)) == "z" );
