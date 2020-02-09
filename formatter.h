@@ -597,6 +597,11 @@ struct StringFormatter {
                         os << "<?>";
                     }
 
+                    // TODO: improve float formatting
+
+                    // reset precision
+                    os.precision(0);
+
                     used_value = true;
 
                     format(os, p, args...);
