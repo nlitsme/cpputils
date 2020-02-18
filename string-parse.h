@@ -185,3 +185,28 @@ auto hex2binary(const S& hexstr)
 }
 
 
+template<typename P>
+uint64_t string_to_unsigned(P first, P last, int base)
+{
+    auto [ value, end ] = parseunsigned(first, last, base);
+    if (last != end)
+        throw std::runtime_error("parsing error");
+    return value;
+}
+
+template<typename P>
+uint64_t string_to_unsigned(const P* str, int base)
+{
+    auto [ value, end ] = parseunsigned(str, base);
+    if (*end)
+        throw std::runtime_error("parsing error");
+    return value;
+}
+template<typename T>
+uint64_t string_to_unsigned(const T& str, int base)
+{
+    auto [ value, end ] = parseunsigned(str, base);
+    if (std::end(str) != end)
+        throw std::runtime_error("parsing error");
+    return value;
+}
