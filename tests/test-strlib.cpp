@@ -4,6 +4,8 @@
 
 #include <string>
 #include <vector>
+#include <tuple>
+
 TEST_CASE("stringlibrary") {
     SECTION("charptr") {
         SECTION("compare") {
@@ -263,6 +265,45 @@ TEST_CASE("stringlibrary") {
                 CHECK(first==last);
             }
         }
+        SECTION("strref") {
+            std::string str = "control a1 01 0100 0";
+
+            const std::string& arg = str;
+            int i = 0;
+            for (auto s : stringsplitter<std::string_view>(arg, " ")) {
+                switch(i++)
+                {
+                    case 0 : CHECK( s == "control" ); break;
+                    case 1 : CHECK( s == "a1" ); break;
+                    case 2 : CHECK( s == "01" ); break;
+                    case 3 : CHECK( s == "0100" ); break;
+                    case 4 : CHECK( s == "0" ); break;
+                    case 5:
+                             CHECK( false );
+                }
+            }
+            CHECK( i == 5 );
+        }
+        SECTION("strview2") {
+            std::string str = "control a1 01 0100 0";
+            std::string_view view(str);
+
+            int i = 0;
+            for (auto s : stringsplitter<std::string_view>(view, " ")) {
+                switch(i++)
+                {
+                    case 0 : CHECK( s == "control" ); break;
+                    case 1 : CHECK( s == "a1" ); break;
+                    case 2 : CHECK( s == "01" ); break;
+                    case 3 : CHECK( s == "0100" ); break;
+                    case 4 : CHECK( s == "0" ); break;
+                    case 5:
+                             CHECK( false );
+                }
+            }
+            CHECK( i == 5 );
+        }
+
     }
 }
 
