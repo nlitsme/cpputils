@@ -73,8 +73,9 @@ struct filehandle {
         _p = fh._p;
         return *this;
     }
-    bool empty() { return !_p; }
+    bool empty() const { return !_p; }
 
+    operator bool () const { return !empty(); }
     operator int () const { return fh(); }
     int fh() const {
         if (!_p) throw std::runtime_error("no filehandle set");
