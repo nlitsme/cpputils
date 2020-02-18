@@ -2,13 +2,15 @@
 #include <utility>
 #include <iterator>
 #include <algorithm>
+#include <string_view>
+
 /*
  *   S  is a std::string, or std::string_view
  */
 template<typename S>
 struct stringsplitter {
-    const S& _str;
-    const S& _sep;
+    S _str;
+    S _sep;
 
 /*
     // separator, which splits according to items in, and not in the set.
@@ -66,7 +68,13 @@ struct stringsplitter {
 
             //q = std::search(p, last, std::begin(sep), std::end(sep));
 
-            return S(p, q);
+            // workaround for lack of iterator variant of stringview
+            if constexpr (std::is_same_v<S, std::string_view>) {
+                return S(&*p, q-p);
+            }
+            else {
+                return S(p, q);
+            }
         }
         // updates 'p', to point to the first 'sep'
         iter& operator++()
