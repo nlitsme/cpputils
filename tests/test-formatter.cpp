@@ -263,8 +263,13 @@ TEST_CASE("formatter") {
         CHECK( stringformat("%s", std::vector<double>{1,2,3,4}) == "1 2 3 4" );
         CHECK( stringformat("%s", std::vector<uint8_t>{1,2,3,4}) == "1 2 3 4" );
 
-        CHECK( stringformat("%s", std::vector<char>{-0x80,-1,0,1,2,3,4,0x7f}) == "-128 -1 0 1 2 3 4 127" );
-        CHECK( stringformat("%s", std::vector<short>{-0x8000,-1,0,1,2,3,4, 0x7fff}) == "-32768 -1 0 1 2 3 4 32767" );
+        // NOTE: 'char' is unsigned on some platforms -> need explicit 'signed char'
+        CHECK( stringformat("%s", std::vector<signed char>{-0x80,-1,0,1,2,3,4,0x7f}) == "-128 -1 0 1 2 3 4 127" );
+        CHECK( stringformat("%s", std::vector<int8_t>{-0x80,-1,0,1,2,3,4,0x7f}) == "-128 -1 0 1 2 3 4 127" );
+        CHECK( stringformat("%s", std::vector<unsigned char>{0x80,0xff,0,1,2,3,4,0x7f}) == "128 255 0 1 2 3 4 127" );
+        CHECK( stringformat("%s", std::vector<uint8_t>{0x80,0xff,0,1,2,3,4,0x7f}) == "128 255 0 1 2 3 4 127" );
+        CHECK( stringformat("%s", std::vector<signed short>{-0x8000,-1,0,1,2,3,4, 0x7fff}) == "-32768 -1 0 1 2 3 4 32767" );
+        CHECK( stringformat("%s", std::vector<unsigned short>{0x8000,0xFFFF,0,1,2,3,4, 0x7fff}) == "32768 65535 0 1 2 3 4 32767" );
         CHECK( stringformat("%s", std::vector<long>{-1,0,1,2,3,4}) == "-1 0 1 2 3 4" );
         CHECK( stringformat("%,s", std::vector<std::string>{"abc", "def", "xyz"}) == "abc,def,xyz" );
     }
@@ -360,7 +365,9 @@ unittests.cpp:426: FAILED:	  CHECK( stringformat("%#o", 01234567) == "01234567" 
 
         CHECK( stringformat("%p", (void*)0xABCDEF) == "0xabcdef" );
         CHECK( stringformat("%p", (void*)NULL) == NULLREPRESENTATION );
-        CHECK( stringformat("%p", (void*)0xABCDEFABCDEF) == "0xabcdefabcdef" );
+        if constexpr (sizeof(void*) == 8) {
+            CHECK( stringformat("%p", (void*)0xABCDEFABCDEF) == "0xabcdefabcdef" );
+        }
         CHECK( stringformat("%p", (void*)NULL) == NULLREPRESENTATION );
         CHECK( stringformat("%p", (void*)0xABCDEF) == "0xabcdef" );
         CHECK( stringformat("%p", (void*)NULL) == NULLREPRESENTATION );
