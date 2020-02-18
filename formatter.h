@@ -209,8 +209,9 @@ std::ostream& operator<<(std::ostream&os, const std::map<K, V, COMP, A>& buf)
     return os;
 }
 
-template<typename OSTREAM>
-OSTREAM& operator<<(OSTREAM&os, __int128_t num)
+#ifdef __SIZEOF_INT128__
+template<typename NUM>
+std::enable_if_t<std::is_same_v<NUM,__int128_t>,std::ostream&> operator<<(std::ostream&os, NUM num)
 {
     if (num == 0)
         return os << '0';
@@ -240,8 +241,8 @@ OSTREAM& operator<<(OSTREAM&os, __int128_t num)
 
     return os << txt;
 }
-template<typename OSTREAM>
-OSTREAM& operator<<(OSTREAM&os, __uint128_t num)
+template<typename NUM>
+std::enable_if_t<std::is_same_v<NUM,__uint128_t>,std::ostream&> operator<<(std::ostream&os, NUM num)
 {
     if (num == 0)
         return os << '0';
@@ -259,7 +260,7 @@ OSTREAM& operator<<(OSTREAM&os, __uint128_t num)
 
     return os << txt;
 }
-
+#endif
 
 #if 0
 namespace {
