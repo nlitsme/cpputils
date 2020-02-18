@@ -1,5 +1,7 @@
 #include "unittestframework.h"
 
+#include <signal.h>
+
 #include "fhandle.h"
 #include <vector>
 
@@ -24,12 +26,12 @@ TEST_CASE("filehandle") {
         filehandle f;
         filehandle g;
 
+        // check assignment
         CHECK_NOTHROW( g = f );
-
         CHECK_NOTHROW( f = 99 );
 
-        CHECK( f == 99 );
-        CHECK( 99 == f );
+        CHECK( f.fh() == 99 );
+        CHECK( 99 == f.fh() );
 
         CHECK_THROWS( f.close(); );
     }
