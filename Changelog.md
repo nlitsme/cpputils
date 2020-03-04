@@ -1,3 +1,9 @@
+## Wed Mar  4 12:02:54 CET 2020
+ * fhandle: added operator bool
+ * added simpler string conversion functions
+ * fixed bugs in stringsplit
+ * more tests
+
 ## Wed Jan 22 22:46:09 CET 2020
 
  * updated catch from v2.3.0 to v2.11.1
