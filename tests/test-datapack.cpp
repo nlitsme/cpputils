@@ -50,7 +50,7 @@ TEST_CASE("packer") {
     }
 
     SECTION("set/getiter") {
-        std::vector<uint8_t> data(29);
+        std::vector<uint8_t> data(36);
 
         packer p(data.begin(), data.end());
 
@@ -61,6 +61,7 @@ TEST_CASE("packer") {
         p.set8(0x88);
         p.set64be(0x123456789abcdef0LL);
         p.set64le(0x123456789abcdef0LL);
+        p.setstr("test123");
         CHECK_THROWS(p.set8(0));
 
         // check consistency
@@ -73,6 +74,7 @@ TEST_CASE("packer") {
         CHECK(q.get8() == 0x88);
         CHECK(q.get64be() == 0x123456789abcdef0LL);
         CHECK(q.get64le() == 0x123456789abcdef0LL);
+        CHECK(q.getstr(7) == "test123");
         CHECK_THROWS(q.get8());
 
         // check be / le
@@ -85,8 +87,9 @@ TEST_CASE("packer") {
         CHECK(r.get8() == 0x88);
         CHECK(r.get64le() == 0xf0debc9a78563412LL);
         CHECK(r.get64be() == 0xf0debc9a78563412LL);
+        std::string str = "test123";
+        CHECK(std::equal(str.begin(), str.end(), r.getdata(7)));
         CHECK_THROWS(r.get8());
-
     }
     SECTION("set/getptr") {
         std::vector<uint8_t> data(29);

@@ -160,6 +160,8 @@ struct unchecked_packer : packer_base<P> {
     }
     void setstr(const std::string& txt) { std::copy(txt.begin(), txt.end(), this->p); this->p += txt.size(); }
     void setbytes(const std::vector<uint8_t>& data) { std::copy(data.begin(), data.end(), this->p); this->p += data.size(); }
+    template<typename Q>
+    void setbytes(Q first, Q last) { std::copy(first, last, this->p); this->p += std::distance(first, last); }
 };
 template<typename P>
 struct packer : unchecked_packer<P> {
@@ -178,6 +180,9 @@ struct packer : unchecked_packer<P> {
 
     void setstr(const std::string& txt) { this->require(txt.size()); unchecked_packer<P>::setstr(txt); }
     void setbytes(const std::vector<uint8_t>& data) { this->require(data.size()); unchecked_packer<P>::setbytes(data); }
+    template<typename Q>
+    void setbytes(Q first, Q last) { this->require(std::distance(first, last)); unchecked_packer<P>::setbytes(first, last); }
+
 };
 template<typename T, typename A>
 auto makepacker(std::vector<T, A>& v)
