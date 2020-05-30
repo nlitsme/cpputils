@@ -2,6 +2,32 @@
 #include <utility>
 #include <iterator>
 #include <algorithm>
+
+/*
+ * converts strings to numbers.
+ *
+ * Four ways to specify a string:
+ *    * a pair of pointers or iterators
+ *    * a pointer to a NUL terminated string
+ *    * a pointer and a size
+ *    * a container supporting std::begin and std::end 
+ *
+ * `parseunsigned` and `parsesigned` return both the result, and the
+ * position where parsing stopped.
+ *
+ * `string_to_unsigned` returns only the result, and throws when
+ * parsing stopped before the end of the string.
+ *
+ * `hex2binary`  converts a bound string of hex values to a vector of those values.
+ *
+ * Two variants:
+ *   * convert a bound string to a bound value range,
+ *     returning the number of converted values.
+ *   * taking a string, returning a specified vector type.
+ *
+ */
+
+
 /*
  * convert a ascii digit to a number, for any base up to 36.
  *
@@ -20,6 +46,7 @@ int char2nyble(T c)
     return -1;
 }
 
+/* parses a string bound by a pointer pair. */
 template<typename P>
 std::pair<uint64_t, P> parseunsigned(P first, P last, int base)
 {
@@ -101,6 +128,8 @@ std::pair<uint64_t, P> parseunsigned(P first, P last, int base)
     }
     return std::make_pair(num, p);
 }
+
+/* parses a string bound by a pointer pair. */
 template<typename P>
 std::pair<int64_t, P> parsesigned(P first, P last, int base)
 {
@@ -119,25 +148,29 @@ std::pair<int64_t, P> parsesigned(P first, P last, int base)
     return std::make_pair(num, res.second);
 }
 
-template<typename P>
-std::pair<uint64_t, const P*> parseunsigned(const P* str, int base)
+/* parses a NUL terminated string */
+template<typename T>
+std::pair<uint64_t, const T*> parseunsigned(const T* str, int base)
 {
     return parseunsigned(str, str+stringlength(str), base);
 }
 
 
-template<typename P>
-std::pair<int64_t, const P*> parsesigned(const P* str, int base)
+/* parses a NUL terminated string */
+template<typename T>
+std::pair<int64_t, const T*> parsesigned(const T* str, int base)
 {
     return parsesigned(str, str+stringlength(str), base);
 }
 
+/* parses a container type string */
 template<typename T>
 std::pair<uint64_t, typename T::const_iterator> parseunsigned(const T& str, int base)
 {
     return parseunsigned(std::begin(str), std::end(str), base);
 }
 
+/* parses a container type string */
 template<typename T>
 std::pair<int64_t, typename T::const_iterator> parsesigned(const T& str, int base)
 {
@@ -185,6 +218,7 @@ auto hex2binary(const S& hexstr)
 }
 
 
+/* parses a string bound by a pointer pair. */
 template<typename P>
 uint64_t string_to_unsigned(P first, P last, int base)
 {
@@ -194,14 +228,17 @@ uint64_t string_to_unsigned(P first, P last, int base)
     return value;
 }
 
-template<typename P>
-uint64_t string_to_unsigned(const P* str, int base)
+/* parses a NUL terminated string */
+template<typename T>
+uint64_t string_to_unsigned(const T* str, int base)
 {
     auto [ value, end ] = parseunsigned(str, base);
     if (*end)
         throw std::runtime_error("parsing error");
     return value;
 }
+
+/* parses a container type string */
 template<typename T>
 uint64_t string_to_unsigned(const T& str, int base)
 {
