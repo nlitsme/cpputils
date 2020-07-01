@@ -1,6 +1,8 @@
 #include "unittestframework.h"
 
 #include "argparse.h"
+#include "argparse.h"
+
 TEST_CASE("argparse") {
     SECTION("test") {
         const char*argv[] = {

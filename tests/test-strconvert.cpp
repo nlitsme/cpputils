@@ -1,6 +1,7 @@
 #include "unittestframework.h"
 
 #include "stringconvert.h"
+#include "stringconvert.h"
 #include <vector>
 
 TEST_CASE("stringconvert") {

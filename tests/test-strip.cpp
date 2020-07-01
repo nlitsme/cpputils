@@ -1,6 +1,7 @@
 #include "unittestframework.h"
 
 #include "string-strip.h"
+#include "string-strip.h"
 
 // ... somehow doctest needs an explicit include of iostream here.
 #include <iostream>

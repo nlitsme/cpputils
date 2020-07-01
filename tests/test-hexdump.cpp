@@ -2,6 +2,7 @@
 
 
 #include "hexdumper.h"
+#include "hexdumper.h"
 
 #include <sstream>
 #include <vector>

@@ -1,6 +1,7 @@
 #include "unittestframework.h"
 
 #include "base64encoder.h"
+#include "base64encoder.h"
 
 #include <array>
 

@@ -1,6 +1,7 @@
 #include "unittestframework.h"
 
 #include "formatter.h"
+#include "formatter.h"
 
 
 struct mytype { };

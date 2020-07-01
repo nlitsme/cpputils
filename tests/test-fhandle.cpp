@@ -3,6 +3,7 @@
 #include <signal.h>
 
 #include "fhandle.h"
+#include "fhandle.h"
 #include <vector>
 
 TEST_CASE("filehandle") {
