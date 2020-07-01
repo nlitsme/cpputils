@@ -2,7 +2,10 @@
 // class wrappong a memmapped object
 
 #include <sys/mman.h>
+#include <stdio.h>
 #include <unistd.h>
+#include <stdint.h>
+#include <algorithm>
 
 #ifdef __ANDROID_API__
 extern "C" void*  __mmap2(void*, size_t, int, int, int, size_t);
@@ -81,6 +84,8 @@ struct mappedmem {
 
         dataofs= start - phys_start;
     }
+
+    // todo: add madvise support
 
     ~mappedmem()
     {
