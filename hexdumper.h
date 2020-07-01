@@ -248,7 +248,7 @@ class Hexdumper : public Hexdumper_base {
         clearflags(os);
     }
 
-    static void output_bin(std::ostream& os, T val)
+    static void output_bin(std::ostream& os, std::remove_const_t<T> val)
     {
         char bits[257];
         int len = 0;
@@ -477,9 +477,9 @@ template<typename V>
 Hexdumper<typename V::value_type> dumper(const V& v)
 {
     if (v.empty()) {
-        V v1{{0}};
+        typename V::value_type x{0};
         // handle the empty case seperately.
-        return Hexdumper<typename V::value_type>(&v1[0], &v1[0]);
+        return Hexdumper<typename V::value_type>(&x, 0);
     }
     return Hexdumper<typename V::value_type>(&v[0], &v[0]+v.size());
 }
