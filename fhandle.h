@@ -20,6 +20,7 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 #endif
+#include <fcntl.h>
 
 // wrap posix file handle in a c++ class,
 // so it will be closed when it leaves the current scope.
@@ -52,7 +53,7 @@ struct filehandle {
 
     filehandle() { }
 
-    filehandle(filehandle& fh)
+    filehandle(const filehandle& fh)
     {
         *this = fh;
     }
@@ -61,6 +62,11 @@ struct filehandle {
     {
         *this = fh;
     }
+    filehandle(const std::string& filename, int openflags = O_RDONLY, int mode=0666)
+    {
+        *this = open(filename.c_str(), openflags, mode);
+    }
+
     filehandle& operator=(int fh)
     { 
         if (fh==-1)
@@ -68,7 +74,7 @@ struct filehandle {
         _p = std::make_shared<ptr>(fh);
         return *this;
     }
-    filehandle& operator=(filehandle& fh)
+    filehandle& operator=(const filehandle& fh)
     {
         _p = fh._p;
         return *this;
