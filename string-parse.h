@@ -2,6 +2,7 @@
 #include <utility>
 #include <iterator>
 #include <algorithm>
+#include "string-base.h"
 
 /*
  * converts strings to numbers.
@@ -210,13 +211,31 @@ size_t hex2binary(P1 strfirst, P1 strlast, P2 first, P2 last)
 template<typename V, typename S>
 auto hex2binary(const S& hexstr)
 {
-    V v(hexstr.size() / 2);
-    size_t n = hex2binary(hexstr.begin(), hexstr.end(), v.begin(), v.end());
+    if constexpr (std::is_pointer_v<S>) {
+        auto len = stringlength(hexstr);
+        V v(len / 2);
+        size_t n = hex2binary(hexstr, hexstr+len, v.begin(), v.end());
+        v.resize(n);
+
+        return v;
+    }
+    else {
+        V v(hexstr.size() / 2);
+        size_t n = hex2binary(hexstr.begin(), hexstr.end(), v.begin(), v.end());
+        v.resize(n);
+
+        return v;
+    }
+}
+template<typename V, typename P>
+auto hex2binary(const P first, const P last)
+{
+    V v(std::distance(first, last) / 2);
+    size_t n = hex2binary(first, last, v.begin(), v.end());
     v.resize(n);
 
     return v;
 }
-
 
 /* parses a string bound by a pointer pair. */
 template<typename P>
