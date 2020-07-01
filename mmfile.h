@@ -16,14 +16,15 @@ public:
     {
     }
 
-    mappedfile(const std::string& filename, int openflags = O_RDONLY)
-        : mappedfile(open(filename.c_str(), openflags))
+    mappedfile(const std::string& filename, int openflags = O_RDONLY, int mode=0666)
+        : mappedfile(open(filename.c_str(), openflags, mode))
     {
     }
     mappedfile(int fh, int mmapmode = PROT_READ)
         : mappedfile(filehandle{fh}, mmapmode)
     {
     }
+    auto file() { return _f; }
 
 
     auto size() { return _m.size(); }
