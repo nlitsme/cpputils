@@ -1,9 +1,12 @@
+#pragma once
+
 #include <cstring>
 #include <algorithm>
 #include <utility>
 #include <iterator>
 #include <string_view>
 
+// TODO: move this template introspection stuff to a separate header file.
 template<typename T>
 struct is_callable_impl {
 private:
