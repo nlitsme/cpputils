@@ -29,6 +29,7 @@
 
 #include "stringconvert.h"
 #include "hexdumper.h"
+#include "fhandle.h"
 
 
 /******************************************************************************
