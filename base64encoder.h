@@ -27,25 +27,19 @@ P base64_encode_chunk(P chunk, P last, S enc)
 
     int c0= b>>2;
     int c1= (b&3)<<4;
-    int c2= 0;
-    int c3= 0;
+    int c2= 0x40;
+    int c3= 0x40;
 
     if (p < last) {
         b = *p++;
         c1 |= (b&0xf0)>>4;
-        c2 |= (b&0x0f)<<2;
-    }
-    else {
-        c2=64;
-    }
+        c2 = (b&0x0f)<<2;
 
-    if (p < last) {
-        b = *p++;
-        c2 |= (b&0xc0)>>6;
-        c3 |= b&0x3f;
-    }
-    else {
-        c3=64;
+        if (p < last) {
+            b = *p++;
+            c2 |= (b&0xc0)>>6;
+            c3 = b&0x3f;
+        }
     }
 
     *enc++= b642char[c0];
