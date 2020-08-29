@@ -1,3 +1,19 @@
+## Sat Aug 29 22:20:06 CEST 2020
+ * string-lineenum.h: enumerate lines in a string
+ * templateutils: is\_container, is\_stream\_insertable, is\_callable, is\_searchable.
+ * formatter.h: fixed bug in %b handling
+ * datapacking: added setbytes with first+last pair.
+ * datapacking: added 24-bit support. added z-string support.
+ * datapacking: improved container detection for makeXXpacker. setbytes now takes generic container.
+ * asn1parser: added named constants for classes and tags
+ * mappedfile: added mode flags
+ * added filehandle support to 'fprint'
+ * fhandle: added 'opening' constructor, which takes a filename and flags.
+ * crc32 + crc16 code
+ * more tests
+ * more documentation.
+
+
 ## Wed Mar  4 12:02:54 CET 2020
  * fhandle: added operator bool
  * added simpler string conversion functions
