@@ -25,7 +25,8 @@
 // wrap posix file handle in a c++ class,
 // so it will be closed when it leaves the current scope.
 // This is most useful for making code exception safe.
-
+//
+// `filehandle` can be assigned to, copied, deleted safely.
 
 struct filehandle {
 
@@ -53,20 +54,26 @@ struct filehandle {
 
     filehandle() { }
 
+    // the copy constructor is implemented in terms of the assignment operator.
     filehandle(const filehandle& fh)
     {
         *this = fh;
     }
 
+    // construct with `int` is implemented using `assign int`.
     filehandle(int fh)
     {
         *this = fh;
     }
+
+    // construct with path + flags opens a filesystem file.
     filehandle(const std::string& filename, int openflags = O_RDONLY, int mode=0666)
     {
         *this = open(filename.c_str(), openflags, mode);
     }
 
+    // discards and optionally closes any handle currently retained,
+    // before creating a new wrapped filehandle.
     filehandle& operator=(int fh)
     { 
         if (fh==-1)
@@ -74,6 +81,7 @@ struct filehandle {
         _p = std::make_shared<ptr>(fh);
         return *this;
     }
+    // copies the wrapped handle from the passed handle.
     filehandle& operator=(const filehandle& fh)
     {
         _p = fh._p;
