@@ -1,10 +1,67 @@
 #pragma once
 #include <memory>   // shared_ptr
+#include <iostream>
+#include <vector>
 
 #include "arrayview.h"
 
+enum {
+    CLS_UNIVERSAL,
+    CLS_APPLICATION,
+    CLS_CONTEXT,
+    CLS_PRIVATE
+};
+enum {  // universal
+    TAG_EOC,                  //  0
+    TAG_BOOLEAN,              //  1
+    TAG_INTEGER,              //  2
+    TAG_BITSTRING,            //  3
+    TAG_OCTETSTRING,          //  4
+    TAG_NULL,                 //  5
+    TAG_OID,                  //  6
+    TAG_OBJDESC,              //  7
+    TAG_EXTTYPE,              //  8
+    TAG_REAL,                 //  9
+    TAG_ENUM,                 // 10
+    TAG_EMBEDDED,             // 11
+    TAG_UTF8STRING,           // 12
+    TAG_RELATIVEOID,          // 13
+    TAG_TIME,                 // 14
+    TAG_0f,                   // 15
+    TAG_SEQUENCE,             // 16
+    TAG_SET,                  // 17
+    TAG_NUMERICSTRING,        // 18
+    TAG_PRINTABLESTRING,      // 19
+    TAG_T61STRING,            // 20
+    TAG_VIDEOTEXSTRING,       // 21
+    TAG_IASSTRING,            // 22
+    TAG_TIMESTAMP,            // 23  UTCTIme
+    TAG_FULLSTAMP,            // 24  GeneralizedTime
+    TAG_GRAPHICSTRING,        // 25
+    TAG_VISIBLESTRING,        // 26
+    TAG_GENERALSTRING,        // 27
+    TAG_UNIVERSALSTRING,      // 28
+    TAG_UNRESTRICTEDSTRING,   // 29
+    TAG_BMPSTRING,            // 30
+    TAG_DATE,                 // 31
+    TAG_TIMEOFDAY,            // 32
+    TAG_DATETIME,             // 33
+    TAG_DURATION,             // 34
+    TAG_RIDTYPE,              // 35  OID internationalized resource identifier type
+    TAG_RRIDTYPE,             // 36  Relative OID internationalized resource identifier type
+};
 /*
  * decodes one t,l,v triplet from a BER asn1 sequence.
+ *
+ * see asn1-ber-X.690-0207.pdf
+ *
+ * properties:
+ *    constructed
+ *    cls
+ *    tagvalue   or tagrange
+ *    length     or lenrange
+ *
+ *    datarange
  */
 template<typename P>
 struct asn1tlv {
@@ -259,6 +316,10 @@ public:
 
     enumtlvs(range<P> range)
         : first(std::begin(range)), last(std::end(range))
+    {
+    }
+    enumtlvs(P first, P last)
+        : first(first), last(last)
     {
     }
 
