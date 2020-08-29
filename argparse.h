@@ -72,9 +72,9 @@ class ArgParser {
             setcurrent();
         }
 
-        bool operator!=(const ArgIterator& rhs) const
+        friend bool operator!=(const ArgIterator& lhs, const ArgIterator& rhs)
         {
-            return !(i==rhs.i && p == rhs.p);
+            return !(lhs.i==rhs.i && lhs.p == rhs.p);
         }
 
         ArgIterator& operator*() { return *this; }

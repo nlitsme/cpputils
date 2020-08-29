@@ -83,9 +83,9 @@ struct stringsplitter {
             //p = q + std::size(ssep)
             return *this;
         }
-        bool operator!=(const iter& rhs) const
+        friend bool operator!=(const iter& lhs, const iter& rhs)
         {
-            return p!=rhs.p || last!=rhs.last;
+            return lhs.p!=rhs.p || lhs.last!=rhs.last;
         }
     };
 
