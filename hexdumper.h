@@ -37,6 +37,7 @@
 // precision = nr of bytes per unit
 // showpoint       -> 'show offset' :  iword(__baseofs)  is valid.
 // skipws          -> summarize identical lines
+// noskipws        -> don't summarize
 //
 // unused stream flags:
 //
