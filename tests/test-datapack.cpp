@@ -21,9 +21,9 @@ TEST_CASE("packer") {
             CHECK_THROWS(q.set8(0));
             CHECK_THROWS(q.set32le(0));
             CHECK_THROWS(q.setstr("x"));
-            CHECK_THROWS(q.setbytes({0}));
+            CHECK_THROWS(q.setbytes(std::vector<uint8_t>{0}));
             CHECK_NOTHROW(q.setstr(""));
-            CHECK_NOTHROW(q.setbytes({}));
+            CHECK_NOTHROW(q.setbytes(std::vector<uint8_t>{}));
 
         }
         SECTION("onebyte_8") {
