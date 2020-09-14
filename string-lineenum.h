@@ -32,14 +32,14 @@ struct lineenumerator {
         }
         iter& operator++()
         {
-            p = q+1;
+            p = (q<last) ? q+1 : last;
             q = std::find(p, last, '\n');
 
             return *this;
         }
         friend bool operator!=(const iter& lhs, const iter& rhs)
         {
-            return lhs.q != rhs.q;
+            return lhs.p != rhs.p;
         }
     };
 
