@@ -155,6 +155,7 @@ and also with options for code coverage testing.
  * `"%*d"` : width from argument list is not supported.
  * `"%+08d"`  produces the wrong result: the sign will be after the padding, instead of in front.
  * `"%.8s"`  string truncation does not work.
+ * add support for different alphabets in base32/base64.
 
 
 (C) 2016 Willem Hengeveld <itsme@xs4all.nl>
