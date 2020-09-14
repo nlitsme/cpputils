@@ -34,7 +34,7 @@ TEST_CASE("filehandle") {
         CHECK( f.fh() == 99 );
         CHECK( 99 == f.fh() );
 
-        CHECK_THROWS( f.close(); );
+        CHECK_THROWS( f.close() );
     }
     SECTION("pair") {
         filehandle f;

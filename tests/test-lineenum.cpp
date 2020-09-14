@@ -57,7 +57,7 @@ TEST_CASE("lineenum_onlylf") {
     }
     CHECK(i==1);
 }
-TEST_CASE("lineenum_onlylf") {
+TEST_CASE("lineenum_lflf") {
     std::string text = "\n\n";
     int i=0;
     // verify that an string with only an lf is handled as one empty line.
