@@ -1,3 +1,7 @@
+## Mon 14 Sep 2020 07:19:25 PM CEST
+ * added a base32 encoder/decoder
+ * fixed lineenum, now all tests succeed.
+
 ## Sat Aug 29 22:20:06 CEST 2020
  * string-lineenum.h: enumerate lines in a string
  * templateutils: is\_container, is\_stream\_insertable, is\_callable, is\_searchable.
