@@ -3,19 +3,8 @@
 #include <tuple>
 #include <vector>
 #include <string>
-/*
-/Users/itsme/myprj/itslib/include/itslib/basexxdecoder.h
-/Users/itsme/myprj/itslib/include/itslib/str/b64.h
-/Users/itsme/myprj/itslib/include/itslib/stringutils.h
-/Users/itsme/myprj/itslib/src/stringutils.cpp
-/Users/itsme/workprj/draupnir/sindri/cli/utils.cpp
-/Users/itsme/workprj/secphone/libraries/SecureStorage/base64.h
-/Users/itsme/workprj/secphone/libraries/SecureStorage/base64.cpp
-/Users/itsme/workprj/secphone/libraries/miscutils/misc/base64conv.h
-/Users/itsme/workprj/secphone/libraries/miscutils/misc/base64conv.cpp
-*/
 
-
+// encode a 3 byte chunk into 4 characters
 template<typename P, typename S>
 P base64_encode_chunk(P chunk, P last, S enc)
 {
