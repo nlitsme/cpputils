@@ -266,3 +266,36 @@ uint64_t string_to_unsigned(const T& str, int base)
         throw std::runtime_error("parsing error");
     return value;
 }
+
+
+/* parses a string bound by a pointer pair. */
+template<typename P>
+int64_t string_to_signed(P first, P last, int base)
+{
+    auto [ value, end ] = parsesigned(first, last, base);
+    if (last != end)
+        throw std::runtime_error("parsing error");
+    return value;
+}
+
+/* parses a NUL terminated string */
+template<typename T>
+int64_t string_to_signed(const T* str, int base)
+{
+    auto [ value, end ] = parsesigned(str, base);
+    if (*end)
+        throw std::runtime_error("parsing error");
+    return value;
+}
+
+/* parses a container type string */
+template<typename T>
+int64_t string_to_signed(const T& str, int base)
+{
+    auto [ value, end ] = parsesigned(str, base);
+    if (std::end(str) != end)
+        throw std::runtime_error("parsing error");
+    return value;
+}
+
+// todo: parse_double
