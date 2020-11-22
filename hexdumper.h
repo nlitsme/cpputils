@@ -479,7 +479,7 @@ Hexdumper<typename V::value_type> dumper(const V& v)
 {
     if (v.empty()) {
         typename V::value_type x{0};
-        // handle the empty case seperately.
+        // handle the empty case separately.
         return Hexdumper<typename V::value_type>(&x, 0);
     }
     return Hexdumper<typename V::value_type>(&v[0], &v[0]+v.size());

@@ -169,7 +169,7 @@ TEST_CASE("stringlibrary") {
                 const auto *cend = t.str.c_str() + delta;
 
                 auto res = parseunsigned(t.str.begin(), t.str.end(), t.base);
-                auto pos = res.second-t.str.begin();  // in seperate variable for doctest.h
+                auto pos = res.second-t.str.begin();  // in separate variable for doctest.h
                 INFO( "test str=" << t.str << " base=" << t.base << " delta=" << delta << " -> " << res.first << ", " << pos);
                 CHECK( parseunsigned(t.str, t.base) == std::make_pair(t.value, pend) );
                 CHECK( parseunsigned(t.str.c_str(), t.base) == std::make_pair(t.value, cend) );
