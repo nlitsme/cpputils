@@ -146,24 +146,8 @@ struct filehandle {
         if (-1==::ftruncate(fh(), pos))
             throw std::system_error(errno, std::generic_category(), "truncate");
     }
-    template<typename RANGE>
-    auto write(const RANGE& r)
-    {
-        auto rc = ::write(fh(), &*r.begin(), r.size());
-        if (rc == -1)
-            throw std::system_error(errno, std::generic_category(), "write");
-        
-        return rc;
-    }
-    template<typename PTR>
-    auto write(PTR first, PTR last)
-    {
-        auto rc = ::write(fh(), first, std::distance(first, last)*sizeof(*first));
-        if (rc == -1)
-            throw std::system_error(errno, std::generic_category(), "write");
-        
-        return rc;
-    }
+
+    // ============================= write =============================
     template<typename PTR>
     auto write(PTR ptr, size_t count)
     {
@@ -173,27 +157,31 @@ struct filehandle {
         
         return rc;
     }
-    template<typename INT>
-    std::enable_if_t<std::is_scalar_v<INT>, std::vector<uint8_t>> read(INT count)
+
+    template<typename RANGE>
+    auto write(const RANGE& r)
     {
-        std::vector<uint8_t> data(count);
-        auto rc = ::read(fh(), &data[0], data.size());
-        if (rc == -1)
-            throw std::system_error(errno, std::generic_category(), "read");
-
-        data.resize(rc);
-
-        return data;
+        return write(&*r.begin(), r.size());
     }
     template<typename PTR>
-    size_t read(PTR first, PTR last)
+    auto write(PTR first, PTR last)
     {
-        auto rc = ::read(fh(), first, std::distance(first, last)*sizeof(*first));
-        if (rc == -1)
-            throw std::system_error(errno, std::generic_category(), "read");
+        return write(first, std::distance(first, last));
+    }
 
+    template<typename PTR>
+    auto pwrite(uint64_t ofs, PTR ptr, size_t count)
+    {
+        auto rc = ::pwrite(fh(), ptr, count*sizeof(*ptr), ofs);
+        if (rc == -1)
+            throw std::system_error(errno, std::generic_category(), "pwrite");
+        
         return rc;
     }
+
+
+    // ============================= read =============================
+
     template<typename PTR>
     size_t read(PTR ptr, size_t count)
     {
@@ -204,13 +192,34 @@ struct filehandle {
         return rc;
     }
 
+    template<typename PTR>
+    size_t read(PTR first, PTR last)
+    {
+        return read(first, std::distance(first, last));
+    }
     template<typename RANGE>
     std::enable_if_t<!std::is_scalar_v<RANGE>, size_t> read(RANGE r)
     {
-        auto rc = ::read(fh(), &*r.begin(), r.size() * sizeof(RANGE::value_type));
+        return read(&*r.begin(), r.size());
+    }
+    template<typename INT>
+    std::enable_if_t<std::is_scalar_v<INT>, std::vector<uint8_t>> read(INT count)
+    {
+        std::vector<uint8_t> data(count);
+        auto rc = read(&data[0], data.size());
+        data.resize(rc);
+
+        return data;
+    }
+
+    template<typename PTR>
+    size_t pread(uint64_t ofs, PTR ptr, size_t count)
+    {
+        auto rc = ::pread(fh(), ptr, count*sizeof(*ptr), ofs);
         if (rc == -1)
-            throw std::system_error(errno, std::generic_category(), "read");
+            throw std::system_error(errno, std::generic_category(), "pread");
 
         return rc;
     }
+
 };
