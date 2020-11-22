@@ -3,7 +3,6 @@
 
 // including all here again, so we will catch linking errors.
 #include "argparse.h"
-#include "asn1maker.h"
 #include "asn1parser.h"
 #include "base64encoder.h"
 #include "datapacking.h"
