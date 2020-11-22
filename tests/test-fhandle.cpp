@@ -7,7 +7,9 @@
 #include <vector>
 
 TEST_CASE("filehandle") {
+#ifndef _WIN32
     signal(SIGPIPE, SIG_IGN);
+#endif
     SECTION("construct") {
 
         // check invalid fh
@@ -36,6 +38,8 @@ TEST_CASE("filehandle") {
 
         CHECK_THROWS( f.close() );
     }
+#ifndef _WIN32
+// TODO - create tests which work on windows as well.
     SECTION("pair") {
         filehandle f;
         filehandle g;
@@ -190,4 +194,5 @@ TEST_CASE("filehandle") {
         // reading returns EOF
         CHECK_THROWS( g.write("abc", 3) );  // writing fails, because f is closed.
     }
+#endif
 }

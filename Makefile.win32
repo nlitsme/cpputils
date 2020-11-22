@@ -1,6 +1,7 @@
 DOCTEST?=1
 CXXFLAGS=/Zi $(if $(D),/O0,/O2) -Wall /EHsc /DNOMINMAX
 CXXFLAGS+=/std:c++17
+CXXFLAGS+=/I .
 LDFLAGS=/debug
 CDEFS?=$(if $(DOCTEST),-DWITH_DOCTEST,-DWITH_CATCH)
 CXX=cl.exe

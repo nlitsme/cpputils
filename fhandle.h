@@ -107,6 +107,7 @@ struct filehandle {
             return -1;
         if (st.st_mode&S_IFREG)
             return st.st_size;
+#ifndef _WIN32
         else if (st.st_mode&S_IFBLK) {
 #ifdef DKIOCGETBLOCKCOUNT
             uint64_t bkcount;
@@ -124,6 +125,7 @@ struct filehandle {
             return devsize;
 #endif
         }
+#endif
         else {
             // pipe or socket
             return -1;
@@ -143,8 +145,12 @@ struct filehandle {
     }
     void trunc(uint64_t pos)
     {
+#ifndef _WIN32
         if (-1==::ftruncate(fh(), pos))
             throw std::system_error(errno, std::generic_category(), "truncate");
+#else
+        throw std::runtime_error("truncate not implemented on windows");
+#endif
     }
 
     // ============================= write =============================
