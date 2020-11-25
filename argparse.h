@@ -6,6 +6,7 @@
 
 #include <string>
 #include <algorithm>
+#include <stdexcept>
 #include <stdlib.h>
 
 #include "stringlibrary.h"
