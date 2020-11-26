@@ -5,6 +5,8 @@
 #include <utility>
 #include <iterator>
 #include <string_view>
+#include <type_traits>
+
 #include "templateutils.h"
 
 template<typename SEQUENCE, typename CHAR>
