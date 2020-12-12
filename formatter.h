@@ -231,11 +231,21 @@ std::enable_if_t<std::is_same_v<NUM,__int128_t>,std::ostream&> operator<<(std::o
     else {
         unum = num;
     }
+    int base = 10;
+    switch (os.flags() & os.basefield)
+    {
+        case std::ios_base::hex: base = 16; break;
+        case std::ios_base::oct: base = 8; break;
+        case std::ios_base::dec: base = 10; break;
+        default:
+            break;
+        // todo - support bin as well
+    }
 
     while (unum) {
-        int digit = unum % 10;
-        unum /= 10;
-        *--p = '0' + digit;
+        int digit = unum % base;
+        unum /= base;
+        *--p = (digit<10) ? ('0' + digit) : ('a' + digit - 10);
     }
     if (isneg)
         *--p = '-';
@@ -253,10 +263,21 @@ std::enable_if_t<std::is_same_v<NUM,__uint128_t>,std::ostream&> operator<<(std::
     std::string txt(40, char(0));
     auto p = txt.end();
 
+    int base = 10;
+    switch (os.flags() & os.basefield)
+    {
+        case std::ios_base::hex: base = 16; break;
+        case std::ios_base::oct: base = 8; break;
+        case std::ios_base::dec: base = 10; break;
+        default:
+            break;
+        // todo - support bin as well
+    }
+
     while (num) {
-        int digit = num % 10;
-        num /= 10;
-        *--p = '0' + digit;
+        int digit = num % base;
+        num /= base;
+        *--p = (digit<10) ? ('0' + digit) : ('a' + digit - 10);
     }
 
     txt.erase(txt.begin(), p);
