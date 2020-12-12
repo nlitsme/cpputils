@@ -25,13 +25,16 @@ TEST_CASE("formatter") {
         CHECK( stringformat("%G", 123.4567) == "123.457" );
         CHECK( stringformat("%g", 1234567.89) == "1.23457e+06" );
         CHECK( stringformat("%G", 1234567.89) == "1.23457E+06" );
-#ifdef _WIN32
-        CHECK( stringformat("%a", 123.45) == "0x1.edcccdp+6" );
-        CHECK( stringformat("%A", 123.45) == "0X1.EDCCCDP+6" );
-#else
+
+        // older than msvc v16.7  had this result, incorrectly applying formatting
+        // rules to hex float output.
+
+        //CHECK( stringformat("%a", 123.45) == "0x1.edcccdp+6" );
+        //CHECK( stringformat("%A", 123.45) == "0X1.EDCCCDP+6" );
+
         CHECK( stringformat("%a", 123.45) == "0x1.edccccccccccdp+6" );
         CHECK( stringformat("%A", 123.45) == "0X1.EDCCCCCCCCCCDP+6" );
-#endif
+
         CHECK( stringformat("%e", 123.45) == "1.234500e+02" );
         CHECK( stringformat("%E", 123.45) == "1.234500E+02" );
         CHECK( stringformat("%c", 122) == "z" );
