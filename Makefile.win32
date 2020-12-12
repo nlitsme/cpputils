@@ -1,19 +1,20 @@
 DOCTEST?=1
-CXXFLAGS=/Zi $(if $(D),/O0,/O2) -Wall /EHsc /DNOMINMAX
-CXXFLAGS+=/std:c++17
-CXXFLAGS+=/I .
-LDFLAGS=/debug
+CXXFLAGS+=-Zi $(if $(D),/O0,/O2) -Wall -EHsc -DNOMINMAX
+CXXFLAGS+=-std:c++17
+CXXFLAGS+=-I .
+CXXFLAGS+=-utf-8
+LDFLAGS=-debug
 CDEFS?=$(if $(DOCTEST),-DWITH_DOCTEST,-DWITH_CATCH)
 CXX=cl.exe
 LD=cl.exe
 
 all: unittests.exe
 
-unittests.exe: $(notdir $(subst .cpp,.obj,$(wildcard tests/*.cpp)))
-	$(LD) $(LDFLAGS) /Fe:$@  $^
+unittests.exe: $(filter-out test-makeasn1.obj,$(notdir $(subst .cpp,.obj,$(wildcard tests/*.cpp))))
+	$(LD) $(LDFLAGS) -Fe:$@  $^
 
 %.obj: tests/%.cpp
-	$(CXX) $(CXXFLAGS) $(CDEFS) /c $^ /Fo:$@
+	$(CXX) $(CXXFLAGS) $(CDEFS) -c $^ -Fo:$@
 
 
 clean:
