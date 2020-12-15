@@ -1,6 +1,11 @@
 #pragma once
+
+#include <iomanip>
 /*
  *  like string_view, but takes an iterator-pair.
+ * 
+ *  Note that array_view can also take streampos as 'P', and therefore I did not
+ *  add operator[] and value_type.
  */
 template<typename P>
 class array_view {
@@ -84,8 +89,9 @@ std::ostream& operator<<(std::ostream&os, const array_view<P>& buf)
     for (const auto& b : buf) {
         os.copyfmt(state);
         if (!first && fillchar) os << fillchar;
-        os.fill('0');
-        os.width(2);
+        os << std::right;
+        os << std::setfill('0');
+        os << std::setw(2);
         os << std::hex << unsigned(b);
         first= false;
     }
