@@ -27,9 +27,18 @@ unittests: $(notdir $(subst .cpp,.o,$(wildcard tests/*.cpp)))
 %.o: tests/%.cpp
 	$(CXX) $(CXXFLAGS) $(CDEFS) -c $^ -o $@
 
+cmake:
+	cmake -B build . $(if $(D),-DCMAKE_BUILD_TYPE=Debug,-DCMAKE_BUILD_TYPE=Release) $(CMAKEARGS)
+	$(MAKE) -C build $(if $(V),VERBOSE=1)
+
+vc:
+	"C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/cmake.exe" -G"Visual Studio 16 2019" -B build .
+	"C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" build/cpputils.sln -t:Rebuild
+
 
 clean:
 	$(RM) unittests $(wildcard *.o) $(wildcard *.profdata *.profraw)
+	$(RM) -r build CMakeFiles CMakeCache.txt CMakeOutput.log
 
 # list of files checked for coverage
 COVERAGEFILES=argparse.h arrayview.h asn1parser.h datapacking.h fhandle.h formatter.h fslibrary.h hexdumper.h mmem.h stringconvert.h string-join.h stringlibrary.h utfconvertor.h string-base.h string-parse.h string-split.h string-strip.h base64encoder.h utfcvutils.h
