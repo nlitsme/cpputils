@@ -78,8 +78,7 @@ struct mappedmem {
         if (pmem==MAP_FAILED) {
             //printf("l=%llx, mm=%x, s=%llx\n", phys_length, mmapmode, phys_start);
             //printf("start=%llx -> %llx,   end=%llx -> %llx\n", start, phys_start, end, phys_end);
-            perror("mmap");
-            throw std::runtime_error("mmap");
+            throw std::system_error(errno, std::generic_category(), "mmap");
         }
 
         dataofs= start - phys_start;
