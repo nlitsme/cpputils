@@ -3,6 +3,8 @@
 #include <vector>
 #include <array>
 #include <string>
+#include <stdexcept>
+#include <algorithm>
 
 #include "templateutils.h"
 
