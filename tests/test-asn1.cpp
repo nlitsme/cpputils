@@ -54,18 +54,32 @@ TEST_CASE("asn1parser") {
     CHECK_THAT( x.lenrange, equalsvector(0x82, 0x01,0x92));
     CHECK( x.datarange == makerange(data.begin()+4, data.end()));
 
+    // the start of the validity period
     CHECK( traverse(x, { 0, 3, 0 }).length == 13 );
     CHECK_THAT( traverse(x, { 0, 3, 0 }).datarange, equalsvector(0x39,0x36,0x31,0x30,0x32,0x33,0x32,0x30,0x35,0x36,0x30,0x33,0x5a) );
 
+    // the entire signed cert
     CHECK( traverse(x, {  }).datarange == makerange(data.begin()+4, data.end()));   // cert+alg+sig body
+
+    // just the cert
     CHECK( traverse(x, { 0 }).datarange== makerange(data.begin()+8, data.begin()+8+316));
+
+    // the version
     CHECK_THAT( traverse(x, { 0, -1 }).datarange, equalsvector(0x02, 0x01, 0x02));  // cert.version
+
+    // the serial
     CHECK_THAT( traverse(x, { 0, 0 }).datarange,    equalsvector(0x38,0xfe,0x09,0xc9,0xa0,0x00,0xed,0x95,0x11,0xd0,0x2d,0x17,0xd7,0xb4,0x08,0xa0)                                                                                                                                                                                                                                                                                                                                                                                                                                         );    // cert.serial
+    // the algo
     CHECK_THAT( traverse(x, { 0, 1 }).datarange,    equalsvector(0x06,0x09,0x2a,0x86,0x48,0x86,0xf7,0x0d,0x01,0x01,0x04,0x05,0x00)                                                                                                                                                                                                                                                                                                                                                                                                                                                        );    // cert.algorithm
     CHECK(stringformat("%s", traverse(x, { 0, 1 }).datarange) == "06 09 2a 86 48 86 f7 0d 01 01 04 05 00");
+
+    // the validity period start
     CHECK_THAT( traverse(x, { 0, 3, 0 }).datarange, equalsvector(0x39,0x36,0x31,0x30,0x32,0x33,0x32,0x30,0x35,0x36,0x30,0x33,0x5a)                                                                                                                                                                                                                                                                                                                                                                                                                                                        );  // first timestamp
+    // the subject
     CHECK_THAT( traverse(x, { 0, 4, 0 }).datarange, equalsvector(0x30,0x12,0x06,0x03,0x55,0x04,0x03,0x13,0x0b,0x54,0x65,0x73,0x74,0x43,0x6f,0x6d,0x70,0x61,0x6e,0x79)                                                                                                                                                                                                                                                                                                                                                                                                                     );  // subject
+    // the extensions
     CHECK_THAT( traverse(x, { 0, -4, 0 }).datarange,equalsvector(0x30,0x1a,0x06,0x03,0x55,0x04,0x03,0x04,0x13,0x13,0x11,0x4d,0x69,0x63,0x72,0x6f,0x73,0x6f,0x66,0x74,0x20,0x54,0x72,0x69,0x64,0x65,0x6e,0x74,0x30,0x47,0x06,0x03,0x55,0x1d,0x01,0x04,0x40,0x30,0x3e,0x80,0x10,0x12,0xe4,0x09,0x2d,0x06,0x1d,0x1d,0x4f,0x00,0x8d,0x61,0x21,0xdc,0x16,0x64,0x63,0xa1,0x18,0x30,0x16,0x31,0x14,0x30,0x12,0x06,0x03,0x55,0x04,0x03,0x13,0x0b,0x52,0x6f,0x6f,0x74,0x20,0x41,0x67,0x65,0x6e,0x63,0x79,0x82,0x10,0x06,0x37,0x6c,0x00,0xaa,0x00,0x64,0x8a,0x11,0xcf,0xb8,0xd4,0xaa,0x5c,0x35,0xf4));    // cert.extensions
+    // the signature algorithm
     CHECK_THAT( traverse(x, { 1 }).datarange,       equalsvector(0x06,0x09,0x2a,0x86,0x48,0x86,0xf7,0x0d,0x01,0x01,0x04,0x05,0x00)                                                                                                                                                                                                                                                                                                                                                                                                                                                        );         // sig.algorithm
 
 }
