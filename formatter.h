@@ -459,6 +459,8 @@ struct StringFormatter {
                 break;
             case 'c': // char -> need explicit cast
             case 's': // string - from type
+                // reset to decimal
+                os << std::dec;
                 break;
             case 'p': // pointer value - cast to (void*)
                 break;
