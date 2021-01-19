@@ -72,6 +72,23 @@ TEST_CASE("formatter") {
  CHECK( stringformat("%s %5d", "xyz", 123) == "xyz   123");
  CHECK( stringformat("%s %5s", "xyz", "xyz") == "xyz   xyz");
  CHECK( stringformat("%s %s", "xyz", "xyz") == "xyz xyz");
+
+ CHECK( stringformat("%x %s", 123, 123) == "7b 123");  // problem
+ CHECK( stringformat("%x %d", 123, 123) == "7b 123");
+ CHECK( stringformat("%x %o", 123, 123) == "7b 173");
+ CHECK( stringformat("%x %X", 123, 123) == "7b 7B");
+
+ CHECK( stringformat("%d %s", 123, 123) == "123 123");
+ CHECK( stringformat("%d %d", 123, 123) == "123 123");
+ CHECK( stringformat("%d %o", 123, 123) == "123 173");
+ CHECK( stringformat("%d %X", 123, 123) == "123 7B");
+
+ CHECK( stringformat("%o %s", 123, 123) == "173 123");  // problem
+ CHECK( stringformat("%o %d", 123, 123) == "173 123");
+ CHECK( stringformat("%o %o", 123, 123) == "173 173");
+ CHECK( stringformat("%o %X", 123, 123) == "173 7B");
+
+
     }
     SECTION("charcv") {
         CHECK( stringformat("%c", char(122)) == "z" );
@@ -292,6 +309,19 @@ TEST_CASE("formatter") {
 
         CHECK( stringformat("%s", std::array<double, 4>{{1,2,3,4}}) == "1 2 3 4" );
         CHECK( stringformat("%s", std::array<uint8_t, 4>{{1,2,3,4}}) == "1 2 3 4" );
+
+        // various hex dumps
+       //CHECK( stringformat("%0b", std::array<uint8_t, 7>{{1,2,3,4,15,0x90,0xff}}) == "01 02 03 04" );
+       //CHECK( stringformat("%-0b", std::array<uint8_t, 7>{{1,2,3,4,15,0x90,0xff}}) == "01 02 03 04" );
+       //CHECK( stringformat("%+0b", std::array<uint8_t, 7>{{1,2,3,4,15,0x90,0xff}}) == "01 02 03 04" );
+       //CHECK( stringformat("%-b", std::array<uint8_t, 7>{{1,2,3,4,15,0x90,0xff}}) == "01 02 03 04" );
+       //CHECK( stringformat("%+b", std::array<uint8_t, 7>{{1,2,3,4,15,0x90,0xff}}) == "01 02 03 04" );
+
+       //CHECK( stringformat("%0x", std::array<uint8_t, 7>{{1,2,3,4,15,0x90,0xff}}) == "01 02 03 04" );
+       //CHECK( stringformat("%x", std::array<uint8_t, 7>{{1,2,3,4,15,0x90,0xff}}) == "01 02 03 04" );
+       //CHECK( stringformat("%-x", std::array<uint8_t, 7>{{1,2,3,4,15,0x90,0xff}}) == "01 02 03 04" );
+       //CHECK( stringformat("%s", std::array<uint8_t, 7>{{1,2,3,4,15,0x90,0xff}}) == "01 02 03 04" );
+       //CHECK( stringformat("%-s", std::array<uint8_t, 7>{{1,2,3,4,15,0x90,0xff}}) == "01 02 03 04" );
     }
     SECTION("custom") {
         CHECK( stringformat("%s", mytype()) == "MYTYPE" );
