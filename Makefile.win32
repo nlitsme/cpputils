@@ -10,7 +10,7 @@ LD=cl.exe
 
 all: unittests.exe
 
-unittests.exe: $(filter-out test-makeasn1.obj,$(notdir $(subst .cpp,.obj,$(wildcard tests/*.cpp))))
+unittests.exe: $(filter-out test-makeasn1.obj test-fhandle.obj,$(notdir $(subst .cpp,.obj,$(wildcard tests/*.cpp))))
 	$(LD) $(LDFLAGS) -Fe:$@  $^
 
 %.obj: tests/%.cpp
