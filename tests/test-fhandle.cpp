@@ -6,6 +6,7 @@
 #include "fhandle.h"
 #include <vector>
 
+// TODO: this test just crashes directly on windows.
 TEST_CASE("filehandle") {
 #ifndef _WIN32
     signal(SIGPIPE, SIG_IGN);
@@ -195,4 +196,11 @@ TEST_CASE("filehandle") {
         CHECK_THROWS( g.write("abc", 3) );  // writing fails, because f is closed.
     }
 #endif
+    // TODO
+    //  - read(first,last)
+    //  - read(first,size)
+    //  - read(vector)
+    //  - read(span)
+    //  - read(range)
+    // 
 }
