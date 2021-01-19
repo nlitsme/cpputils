@@ -10,9 +10,9 @@ class mappedfile {
     filehandle _f;
     mappedmem _m;
 public:
-    mappedfile(filehandle fh, int flags = O_RDONLY)
+    mappedfile(filehandle fh, int mmapmode)
         : _f(fh),
-        _m(_f, 0, _f.size(), (flags==O_RDONLY)?PROT_READ:(flags==O_WRONLY)?PROT_WRITE:(flags==O_RDWR)?(PROT_READ|PROT_WRITE):0)
+        _m(_f, 0, _f.size(), mmapmode)
     {
     }
 
