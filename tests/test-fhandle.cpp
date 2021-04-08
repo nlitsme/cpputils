@@ -42,7 +42,7 @@ TEST_CASE("filehandle") {
         CHECK( 99 == g.fh() );
 
         CHECK_THROWS( f.close() ); // because 99 is not a valid fd.
-        CHECK_THROWS( g.close() );
+        CHECK_NOTHROW( g.close() );  // now g is also already closed
     }
 #ifndef _WIN32
 // TODO - create tests which work on windows as well.
