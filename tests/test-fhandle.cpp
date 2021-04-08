@@ -32,12 +32,17 @@ TEST_CASE("filehandle") {
 
         // check assignment
         CHECK_NOTHROW( g = f );
+        CHECK_THROWS( f = -1 );
         CHECK_NOTHROW( f = 99 );
 
         CHECK( f.fh() == 99 );
         CHECK( 99 == f.fh() );
 
-        CHECK_THROWS( f.close() );
+        CHECK_NOTHROW( g = f );
+        CHECK( 99 == g.fh() );
+
+        CHECK_THROWS( f.close() ); // because 99 is not a valid fd.
+        CHECK_THROWS( g.close() );
     }
 #ifndef _WIN32
 // TODO - create tests which work on windows as well.
