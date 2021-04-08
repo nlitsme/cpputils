@@ -11,7 +11,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
     set(FREEBSD TRUE)
 endif()
 
-# checking for if we are called in the correct way:
+# checking if we are called in the correct way:
 #  with a -B argument.  and without a cache file in the source directory.
 if (CMAKE_CACHEFILE_DIR STREQUAL "${CMAKE_SOURCE_DIR}")
     message(FATAL_ERROR "\nUnexpected CMakeCache.txt file in the source directory. Please remove it.")
