@@ -1,3 +1,18 @@
+## Thu Apr  8 09:59:13 CEST 2021
+ * mmfile: better handling of ro/rw flags
+ * added cmake build
+ * more tests
+ * alphabets for base32 and base64 coding
+ * fhandle: write now takes PTR+size. added pread, pwrite.
+ * formatter: added hex,octal output for 128-bit integers
+ * added `string_to_signed` integer parsers.
+ * mmfile no longer throws on an empty file.
+
+bugfixes:
+ * formatter: reset to decimal in '%s'
+ * mmem: forgot to copy 'length' field in the move constructor.
+ * correct hex output of `array_view`
+
 ## Mon 14 Sep 2020 07:19:25 PM CEST
  * added a base32 encoder/decoder
  * fixed lineenum, now all tests succeed.

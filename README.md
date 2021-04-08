@@ -146,6 +146,11 @@ Provides several methods of accessing items in an asn.1 BER encoded object.
 A Makefile is provided for building the unittests. These can be build 'normally', 
 and also with options for code coverage testing.
 
+several targets exist:
+ * `all`, the old method of building the tests
+ * `cmake`, using cmake to resolve dependencies
+ * `vc`, for building this on windows platforms with cmake + visualc++
+
 
 ### todo
 
