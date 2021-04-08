@@ -215,6 +215,8 @@ auto hex2binary(const S& hexstr)
         auto len = stringlength(hexstr);
         V v(len / 2);
         size_t n = hex2binary(hexstr, hexstr+len, v.begin(), v.end());
+
+        // todo: when 'V' is an std::array, don't resize.
         v.resize(n);
 
         return v;
@@ -222,6 +224,8 @@ auto hex2binary(const S& hexstr)
     else {
         V v(hexstr.size() / 2);
         size_t n = hex2binary(hexstr.begin(), hexstr.end(), v.begin(), v.end());
+
+        // todo: when 'V' is an std::array, don't resize.
         v.resize(n);
 
         return v;

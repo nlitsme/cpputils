@@ -44,6 +44,8 @@
  */
 
 // TODO - support floating point numbers
+// TODO - support options with multiple arguments.
+
 class ArgParser {
     struct ArgIterator {
         const char **argv;  // argument list
