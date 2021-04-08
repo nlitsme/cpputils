@@ -6,6 +6,7 @@
 #include "fhandle.h"
 
 /* retain both the filehandle and the mmap */
+// todo: make this copyable.
 class mappedfile {
     filehandle _f;
     mappedmem _m;
@@ -17,7 +18,7 @@ public:
     }
 
     mappedfile(const std::string& filename, int openflags = O_RDONLY, int mode=0666)
-        : mappedfile(open(filename.c_str(), openflags, mode))
+        : mappedfile(open(filename.c_str(), openflags, mode), openflags==O_RDONLY ? PROT_READ : (PROT_READ|PROT_WRITE))
     {
     }
     mappedfile(int fh, int mmapmode = PROT_READ)
