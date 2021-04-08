@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <algorithm>
+#include <system_error>
 
 #ifdef __ANDROID_API__
 extern "C" void*  __mmap2(void*, size_t, int, int, int, size_t);
@@ -40,6 +41,7 @@ https://opensource.apple.com/source/xnu/xnu-2422.1.72/bsd/kern/kern_mman.c
 
 
 // class for creating a memory mapped file.
+// TODO: create internal sharedptr like I did in filehandle.
 struct mappedmem {
     uint8_t *pmem;
     uint64_t phys_length;
@@ -58,9 +60,10 @@ struct mappedmem {
 
     mappedmem(mappedmem&& mm)
     {
-        pmem= mm.pmem;
-        phys_length= mm.phys_length;
-        dataofs= mm.dataofs;
+        pmem = mm.pmem;
+        phys_length = mm.phys_length;
+        dataofs = mm.dataofs;
+        length = mm.length;
 
         mm.pmem= nullptr;
     }
@@ -73,15 +76,19 @@ struct mappedmem {
 
         phys_length= phys_end - phys_start;
         length = end - start;
+        dataofs= start - phys_start;
 
+        if (phys_length==0) {
+            pmem = NULL;
+            return;
+        }
         pmem= (uint8_t*)mymmap(NULL, phys_length, mmapmode, MAP_SHARED, f, mmapoffset(phys_start));
         if (pmem==MAP_FAILED) {
-            //printf("l=%llx, mm=%x, s=%llx\n", phys_length, mmapmode, phys_start);
-            //printf("start=%llx -> %llx,   end=%llx -> %llx\n", start, phys_start, end, phys_end);
+            //print("l=%llx, mm=%x, s=%llx\n", phys_length, mmapmode, phys_start);
+            //print("start=%llx -> %llx,   end=%llx -> %llx\n", start, phys_start, end, phys_end);
             throw std::system_error(errno, std::generic_category(), "mmap");
         }
 
-        dataofs= start - phys_start;
     }
 
     // todo: add madvise support
