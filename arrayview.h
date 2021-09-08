@@ -2,10 +2,12 @@
 
 #include <iomanip>
 /*
- *  like string_view, but takes an iterator-pair.
+ *  like string_view or span, but takes an iterator-pair.
  * 
  *  Note that array_view can also take streampos as 'P', and therefore I did not
  *  add operator[] and value_type.
+
+ *   this is probably obsolete now that <span> is part of all standard libs.
  */
 template<typename P>
 class array_view {
@@ -27,6 +29,8 @@ public:
 
     P begin() { return first; }
     P end() { return last; }
+
+    P data() { return &*first; }
 
     auto& front() const { return *first; }
     auto& back() const { return *(last-1); }
