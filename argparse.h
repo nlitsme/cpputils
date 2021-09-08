@@ -19,7 +19,7 @@
         switch (arg.option())
         {
             case 'a':
-                if (arg.match("apple")) {
+                if (arg.match("-apple")) {
    
                 }
                 else {
