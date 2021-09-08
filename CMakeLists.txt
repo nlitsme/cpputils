@@ -37,6 +37,13 @@ endif()
 add_library(cpputils INTERFACE)
 target_include_directories(cpputils INTERFACE .)
 
+include(FetchContent)
+FetchContent_Declare(fmt
+      GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+      GIT_TAG master
+      )
+FetchContent_MakeAvailable(fmt)
+
 file(GLOB UnittestSrc tests/*.cpp)
 if (WIN32)
     # skippoing this test on windows.
@@ -49,3 +56,14 @@ list(REMOVE_ITEM UnittestSrc ${CMAKE_SOURCE_DIR}/tests/test-makeasn1.cpp)
 add_executable(unittests ${UnittestSrc})
 target_link_libraries(unittests cpputils)
 target_compile_definitions(unittests PRIVATE WITH_DOCTEST)
+
+add_executable(fmt_bench-boost     fmtbench/fmt_bench-boost.cpp)
+target_link_libraries(fmt_bench-boost cpputils)
+add_executable(fmt_bench-fmt       fmtbench/fmt_bench-fmt.cpp)
+target_link_libraries(fmt_bench-fmt cpputils fmt::fmt)
+add_executable(fmt_bench-fmt2      fmtbench/fmt_bench-fmt2.cpp)
+target_link_libraries(fmt_bench-fmt2 cpputils fmt::fmt)
+add_executable(fmt_bench-formatter fmtbench/fmt_bench-formatter.cpp)
+target_link_libraries(fmt_bench-formatter cpputils)
+add_executable(fmt_bench-printf    fmtbench/fmt_bench-printf.cpp)
+target_link_libraries(fmt_bench-printf cpputils)
