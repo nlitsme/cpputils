@@ -211,7 +211,7 @@ size_t hex2binary(P1 strfirst, P1 strlast, P2 first, P2 last)
 template<typename V, typename S>
 auto hex2binary(const S& hexstr)
 {
-    if constexpr (std::is_pointer_v<S>) {
+    if constexpr (std::is_pointer_v<S> || std::is_array_v<S>) {
         auto len = stringlength(hexstr);
         V v(len / 2);
         size_t n = hex2binary(hexstr, hexstr+len, v.begin(), v.end());
