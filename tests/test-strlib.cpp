@@ -238,6 +238,14 @@ TEST_CASE("stringlibrary") {
             }
         }
     }
+    SECTION("hex2bin") {
+        CHECK( hex2binary<std::vector<uint8_t>>("") == std::vector<uint8_t>{ } );
+        //CHECK( hex2binary<std::vector<uint8_t>>("0") == std::vector<uint8_t>{ 0x00 } );
+        CHECK( hex2binary<std::vector<uint8_t>>("00") == std::vector<uint8_t>{ 0x00 } );
+        //CHECK( hex2binary<std::vector<uint8_t>>("000") == std::vector<uint8_t>{ 0x00, 0x00 } );
+        CHECK( hex2binary<std::vector<uint8_t>>("00ff") == std::vector<uint8_t>{ 0x00, 0xff } );
+        //CHECK( hex2binary<std::vector<uint8_t>>("0ff") == std::vector<uint8_t>{ 0x00, 0xff } );
+    }
     SECTION("splitter") {
         SECTION("stdstring") {
             using namespace std::string_literals;
