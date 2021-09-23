@@ -11,7 +11,7 @@
 #ifdef __ANDROID_API__
 extern "C" void*  __mmap2(void*, size_t, int, int, int, size_t);
 #define mymmap __mmap2
-#define mmapoffset(x) (x>>12)
+#define mmapoffset(x) ((x)>>12)
 #else
 #define mymmap mmap
 #define mmapoffset(x) (x)
@@ -67,6 +67,8 @@ struct mappedmem {
 
         mm.pmem= nullptr;
     }
+
+    // maps offsets start..end from file.
     mappedmem(int f, uint64_t start, uint64_t end, int mmapmode= PROT_READ|PROT_WRITE)
     {
         uint64_t pagesize= std::max(0x1000, (int)sysconf(_SC_PAGE_SIZE));
@@ -83,12 +85,8 @@ struct mappedmem {
             return;
         }
         pmem= (uint8_t*)mymmap(NULL, phys_length, mmapmode, MAP_SHARED, f, mmapoffset(phys_start));
-        if (pmem==MAP_FAILED) {
-            //print("l=%llx, mm=%x, s=%llx\n", phys_length, mmapmode, phys_start);
-            //print("start=%llx -> %llx,   end=%llx -> %llx\n", start, phys_start, end, phys_end);
+        if (pmem==MAP_FAILED)
             throw std::system_error(errno, std::generic_category(), "mmap");
-        }
-
     }
 
     // todo: add madvise support
@@ -117,6 +115,26 @@ struct mappedmem {
     size_t size()
     {
         return length;
+    }
+
+    // returns true when addresses stayed the same.
+    bool resize(uint64_t newsize)
+    {
+        uint64_t pagesize= std::max(0x1000, (int)sysconf(_SC_PAGE_SIZE));
+        uint64_t new_physlength = round_up(dataofs+newsize, pagesize);
+
+        uint8_t *newaddr = (uint8_t *)mremap(pmem, phys_length, new_physlength, MREMAP_MAYMOVE);
+        if (newaddr==MAP_FAILED)
+            throw std::system_error(errno, std::generic_category(), "mremap");
+
+        bool havemoved = newaddr!=pmem;
+
+        pmem = newaddr;
+        phys_length = new_physlength;
+        // dataofs should remain the same
+        length = newsize;
+
+        return !havemoved;
     }
 };
 
