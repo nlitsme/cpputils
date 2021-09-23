@@ -3,6 +3,11 @@ project(cpputils)
 set(CMAKE_CXX_STANDARD 17)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
+option(OPT_STL_DEBUGGING "Build with STL debugging"  OFF)
+option(OPT_PROF "Build for profiling"  OFF)
+option(OPT_COV "Build for code coverage"  OFF)
+option(OPT_LIBCXX "Build with libcxx"  OFF)
+
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     set(LINUX TRUE)
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -23,16 +28,41 @@ if (EXISTS ${CMAKE_BINARY_DIR}/CMakeLists.txt)
     return()
 endif()
 
+if (OPT_LIBCXX)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+endif()
+if (OPT_STL_DEBUGGING)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_GLIBCXX_DEBUG")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_LIBCPP_DEBUG_LEVEL=1")
+endif()
+if (OPT_PROF)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg ")
+endif()
+if (OPT_COV)
+
+	if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        message(INFO "gcc code coverage")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage -ftest-coverage -fprofile-arcs ")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage -ftest-coverage -fprofile-arcs ")
+	elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        message(INFO "llvm code coverage")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-instr-generate -fcoverage-mapping -fdebug-info-for-profiling")
+        #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mllvm -inline-threshold=100000")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fprofile-instr-generate -fcoverage-mapping")
+    else()
+        message(INFO "don't know how to add code coverage for ${CMAKE_CXX_COMPILER_ID }")
+    endif()
+
+endif()
 if(MSVC)
     # /MP = multithreaded build
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
     # /utf-8 = utf8 source and execution
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8")
-endif()
-
-if (WIN32)
     add_definitions(-DNOMINMAX -DNOGDI)
 endif()
+
+
 
 add_library(cpputils INTERFACE)
 target_include_directories(cpputils INTERFACE .)

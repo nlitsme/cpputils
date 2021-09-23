@@ -16,6 +16,11 @@ LDFLAGS=-g
 CDEFS?=$(if $(DOCTEST),-DWITH_DOCTEST,-DWITH_CATCH)
 all: cmake
 
+CMAKEARGS+=$(if $(D),-DCMAKE_BUILD_TYPE=Debug,-DCMAKE_BUILD_TYPE=Release)
+CMAKEARGS+=$(if $(COV),-DOPT_COV=1)
+CMAKEARGS+=$(if $(PROF),-DOPT_PROF=1)
+CMAKEARGS+=$(if $(LIBCXX),-DOPT_LIBCXX=1)
+
 CXXFLAGS+=$(if $(COVERAGE),-fprofile-instr-generate -fcoverage-mapping)
 LDFLAGS+=$(if $(COVERAGE),-fprofile-instr-generate -fcoverage-mapping)
 
@@ -28,8 +33,13 @@ unittests: $(notdir $(subst .cpp,.o,$(wildcard tests/*.cpp)))
 	$(CXX) $(CXXFLAGS) $(CDEFS) -c $^ -o $@
 
 cmake:
-	cmake -B build . $(if $(D),-DCMAKE_BUILD_TYPE=Debug,-DCMAKE_BUILD_TYPE=Release) $(CMAKEARGS)
+	cmake -B build . $(CMAKEARGS)
 	$(MAKE) -C build $(if $(V),VERBOSE=1)
+
+llvm:
+	CC=clang CXX=clang++ cmake -B build . $(CMAKEARGS)
+	$(MAKE) -C build $(if $(V),VERBOSE=1)
+
 
 vc:
 	"C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/cmake.exe" -G"Visual Studio 16 2019" -B build .
@@ -42,6 +52,7 @@ clean:
 
 # list of files checked for coverage
 COVERAGEFILES=argparse.h arrayview.h asn1parser.h datapacking.h fhandle.h formatter.h fslibrary.h hexdumper.h mmem.h stringconvert.h string-join.h stringlibrary.h utfconvertor.h string-base.h string-parse.h string-split.h string-strip.h base64encoder.h utfcvutils.h
+COVERAGEFILES+=HiresTimer.h asn1_presence.h asn1maker.h b32-alphabet.h b64-alphabet.h base32encoder.h certparser.h crccalc.h lowpass_filter.h mmfile.h string-lineenum.h templateutils.h xmlnodetree.h xmlparser.h
 
 COVOPTIONS+=-show-instantiation-summary
 #COVOPTIONS+=-show-functions
@@ -51,9 +62,7 @@ COVOPTIONS+=-show-line-counts-or-regions
 
 
 XCODETOOLCHAINS=$(shell xcode-select -p)/Toolchains/XcodeDefault.xctoolchain
-coverage: COVERAGE=1
-coverage: unittests
-	./unittests
-	$(XCODETOOLCHAINS)/usr/bin/llvm-profdata merge -o unittest.profdata default.profraw
-	$(XCODETOOLCHAINS)/usr/bin/llvm-cov show ./unittests -instr-profile=unittest.profdata $(COVOPTIONS) $(COVERAGEFILES)
+coverage:
+	llvm-profdata merge -o unittest.profdata default.profraw
+	llvm-cov show ./build/unittests -instr-profile=unittest.profdata $(COVOPTIONS) $(COVERAGEFILES)
 
