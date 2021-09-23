@@ -159,6 +159,12 @@ struct asn1tlv {
     }
 };
 
+template<typename P>
+auto gettlv(P first, P last)
+{
+    return asn1tlv<P>(first, last);
+}
+
 namespace std {
 template<>
 struct iterator_traits<std::istream::pos_type>
