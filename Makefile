@@ -14,7 +14,7 @@ CXXFLAGS+=-I .
 CXXFLAGS+=-I /usr/local/include
 LDFLAGS=-g
 CDEFS?=$(if $(DOCTEST),-DWITH_DOCTEST,-DWITH_CATCH)
-all: unittests
+all: cmake
 
 CXXFLAGS+=$(if $(COVERAGE),-fprofile-instr-generate -fcoverage-mapping)
 LDFLAGS+=$(if $(COVERAGE),-fprofile-instr-generate -fcoverage-mapping)
