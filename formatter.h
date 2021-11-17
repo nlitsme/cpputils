@@ -359,6 +359,8 @@ constexpr bool is_hexdumper_v = is_hexdumper<T>::value;
 
 }
 
+// note: need to include this as late as possible, so clang will know about operator<<(vector) etc.
+#include "is_stream_insertable.h"
 /*****************************************************************************
  * the StringFormatter class,
  *
@@ -654,7 +656,7 @@ struct StringFormatter {
     { 
         if constexpr (is_hexdumper_v<T>) {
             if (os.fill()=='0')
-                os.fill(0);
+                os.fill(0); // 0 -> no spaces
             os << std::hex << value;
             return true;
         }

@@ -31,30 +31,14 @@ struct is_container<std::basic_string_view<T> > : std::true_type {};
 template<typename T>
 struct is_container<const std::basic_string_view<T> > : std::true_type {};
 
-template<typename T, int N>
+// note: gcc will not match this template when N is specified as 'int'
+template<typename T, size_t N>
 struct is_container<std::array<T,N> > : std::true_type {};
-template<typename T, int N>
+template<typename T, size_t N>
 struct is_container<const std::array<T,N> > : std::true_type {};
 
 template<typename T>
 constexpr bool is_container_v = is_container<T>::value;
-
-/** test if T can be inserted in a std::ostream */
-template<typename T>
-class is_stream_insertable {
-    template<typename SS, typename TT>
-    static auto test(int)
-        -> decltype(std::declval<SS&>() << std::declval<TT>(), std::true_type());
-
-    template<typename, typename>
-    static auto test(...)->std::false_type;
-
-public:
-    static const bool value = decltype(test<std::ostream, const T&>(0))::value;
-};
-template<typename T>
-constexpr bool is_stream_insertable_v = is_stream_insertable<T>::value;
-
 
 
 template<typename T>
