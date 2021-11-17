@@ -47,7 +47,11 @@ int char2nyble(T c)
     return -1;
 }
 
-/* parses a string bound by a pointer pair. */
+/*
+    parses a string bound by a pointer pair.
+
+    failure is indicated by returning 'first'.
+ */
 template<typename P>
 std::pair<uint64_t, P> parseunsigned(P first, P last, int base)
 {
@@ -120,11 +124,11 @@ std::pair<uint64_t, P> parseunsigned(P first, P last, int base)
 
         ++p;
     }
-    if (state==2)
+    if (state==2)  // invalid
         return std::make_pair(0, first);
 
     if (state==3 && digits==0) {
-        // "0x" and "0b" are invalid numbers.
+        // "0x" and "0b" are invalid numbers, they expect digits.
         return std::make_pair(0, first);
     }
     return std::make_pair(num, p);
