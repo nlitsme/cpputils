@@ -4,6 +4,29 @@
 #include <vector>
 #include <string>
 #include "b64-alphabet.h"
+/*
+Functions for base64 encoding and decoding.
+
+most convenient interface:
+
+    std::string base64_encode(const P& data)
+    std::vector<uint8_t> base64_decode(const S& txt)
+
+Where the encode function takes any kind of vector/array, and the
+decode function takes any kind of string
+
+
+When you want functions which don't allocate anything
+the following two are useful:
+
+std::tuple<P, S> base64_encode(P ifirst, P ilast, S ofirst, S olast)
+std::tuple<S, P, bool> base64_decode(S ifirst, S ilast, P ofirst, P olast)
+
+these take iterator(or pointer) pairs for the input and output,
+and return the last used in and output iterators.
+The decoder also returns a bool, indicating if the input string contained all valid base64.
+
+ */
 
 // encode a 3 byte chunk into 4 characters
 template<typename P, typename S, typename ALPHABET=StandardBase64>
@@ -63,8 +86,7 @@ std::tuple<S, P, bool> base64_decode(S ifirst, S ilast, P ofirst, P olast)
         auto c = *p++;
         int cv = ALPHABET::char2code(c);
         if (cv==-2) {
-            // '=' is always a proper base64 ending
-            i = 0;
+            // '=' always ends a base64 encoding
             break;
         }
         else if (cv==-3) {
@@ -88,7 +110,7 @@ std::tuple<S, P, bool> base64_decode(S ifirst, S ilast, P ofirst, P olast)
     while (p < ilast && *p == '=')
         p++;
 
-    return { p, o, i==0 };
+    return { p, o, i!=1 };
 }
 
 template<typename P>
@@ -99,6 +121,9 @@ std::vector<uint8_t> base64_decode(P first, P last)
     if (!ok)
         throw std::runtime_error("base64_decode");
     // todo: check if all data was decoded.
+    //  -- problem: since decode will return when all bytes in the output are used.
+    //           there still may be unprocessed space chars left.
+    //     I could work around this by making the data vector one larger then needed.
     data.erase(o, data.end());
     return data;
 }
@@ -114,7 +139,9 @@ std::string base64_encode(const P& data)
 {
     std::string txt(((data.size()+2)/3)*4, char(0));
     auto [p, o] = base64_encode(data.begin(), data.end(), txt.begin(), txt.end());
-    // todo: check if all data was encoded.
+    // check if all data was encoded.
+    if (p != data.end())
+        throw std::runtime_error("base64_encode");
     txt.erase(o, txt.end());
     return txt;
 }
