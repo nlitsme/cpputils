@@ -6,12 +6,25 @@
 #include <array>
 
 TEST_CASE("base64") {
-    enum { E=1, D=2, FD=4 };
+    enum {
+        E=1,  // encode must succeed.
+        D=2,  // decode must succeed.
+        FD=4, // decode must fail.
+    };
     std::vector<std::tuple<std::vector<uint8_t>, int, std::string>> testcases = {
         { { }, E|D, "" },
         { { }, D,   "\n" },
         { { }, D,   "\t" },
         { { }, FD,   "." },
+        { { }, FD,   "A" },
+        { { }, FD,   "A=" },
+        { { }, FD,   "A==" },
+        { { }, FD,   "A===" },
+        { { }, FD,   "AAAAA" },
+        { { }, FD,   "AAAAA=" },
+        { { }, FD,   "AAAAA==" },
+        { { }, FD,   "AAAAA===" },
+
         { { }, D,   "\t" },
         { { }, D,   "=" },
         { { }, D,   "==" },
@@ -37,6 +50,14 @@ TEST_CASE("base64") {
         { { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, D,   "AAAA\nAAAA" },
         { { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, D,   "AAAA\nAAAA\n" },
         { { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, D,   "AAAA\nAAAA=\n" },
+        { { 0xff, 0xff, 0xff, 0xff, 0xff }, D,   "//////8=\n" },
+        { { 0xff, 0xff, 0xff, 0xff, 0xff }, D,   "////\n//8=\n" },
+        { { 0xff, 0xff, 0xff, 0xff, 0xff }, D,   "\t////\n//8=\n" },
+        { { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff }, E|D,   "////////" },
+        { { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff }, D,   "////\n////" },
+        { { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff }, D,   "////\n////\n" },
+        { { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff }, D,   "////\n////=\n" },
+
         { { 0xff }, E|D,   "/w==" },
         { { 0xff, 0xff }, E|D,   "//8=" },
         { { 0xff, 0xff, 0xff }, E|D,   "////" },
@@ -76,22 +97,30 @@ E|D, "//79/Pv6+fj39vX08/Lx8O/u7ezr6uno5+bl5OPi4eDf3t3c29rZ2NfW1dTT0tHQz87NzMvKyc
 
         std::basic_string<uint8_t> bs = { 0, 1, 2 };
         CHECK( base64_encode(bs) == "AAEC" );
+#if  __cplusplus >= 201703L
         CHECK( base64_encode((std::basic_string_view<uint8_t>)bs ) == "AAEC" );
+#endif
 
         std::vector<int> iv = { 0, 1, 2 };
         CHECK( base64_encode(iv) == "AAEC" );
 
         std::string txt = "aaaa";
         CHECK( base64_decode(txt) == std::vector<uint8_t>{0x69, 0xa6, 0x9a} );
+#if  __cplusplus >= 201703L
         CHECK( base64_decode((std::string_view)txt) == std::vector<uint8_t>{0x69, 0xa6, 0x9a} );
+#endif
 
         std::basic_string<int> itxt = { 'a', 'a', 'a', 'a' };
         CHECK( base64_decode(itxt) == std::vector<uint8_t>{0x69, 0xa6, 0x9a} );
+#if  __cplusplus >= 201703L
         CHECK( base64_decode((std::basic_string_view<int>)itxt) == std::vector<uint8_t>{0x69, 0xa6, 0x9a} );
+#endif
 
         std::basic_string<uint8_t> btxt = { 'a', 'a', 'a', 'a' };
         CHECK( base64_decode(btxt) == std::vector<uint8_t>{0x69, 0xa6, 0x9a} );
+#if  __cplusplus >= 201703L
         CHECK( base64_decode((std::basic_string_view<uint8_t>)btxt) == std::vector<uint8_t>{0x69, 0xa6, 0x9a} );
+#endif
     }
     SECTION("invalid") {
         std::string txt = "x";
@@ -111,4 +140,3 @@ E|D, "//79/Pv6+fj39vX08/Lx8O/u7ezr6uno5+bl5OPi4eDf3t3c29rZ2NfW1dTT0tHQz87NzMvKyc
         }
     }
 }
-
