@@ -7,14 +7,13 @@ cmake:
 	cmake -B build . $(CMAKEARGS)
 	$(MAKE) -C build $(if $(V),VERBOSE=1)
 
+vc:
+	"C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/cmake.exe" -G"Visual Studio 16 2019" -B build . $(CMAKEARGS)
+	"C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" build/*.sln -t:Rebuild
+
 llvm:
 	CC=clang CXX=clang++ cmake -B build . $(CMAKEARGS)
 	$(MAKE) -C build $(if $(V),VERBOSE=1)
-
-
-vc:
-	"C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/cmake.exe" -G"Visual Studio 16 2019" -B build .
-	"C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" build/cpputils.sln -t:Rebuild
 
 
 clean:
