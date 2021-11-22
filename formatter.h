@@ -118,6 +118,10 @@ inline std::ostream& operator<<(std::ostream&os, const QString& s)
 // outputformat.
 
 
+namespace std {
+// note: adding 'namespace std {...}' around operator<<, fixes a problem
+// where g++-11 would complain that it could not find operator<<.
+// This has to do with the 'argument dependend lookup' strategy.
 template<typename T, size_t N>
 std::ostream& operator<<(std::ostream&os, const std::array<T,N>& buf)
 {
@@ -211,7 +215,7 @@ std::ostream& operator<<(std::ostream&os, const std::map<K, V, COMP, A>& buf)
     }
     return os;
 }
-
+}
 #ifdef __SIZEOF_INT128__
 template<typename NUM>
 std::enable_if_t<std::is_same_v<NUM,__int128_t>,std::ostream&> operator<<(std::ostream&os, NUM num)
@@ -732,7 +736,7 @@ QString qstringformat(const char *fmt, ARGS&&...args)
 
 #ifdef _WIN32
 template<typename...ARGS>
-void debug(const char *fmt, ARGS&&...args)
+void windebug(const char *fmt, ARGS&&...args)
 {
     OutputDebugString(string::convert<TCHAR>(stringformat(fmt, std::forward<ARGS>(args)...).c_str()));
 }
