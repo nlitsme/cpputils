@@ -87,8 +87,10 @@ add_executable(unittests ${UnittestSrc})
 target_link_libraries(unittests cpputils)
 target_compile_definitions(unittests PRIVATE WITH_DOCTEST)
 
+find_package(Boost REQUIRED COMPONENTS system)
 add_executable(fmt_string-boost     fmtbench/fmt_string-boost.cpp)
-target_link_libraries(fmt_string-boost cpputils)
+target_link_libraries(fmt_string-boost cpputils Boost::headers)
+
 add_executable(fmt_string-fmt       fmtbench/fmt_string-fmt.cpp)
 target_link_libraries(fmt_string-fmt cpputils fmt::fmt)
 add_executable(fmt_string-fmt2      fmtbench/fmt_string-fmt2.cpp)
@@ -100,7 +102,8 @@ add_executable(fmt_string-printf    fmtbench/fmt_string-printf.cpp)
 
 
 add_executable(fmt_print-boost     fmtbench/fmt_print-boost.cpp)
-target_link_libraries(fmt_print-boost cpputils)
+target_link_libraries(fmt_print-boost cpputils Boost::headers)
+
 add_executable(fmt_print-fmt       fmtbench/fmt_print-fmt.cpp)
 target_link_libraries(fmt_print-fmt cpputils fmt::fmt)
 add_executable(fmt_print-fmt2      fmtbench/fmt_print-fmt2.cpp)
