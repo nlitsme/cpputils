@@ -15,6 +15,7 @@ various c++ utility classes
 * mmem: memory mapped files.
 * stringconvert: utf-N conversion tools.
 * stringlibrary: type independent string functions.
+* xmlparser: idea based on the python html.parser module.
 
 
 
@@ -157,7 +158,7 @@ several targets exist:
  * add support for hexdumping data from streams.
  * string alignment / width does not work correctly for unicode characters > 0x80.
  * `"% d"` : space-for-positive is not supported.
- * `"%*d"` : width from argument list is not supported.
+ * `"%\*d"` : width from argument list is not supported.
  * `"%+08d"`  produces the wrong result: the sign will be after the padding, instead of in front.
  * `"%.8s"`  string truncation does not work.
  * add support for different alphabets in base32/base64.
