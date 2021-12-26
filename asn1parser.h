@@ -116,13 +116,20 @@ struct asn1tlv {
             length = -1;
         }
         else {
-            len_end = p+(lbyte&0x7F);
+            lbyte &= 0x7F;
+            if (last-p < lbyte)
+                throw std::runtime_error("not enough data");
+
+            len_end = p+lbyte;
             if (len_end>last)
                 throw std::runtime_error("not enough data");
             length = readfixed(p, len_end);
             p = len_end;
         }
         lenrange = makerange(len_start, len_end);
+
+        if (last-p < length)
+            throw std::runtime_error("not enough data");
 
         datarange = makerange(p, p+length);
     }

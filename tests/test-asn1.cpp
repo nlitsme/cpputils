@@ -180,16 +180,16 @@ TEST_CASE("invaliddata") {
     CHECK_THROWS(asn1tlv(makerange(std::vector<uint8_t>{0x30})));
 
     // missing content
-    CHECK_NOTHROW(asn1tlv(makerange(std::vector<uint8_t>{0x30,0x01})));
+    CHECK_THROWS(asn1tlv(makerange(std::vector<uint8_t>{0x30,0x01})));
 
     // missing length part
     CHECK_THROWS(asn1tlv(makerange(std::vector<uint8_t>{0x30,0x81     })));
 
     // missing content
-    CHECK_NOTHROW(asn1tlv(makerange(std::vector<uint8_t>{0x30,0x81,0x80})));
+    CHECK_THROWS(asn1tlv(makerange(std::vector<uint8_t>{0x30,0x81,0x80})));
 
     // missing content part
-    CHECK_NOTHROW(asn1tlv(makerange(std::vector<uint8_t>{0x30,0x02,0x05})));
+    CHECK_THROWS(asn1tlv(makerange(std::vector<uint8_t>{0x30,0x02,0x05})));
 
     // missing extented tag
     CHECK_THROWS(asn1tlv(makerange(std::vector<uint8_t>{0x1f     })));
@@ -199,14 +199,14 @@ TEST_CASE("invaliddata") {
     // extended tag, missing length
     CHECK_THROWS(asn1tlv(makerange(std::vector<uint8_t>{0x1f,0x80,0x01})));
     // extended tag, missing content
-    CHECK_NOTHROW(asn1tlv(makerange(std::vector<uint8_t>{0x1f,0x80,0x01,0x01})));
+    CHECK_THROWS(asn1tlv(makerange(std::vector<uint8_t>{0x1f,0x80,0x01,0x01})));
     // extended tag, missing length part
     CHECK_THROWS(asn1tlv(makerange(std::vector<uint8_t>{0x1f,0x80,0x01,0x81     })));
 
     // extended tag, missing content
-    CHECK_NOTHROW(asn1tlv(makerange(std::vector<uint8_t>{0x1f,0x80,0x01,0x81,0x80})));
+    CHECK_THROWS(asn1tlv(makerange(std::vector<uint8_t>{0x1f,0x80,0x01,0x81,0x80})));
     // extended tag, missing content part
-    CHECK_NOTHROW(asn1tlv(makerange(std::vector<uint8_t>{0x1f,0x80,0x01,0x02,0x05})));
+    CHECK_THROWS(asn1tlv(makerange(std::vector<uint8_t>{0x1f,0x80,0x01,0x02,0x05})));
 
     auto x = asn1tlv(makerange(std::vector<uint8_t>{0x1f,0x80,0x01,0x00}));
 

@@ -33,7 +33,7 @@ struct packer_base {
     bool have(int n)
     {
         if constexpr (!std::is_void_v<typename std::iterator_traits<P>::difference_type>)
-            return p+n <= last;
+            return n <= last-p;
 
         // with output iterator i can't check if there is enough space,
         // usually this is the case with the back_insert_iterator.
