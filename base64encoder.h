@@ -28,9 +28,11 @@ The decoder also returns a bool, indicating if the input string contained all va
 
  */
 
-// encode a 3 byte chunk into 4 characters
+/*
+ * encode a 3 byte chunk into 4 characters
+ */
 template<typename P, typename S, typename ALPHABET=StandardBase64>
-P base64_encode_chunk(P chunk, P last, S enc)
+auto base64_encode_chunk(P chunk, P last, S enc, bool nopadding)
 {
     // note: facebook, youtube use a modified version with  tr "+/"  "-_"
     P p = chunk;
@@ -55,24 +57,39 @@ P base64_encode_chunk(P chunk, P last, S enc)
 
     *enc++= ALPHABET::code2char(c0);
     *enc++= ALPHABET::code2char(c1);
-    *enc++= ALPHABET::code2char(c2);
-    *enc++= ALPHABET::code2char(c3);
+    if (!(nopadding && c2==0x40)) *enc++= ALPHABET::code2char(c2);
+    if (!(nopadding && c3==0x40)) *enc++= ALPHABET::code2char(c3);
 
-    return p;
+    return std::make_tuple(p, enc);
 }
+/*
+ * returns a tuple with:
+ *  - the next unused input pointer 'p'
+ *  - the next unused output pointer 'o'
+ *
+ * When p!=ilast  then there was not enough space in the output buffer
+ * to encode all the data.
+ */
 template<typename P, typename S, typename ALPHABET=StandardBase64>
-std::tuple<P, S> base64_encode(P ifirst, P ilast, S ofirst, S olast)
+std::tuple<P, S> base64_encode(P ifirst, P ilast, S ofirst, S olast, bool nopadding=false)
 {
     P p = ifirst;
     S o = ofirst;
     while (p < ilast && o+4 <= olast)
     {
-        p = base64_encode_chunk<P, S, ALPHABET>(p, ilast, o);
-        o += 4;
+        auto [newp, newo] = base64_encode_chunk<P, S, ALPHABET>(p, ilast, o, nopadding);
+        p = newp;
+        o = newo;
     }
     return { p, o };
 }
 
+/*
+   returns a tuple with:
+     - where the decoding stopped
+     - where the next unused output ptr.
+     - success flag.
+ */
 template<typename S, typename P, typename ALPHABET=StandardBase64>
 std::tuple<S, P, bool> base64_decode(S ifirst, S ilast, P ofirst, P olast)
 {
@@ -138,10 +155,22 @@ template<typename P>
 std::string base64_encode(const P& data)
 {
     std::string txt(((data.size()+2)/3)*4, char(0));
-    auto [p, o] = base64_encode(data.begin(), data.end(), txt.begin(), txt.end());
+    auto [p, o] = base64_encode(data.begin(), data.end(), txt.begin(), txt.end(), /*nopadding*/false);
     // check if all data was encoded.
     if (p != data.end())
         throw std::runtime_error("base64_encode");
+    txt.erase(o, txt.end());
+    return txt;
+}
+
+template<typename P>
+std::string base64_encode_unpadded(const P& data)
+{
+    std::string txt(((data.size()+2)/3)*4, char(0));
+    auto [p, o] = base64_encode(data.begin(), data.end(), txt.begin(), txt.end(), /*nopadding*/true);
+    // check if all data was encoded.
+    if (p != data.end())
+        throw std::runtime_error("base64_encode_unpadded");
     txt.erase(o, txt.end());
     return txt;
 }
