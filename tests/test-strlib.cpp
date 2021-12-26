@@ -264,7 +264,7 @@ TEST_CASE("stringlibrary") {
                 auto& result = std::get<2>(tcase);
                 auto first = result.begin();
                 auto last = result.end();
-#ifdef WITH_CATCH
+#ifdef USE_CATCH
                 INFO("testing " << ::Catch::Detail::stringify(tcase));
 #endif
                 for (auto item : stringsplitter(std::get<0>(tcase), std::get<1>(tcase))) {

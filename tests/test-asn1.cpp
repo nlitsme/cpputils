@@ -9,7 +9,7 @@
  * alternative for:
  *  CHECK( equalrange(y.datarange, std::vector<uint8_t>{ 0x39,0x36,0x31,0x30,0x32,0x33,0x32,0x30,0x35,0x36,0x30,0x33,0x5a}) == true );
  */
-#ifdef WITH_CATCH
+#ifdef USE_CATCH
 // note: matchers will probably be added to doctest in v2.4
 template<typename RANGE>
 class EqualsVector : public Catch::MatcherBase<RANGE> {

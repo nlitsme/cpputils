@@ -85,7 +85,7 @@ list(REMOVE_ITEM UnittestSrc ${CMAKE_SOURCE_DIR}/tests/test-makeasn1.cpp)
 
 add_executable(unittests ${UnittestSrc})
 target_link_libraries(unittests cpputils)
-target_compile_definitions(unittests PRIVATE WITH_DOCTEST)
+target_compile_definitions(unittests PRIVATE USE_DOCTEST)
 
 find_package(Boost REQUIRED COMPONENTS system)
 add_executable(fmt_string-boost     fmtbench/fmt_string-boost.cpp)

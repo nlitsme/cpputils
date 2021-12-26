@@ -13,7 +13,7 @@ CXXFLAGS=-g $(if $(D),-O0,-O3) -std=c++17 -Wall
 CXXFLAGS+=-I .
 CXXFLAGS+=-I /usr/local/include
 LDFLAGS=-g
-CDEFS?=$(if $(DOCTEST),-DWITH_DOCTEST,-DWITH_CATCH)
+CDEFS?=$(if $(DOCTEST),-DUSE_DOCTEST,-DUSE_CATCH)
 all: cmake
 
 CMAKEARGS+=$(if $(D),-DCMAKE_BUILD_TYPE=Debug,-DCMAKE_BUILD_TYPE=Release)
