@@ -3,6 +3,8 @@ CMAKEARGS+=$(if $(COV),-DOPT_COV=1)
 CMAKEARGS+=$(if $(PROF),-DOPT_PROF=1)
 CMAKEARGS+=$(if $(LIBCXX),-DOPT_LIBCXX=1)
 CMAKEARGS+=$(if $(STLDEBUG),-DOPT_STL_DEBUGGING=1)
+CMAKEARGS+=$(if $(SANITIZE),-DOPT_SANITIZE=1)
+CMAKEARGS+=$(if $(ANALYZE),-DOPT_ANALYZE=1)
 
 cmake:
 	cmake -B build . $(CMAKEARGS)
@@ -15,6 +17,11 @@ vc:
 llvm:
 	CC=clang CXX=clang++ cmake -B build . $(CMAKEARGS)
 	$(MAKE) -C build $(if $(V),VERBOSE=1)
+
+SCANBUILD=$(firstword $(wildcard /usr/bin/scan-build*))
+llvmscan:
+	CC=clang CXX=clang++ cmake -B build . $(CMAKEARGS)
+	$(SCANBUILD) $(MAKE) -C build $(if $(V),VERBOSE=1)
 
 
 clean:
