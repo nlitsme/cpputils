@@ -1,3 +1,33 @@
+## Fri May 27 22:45:46 CEST 2022
+ * updated doctest from 2.3.6 to 2.4.8
+ * updated catch from 2.11.1 to v2.13.9
+ * added `OPT_ANALYZE` and `OPT_SANITIZE` for the gcc/clang builtin analyzers
+ * fixed several stl-debug warnings. more exceptions in asn1parser
+ * added option to enable STLDEBUGGING, targets for coverage processing
+ * all my projects now use `USE_xxx`
+ * base64encoder: added `base64_encode_unpadded`
+ * solved problem with `operator<<(std::something)` output on some compilers.  renamed 'debug' to 'windebug' to avoid name collisions.
+ * added cmakeargs, same code in all makefiles for building msvc
+ * added boost as depenency for the `fmt*boost.cpp` benchmarks
+ * tests for mmem.h
+ * makefile now only contains code for invoking cmake, the old makefile was renamed to Makefile.linux
+ * fixed some incompatibilities with gcc and clang. moved `is_stream_insertable` to separate file.
+ * base64: more tests
+ * xmlparser and xmlnodetree
+ * jenkins: added freebsd, stdlib variants
+ * changed fmt bench to print and string variants
+ * make/cmake: added COV, PROF, LIBCXX flags. llvm target
+ * asn1parser: added gettlv(p,p) function
+ * default to the cmake build
+ * test-strlib.cpp: added hex2binary tests
+ * test-argparse.cpp: added check for single arg
+ * hex2binary now works on arrays as well
+ * added 'data' method to `array_view`
+ * change old makefile to c++20
+ * cmake: added formatter benchmarks. for bench: fetch fmt library
+ * several bugs fixed
+ * more tests
+
 ## Thu Apr  8 09:59:13 CEST 2021
  * mmfile: better handling of ro/rw flags
  * added cmake build
