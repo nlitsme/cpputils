@@ -28,6 +28,8 @@
 //
 // `filehandle` can be assigned to, copied, deleted safely.
 
+// todo: add 'open' method
+
 struct filehandle {
 
     struct ptr {
@@ -117,12 +119,13 @@ struct filehandle {
             if (-1==ioctl(fh(), DKIOCGETBLOCKSIZE, &bksize))
                 return -1;
             return bkcount*bksize;
-#endif
-#ifdef BLKGETSIZE64
+#elif defined(BLKGETSIZE64)
             uint64_t devsize;
             if (-1==ioctl(fh(), BLKGETSIZE64, &devsize))
                 return -1;
             return devsize;
+#else
+            return -1;
 #endif
         }
 #endif
