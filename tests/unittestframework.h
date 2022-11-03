@@ -20,10 +20,14 @@
 #endif
 //#define CATCH_CONFIG_ENABLE_TUPLE_STRINGMAKER
 #define CATCH_CONFIG_ENABLE_ALL_STRINGMAKERS
-#if __has_include("catch2/catch.hpp")
+#if __has_include(<catch2/catch.hpp>)
 #include <catch2/catch.hpp>
+#elif __has_include("single_include/catch.hpp")
+#include "single_include/catch.hpp"
 #elif __has_include("contrib/catch.hpp")
 #include "contrib/catch.hpp"
+#else
+#error  "Could not find catch.hpp"
 #endif
 
 #define SKIPTEST  , "[!hide]"
@@ -36,10 +40,14 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #endif
 #include <ostream>
-#if __has_include("contrib/doctest.h")
+#if __has_include(<doctest/doctest.h>)
+#include <doctest/doctest.h>
+#elif __has_include("single_include/doctest.h")
+#include "single_include/doctest.h"
+#elif __has_include("contrib/doctest.h")
 #include "contrib/doctest.h"
-#elif __has_include("doctest/doctest.h")
-#include "doctest/doctest.h"
+#else
+#error  "Could not find doctest.h"
 #endif
 #define SECTION(...) SUBCASE(__VA_ARGS__)
 #define SKIPTEST  * doctest::skip(true)
@@ -48,3 +56,5 @@
 #else
 #error define either USE_CATCH or USE_DOCTEST
 #endif
+
+#define IN_UNITTEST 1
