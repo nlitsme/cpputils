@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <vector>
+#include <span>
 #include <stdexcept>
 #include <system_error>
 
@@ -119,13 +120,12 @@ struct filehandle {
             if (-1==ioctl(fh(), DKIOCGETBLOCKSIZE, &bksize))
                 return -1;
             return bkcount*bksize;
-#elif defined(BLKGETSIZE64)
+#endif
+#ifdef BLKGETSIZE64
             uint64_t devsize;
             if (-1==ioctl(fh(), BLKGETSIZE64, &devsize))
                 return -1;
             return devsize;
-#else
-            return -1;
 #endif
         }
 #endif
@@ -164,7 +164,7 @@ struct filehandle {
         if (rc == -1)
             throw std::system_error(errno, std::generic_category(), "write");
         
-        return rc;
+        return rc/sizeof(*ptr);
     }
 
     template<typename RANGE>
@@ -185,7 +185,7 @@ struct filehandle {
         if (rc == -1)
             throw std::system_error(errno, std::generic_category(), "pwrite");
         
-        return rc;
+        return rc/sizeof(*ptr);
     }
 
 
@@ -198,7 +198,7 @@ struct filehandle {
         if (rc == -1)
             throw std::system_error(errno, std::generic_category(), "read");
 
-        return rc;
+        return rc/sizeof(*ptr);
     }
 
     template<typename PTR>
@@ -221,6 +221,14 @@ struct filehandle {
         return data;
     }
 
+#if __cplusplus > 201703L
+    // returns a span for the actually read bytes.
+    std::span<uint8_t> readspan(std::span<uint8_t> r)
+    {
+        size_t n = read(r.data(), r.size());
+        return r.first(n);
+    }
+#endif
     template<typename PTR>
     size_t pread(uint64_t ofs, PTR ptr, size_t count)
     {
@@ -228,7 +236,7 @@ struct filehandle {
         if (rc == -1)
             throw std::system_error(errno, std::generic_category(), "pread");
 
-        return rc;
+        return rc/sizeof(*ptr);
     }
 
 };
