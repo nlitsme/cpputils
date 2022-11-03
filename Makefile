@@ -10,6 +10,10 @@ cmake:
 	cmake -B build . $(CMAKEARGS)
 	$(MAKE) -C build $(if $(V),VERBOSE=1)
 
+ctest: TEST=1
+ctest: cmake
+	cd build && ctest --verbose
+
 vc:
 	"C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/cmake.exe" -G"Visual Studio 16 2019" -B build . $(CMAKEARGS)
 	"C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" build/*.sln -t:Rebuild
@@ -43,4 +47,16 @@ coverage:
 	llvm-cov show ./build/unittests -instr-profile=unittest.profdata $(COVOPTIONS) $(COVERAGEFILES)
 
 gcov:
-	gcov -H $(wildcard build/CMakeFiles/unittests.dir/tests/*.cpp.gcda)
+	find build/CMakeFiles -name "*.gcda" | xargs rm -f
+	./build/unittests
+	rm -f *.gcov
+	#  -H : human readable output
+	#  -p : preserve paths
+	#  -m : demangle names
+	find build/CMakeFiles -name "*.gcda" | xargs gcov -p -m -H
+	# outputs #home#itsme@workprj...  files in the current directory
+	#  look for lines with '#####', this means: never executed.
+	#  TODO: create python script to merge coverage lines for templated code.
+	rm -f *"#build#"* *"#tests#"*  "#usr#"*
+	head -999999 *.gcov | filtercov 
+
