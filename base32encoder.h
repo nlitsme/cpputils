@@ -3,6 +3,7 @@
 #include <tuple>
 #include <vector>
 #include <string>
+#include <stdexcept>
 
 // encode a 5 byte chunk into 8 characters
 template<typename P, typename S>
