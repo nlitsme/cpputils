@@ -100,7 +100,6 @@ target_link_libraries(unittests cpputils)
 target_compile_definitions(unittests PRIVATE USE_DOCTEST)
 
 include(CTest)
-add_test(NAME unittests COMMAND unittests)
 include(doctest)
 doctest_discover_tests(unittests)
 
