@@ -11,6 +11,16 @@
 // todo: add 'P copybytes([int n, ]range-object)' which copies (n or range.size()) bytes
 // to range, and returns the ptr to the next item to be written.
 
+template <typename, typename = void>
+constexpr bool has_op_difference_v{};
+ 
+template <typename T>
+constexpr bool has_op_difference_v<
+    T,
+    std::void_t< decltype(std::declval<T>()-std::declval<T>()) >
+> = true;
+
+
 template<typename P>
 struct packer_base {
     P p;
@@ -32,7 +42,9 @@ struct packer_base {
     }
     bool have(int n)
     {
-        if constexpr (!std::is_void_v<typename std::iterator_traits<P>::difference_type>)
+        // I used to check for difference_type here, unfortunately since c++20 
+        //  backinserter now has a difference_type, but no operate-, so checking for that now.
+        if constexpr (has_op_difference_v<P>)
             return n <= last-p;
 
         // with output iterator i can't check if there is enough space,
