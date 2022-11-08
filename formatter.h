@@ -133,6 +133,8 @@ std::ostream& operator<<(std::ostream&os, const std::array<T,N>& buf)
         os.copyfmt(state);
         if (!first && fillchar) os << fillchar;
         if constexpr (std::is_integral_v<T> && sizeof(T)==1) {
+            // This makes sure the numbers in byte and char arrays are printed 
+            // as numbers, instead of as characters.
             os << +b;
         }
         else {
@@ -155,6 +157,8 @@ std::ostream& operator<<(std::ostream&os, const std::vector<T, A>& buf)
         os.copyfmt(state);
         if (!first && fillchar) os << fillchar;
         if constexpr (std::is_integral_v<T> && sizeof(T)==1) {
+            // This makes sure the numbers in byte and char vectors are printed 
+            // as numbers, instead of as characters.
             os << +b;
         }
         else {
@@ -176,6 +180,8 @@ std::ostream& operator<<(std::ostream&os, const std::set<T, COMP, A>& buf)
         os.copyfmt(state);
         if (!first && fillchar) os << fillchar;
         if constexpr (std::is_integral_v<T> && sizeof(T)==1) {
+            // This makes sure the numbers in byte and char sets are printed 
+            // as numbers, instead of as characters.
             os << +b;
         }
         else {
