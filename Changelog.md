@@ -1,3 +1,9 @@
+## Tue Nov  8 15:58:20 CET 2022
+ * improved `packer_base` for `back_inserter`.
+ * fhandle: fixed bug with return value of read/write of non-byte sized types
+ * added ctest support
+ * added cmake finders for doctest and fmt libraries.
+
 ## Fri May 27 22:45:46 CEST 2022
  * updated doctest from 2.3.6 to 2.4.8
  * updated catch from 2.11.1 to v2.13.9
