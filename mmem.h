@@ -120,6 +120,10 @@ struct mappedmem {
     // returns true when addresses stayed the same.
     bool resize(uint64_t newsize)
     {
+#ifndef MREMAP_MAYMOVE
+        // freebsd does not have mremap
+        throw std::runtime_error("mmap.resize not supported");
+#else
         uint64_t pagesize= std::max(0x1000, (int)sysconf(_SC_PAGE_SIZE));
         uint64_t new_physlength = round_up(dataofs+newsize, pagesize);
 
@@ -135,6 +139,7 @@ struct mappedmem {
         length = newsize;
 
         return !havemoved;
+#endif
     }
 };
 
