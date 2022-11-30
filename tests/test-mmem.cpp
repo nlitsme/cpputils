@@ -1,5 +1,8 @@
 #include "unittestframework.h"
 
+#ifndef _WIN32
+// until I add windows support to mmem.h,  these tests will fail
+
 #include <signal.h>
 
 #include "mmem.h"
@@ -112,3 +115,5 @@ TEST_CASE("mmem2") {
     CHECK( p0 == p2 );
     CHECK( std::equal(rnddata.begin(), rnddata.begin()+256, p0) );
 }
+
+#endif
