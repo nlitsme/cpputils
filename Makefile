@@ -5,27 +5,29 @@ CMAKEARGS+=$(if $(LIBCXX),-DOPT_LIBCXX=1)
 CMAKEARGS+=$(if $(STLDEBUG),-DOPT_STL_DEBUGGING=1)
 CMAKEARGS+=$(if $(SANITIZE),-DOPT_SANITIZE=1)
 CMAKEARGS+=$(if $(ANALYZE),-DOPT_ANALYZE=1)
+CMAKEARGS+=$(if $(BENCH),-DOPT_BENCH=1)
 
 cmake:
 	cmake -B build . $(CMAKEARGS)
-	$(MAKE) -C build $(if $(V),VERBOSE=1)
+	cmake --build build $(if $(V),--verbose)
 
 ctest: TEST=1
 ctest: cmake
 	cd build && ctest --verbose
 
+VC_CMAKE=C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/cmake.exe
 vc:
-	"C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/cmake.exe" -G"Visual Studio 16 2019" -B build . $(CMAKEARGS)
-	"C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" build/*.sln -t:Rebuild
+	"$(VC_CMAKE)" -G"Visual Studio 16 2019" -B build . $(CMAKEARGS)
+	"$(VC_CMAKE)" --build build $(if $(V),--verbose)
 
 llvm:
 	CC=clang CXX=clang++ cmake -B build . $(CMAKEARGS)
-	$(MAKE) -C build $(if $(V),VERBOSE=1)
+	cmake --build build $(if $(V),--verbose)
 
 SCANBUILD=$(firstword $(wildcard /usr/bin/scan-build*))
 llvmscan:
 	CC=clang CXX=clang++ cmake -B build . $(CMAKEARGS)
-	$(SCANBUILD) $(MAKE) -C build $(if $(V),VERBOSE=1)
+	$(SCANBUILD) cmake --build build $(if $(V),--verbose)
 
 
 clean:
@@ -42,11 +44,11 @@ COVERAGEFILES=HiresTimer.h argparse.h arrayview.h asn1parser.h b32-alphabet.h b6
 COVERAGEFILES+=datapacking.h fhandle.h formatter.h fslibrary.h hexdumper.h is_stream_insertable.h mmem.h mmfile.h xmlnodetree.h xmlparser.h
 COVERAGEFILES+=string-base.h string-join.h string-lineenum.h string-parse.h string-split.h string-strip.h stringconvert.h stringlibrary.h templateutils.h utfconvertor.h utfcvutils.h
 
-coverage:
+coverage:  ctest
 	llvm-profdata merge -o unittest.profdata default.profraw
 	llvm-cov show ./build/unittests -instr-profile=unittest.profdata $(COVOPTIONS) $(COVERAGEFILES)
 
-gcov:
+gcov:  ctest
 	find build/CMakeFiles -name "*.gcda" | xargs rm -f
 	./build/unittests
 	rm -f *.gcov
@@ -56,7 +58,6 @@ gcov:
 	find build/CMakeFiles -name "*.gcda" | xargs gcov -p -m -H
 	# outputs #home#itsme@workprj...  files in the current directory
 	#  look for lines with '#####', this means: never executed.
-	#  TODO: create python script to merge coverage lines for templated code.
 	rm -f *"#build#"* *"#tests#"*  "#usr#"*
 	head -999999 *.gcov | filtercov 
 
