@@ -140,6 +140,8 @@ std::pair<int64_t, P> parsesigned(P first, P last, int base)
 {
     auto p = first;
     bool negative = false;
+    if (first==last)
+        return std::make_pair(0, first);
     if (*p == '-') {
         negative = true;
         ++p;
