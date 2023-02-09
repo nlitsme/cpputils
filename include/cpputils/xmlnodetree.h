@@ -1,7 +1,7 @@
 #pragma once
 
-#include <formatter.h>
-#include <xmlparser.h>
+#include <cpputils/formatter.h>
+#include <cpputils/xmlparser.h>
 
 struct XmlNode {
     using ptr = std::shared_ptr<XmlNode>;

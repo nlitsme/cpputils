@@ -1,6 +1,6 @@
 #pragma once
 
-#include "arrayview.h"
+#include <cpputils/arrayview.h>
 #include <algorithm>
 /*
  *
@@ -58,3 +58,43 @@ struct lineenumerator {
     iter end() { return iter(last, last); }
 
 };
+/*
+struct lineenumerator {
+    template<typename PTR>
+    struct iter {
+        PTR p, q, last;
+
+        iter(PTR first, PTR last)
+            : p(first), q(first), last(last)
+        {
+            q = std::find(p, last, '\n');
+        }
+        auto operator*()
+        {
+            return std::span(p, q);
+        }
+        iter& operator++()
+        {
+            p = (q<last) ? q+1 : last;
+            q = std::find(p, last, '\n');
+
+            return *this;
+        }
+        friend bool operator!=(const iter& lhs, const iter& rhs)
+        {
+            return lhs.p != rhs.p;
+        }
+    };
+
+
+    std::span<const char> text;
+
+    template<typename CHAR>
+    lineenumerator(std::span<const CHAR> text)
+        : text((const char*)text.data(), (const char*)text.data()+text.size())
+    {
+    }
+    iter begin() { return iter(text.begin(), text.end()); }
+    iter end() { return iter(text.end(), text.end()); }
+};
+*/

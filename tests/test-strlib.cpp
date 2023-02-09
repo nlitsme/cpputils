@@ -1,7 +1,7 @@
 #include "unittestframework.h"
 
-#include "stringlibrary.h"
-#include "stringlibrary.h"
+#include <cpputils/stringlibrary.h>
+#include <cpputils/stringlibrary.h>
 
 #include <string>
 #include <vector>

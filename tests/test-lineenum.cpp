@@ -1,7 +1,7 @@
 #include "unittestframework.h"
 
-#include "string-lineenum.h"
-#include "string-lineenum.h"
+#include <cpputils/string-lineenum.h>
+#include <cpputils/string-lineenum.h>
 
 TEST_CASE("lineenum") {
     std::string text = "first\nsecond\nthird";

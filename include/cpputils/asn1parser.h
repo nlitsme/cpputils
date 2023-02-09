@@ -3,7 +3,7 @@
 #include <iostream>
 #include <vector>
 
-#include "arrayview.h"
+#include <cpputils/arrayview.h>
 
 enum {
     CLS_UNIVERSAL,

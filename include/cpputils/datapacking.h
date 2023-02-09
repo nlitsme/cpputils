@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <algorithm>
 
-#include "templateutils.h"
+#include <cpputils/templateutils.h>
 
 // todo: add 'P copybytes([int n, ]range-object)' which copies (n or range.size()) bytes
 // to range, and returns the ptr to the next item to be written.

@@ -2,7 +2,7 @@
 #include <utility>
 #include <iterator>
 #include <algorithm>
-#include "string-base.h"
+#include <cpputils/string-base.h>
 
 /*
  * converts strings to numbers.

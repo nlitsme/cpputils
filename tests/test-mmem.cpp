@@ -5,11 +5,11 @@
 
 #include <signal.h>
 
-#include "mmem.h"
-#include "mmem.h"
-#include "mmfile.h"
-#include "mmfile.h"
-#include "formatter.h"
+#include <cpputils/mmem.h>
+#include <cpputils/mmem.h>
+#include <cpputils/mmfile.h>
+#include <cpputils/mmfile.h>
+#include <cpputils/formatter.h>
 
 #include <vector>
 #include <cstdlib>

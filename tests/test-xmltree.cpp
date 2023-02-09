@@ -1,7 +1,7 @@
 #include "unittestframework.h"
 
-#include "xmlnodetree.h"
-#include "xmlnodetree.h"
+#include <cpputils/xmlnodetree.h>
+#include <cpputils/xmlnodetree.h>
 
 TEST_CASE("xmlnode") {
     XmlNode x("tag", {});

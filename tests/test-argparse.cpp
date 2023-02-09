@@ -1,7 +1,7 @@
 #include "unittestframework.h"
 
-#include "argparse.h"
-#include "argparse.h"
+#include <cpputils/argparse.h>
+#include <cpputils/argparse.h>
 
 TEST_CASE("argparse") {
     SECTION("test") {

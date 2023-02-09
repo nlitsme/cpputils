@@ -1,6 +1,6 @@
 #pragma once
 #include <numeric>
-#include "stringlibrary.h"
+#include <cpputils/stringlibrary.h>
 #include <dirent.h>
 
 #define dbgprint(...)

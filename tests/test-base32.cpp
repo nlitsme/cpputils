@@ -1,7 +1,7 @@
 #include "unittestframework.h"
 
-#include "base32encoder.h"
-#include "base32encoder.h"
+#include <cpputils/base32encoder.h>
+#include <cpputils/base32encoder.h>
 
 #include <array>
 
