@@ -6,7 +6,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmfind")
 include(boilerplate)
 
 add_library(cpputils INTERFACE)
-target_include_directories(cpputils INTERFACE include)
+target_include_directories(cpputils INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 include(CTest)
 if(BUILD_TESTING)
