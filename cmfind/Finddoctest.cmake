@@ -1,4 +1,8 @@
+list(APPEND CMAKE_MODULE_PATH "/usr/lib/cmake/doctest/")
 if (TARGET doctest)
+    return()
+endif()
+if (TARGET doctest::doctest)
     return()
 endif()
 file(GLOB DOCTEST_DOCTEST_DIRS /usr/include /usr/local/include /usr/local/opt/doctest/include)
