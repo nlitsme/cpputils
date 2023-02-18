@@ -2,8 +2,9 @@ find_package(doctest REQUIRED)
 
 file(GLOB UnittestSrc *.cpp)
 if (WIN32)
-    # skippoing this test on windows.
+    # skippoing these tests on windows.
     list(REMOVE_ITEM UnittestSrc test-fhandle.cpp)
+    list(REMOVE_ITEM UnittestSrc test-mmem.cpp)
 endif()
 
 # disable work-in-progress

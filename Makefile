@@ -60,13 +60,15 @@ SCANBUILD=$(firstword $(wildcard /usr/bin/scan-build*))
 scan: CMAKE:=$(SCANBUILD) -o $$(pwd)/build/scanbuild $(CMAKE)
 scan: ctest
 
-
-CMAKE_BIN:=${PROGRAMFILES}\CMake\bin
-vc: CMAKE:="$(CMAKE_BIN)/cmake.exe"
+vc: CMAKE:=cmake.exe
 vc: GENERATOR=Visual Studio 16 2019
 vc: CMAKEARGS+=$(VC_CMAKEARGS)
 vc: all
 
+nmake: CMAKE:=cmake.exe
+nmake: GENERATOR=NMake Makefiles
+nmake: CMAKEARGS+=$(VC_CMAKEARGS)
+nmake: all
 
 clean:
 	$(RM) -r build CMakeFiles CMakeCache.txt CMakeOutput.log

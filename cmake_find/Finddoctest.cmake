@@ -9,11 +9,10 @@ file(GLOB DOCTEST_DOCTEST_DIRS /usr/include /usr/local/include /usr/local/opt/do
 find_path(DOCTEST_DOCTEST_DIR NAMES doctest/doctest.h PATHS ${DOCTEST_DOCTEST_DIRS})
 if (DOCTEST_DOCTEST_DIR STREQUAL "DOCTEST_DOCTEST_DIR-NOTFOUND")
     include(FetchContent)
-    FetchContent_Declare(
+    FetchContent_Populate(
       doctest
       GIT_REPOSITORY https://github.com/doctest/doctest.git
     )
-    FetchContent_MakeAvailable(doctest)
     list(APPEND CMAKE_MODULE_PATH "${doctest_SOURCE_DIR}/scripts/cmake/")
     set(DOCTEST_DOCTEST_DIR ${doctest_SOURCE_DIR})
 else()
