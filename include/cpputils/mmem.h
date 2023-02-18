@@ -1,6 +1,10 @@
 #pragma once
 // class wrappong a memmapped object
 
+#ifdef _WIN32
+#pragma error("Shared memory support on windows not yet implemented!")
+#endif
+
 #include <sys/mman.h>
 #include <stdio.h>
 #include <unistd.h>
