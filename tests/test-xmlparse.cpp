@@ -1,8 +1,8 @@
 #include "unittestframework.h"
 
 // include twice to detect proper header behaviour
-#include "xmlparser.h"
-#include "xmlparser.h"
+#include <cpputils/xmlparser.h>
+#include <cpputils/xmlparser.h>
 
 using namespace std::string_literals;
 

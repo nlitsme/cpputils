@@ -7,7 +7,7 @@
 #include <string_view>
 #include <type_traits>
 
-#include "templateutils.h"
+#include <cpputils/templateutils.h>
 
 template<typename SEQUENCE, typename CHAR>
 bool is_in(const SEQUENCE& trims, CHAR c)

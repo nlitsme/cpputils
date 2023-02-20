@@ -2,8 +2,8 @@
 
 #include <fcntl.h>
 
-#include "mmem.h"
-#include "fhandle.h"
+#include <cpputils/mmem.h>
+#include <cpputils/fhandle.h>
 
 /*
    retain both the filehandle and the mmap

@@ -1,7 +1,7 @@
 #include "unittestframework.h"
 
-#include "stringconvert.h"
-#include "stringconvert.h"
+#include <cpputils/stringconvert.h>
+#include <cpputils/stringconvert.h>
 #include <vector>
 
 TEST_CASE("stringconvert") {
@@ -91,15 +91,15 @@ TEST_CASE("stringconvert") {
 
             // note: problem
             //   convert<char>("bad utf8 string") -> contents of string are not checked.
-            for (int i=0 ; i<bad8list.size() ; i++) {
+            for (size_t i=0 ; i<bad8list.size() ; i++) {
                 INFO("utf8 " << i);
                 CHECK( string::convert<wchar_t>(mkstring(bad8list[i])) == L"" );
             }
-            for (int i=0 ; i<bad16list.size() ; i++) {
+            for (size_t i=0 ; i<bad16list.size() ; i++) {
                 INFO("utf16 " << i);
                 CHECK( string::convert<char>(mkstring(bad16list[i])) == "" );
             }
-            for (int i=0 ; i<bad32list.size() ; i++) {
+            for (size_t i=0 ; i<bad32list.size() ; i++) {
                 INFO("utf32 " << i);
                 CHECK( string::convert<char>(mkstring(bad32list[i])) == "" );
             }

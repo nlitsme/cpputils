@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 #include <stdexcept>
-#include "b64-alphabet.h"
+#include <cpputils/b64-alphabet.h>
 /*
 Functions for base64 encoding and decoding.
 

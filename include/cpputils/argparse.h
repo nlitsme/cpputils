@@ -9,7 +9,7 @@
 #include <stdexcept>
 #include <stdlib.h>
 
-#include "stringlibrary.h"
+#include <cpputils/stringlibrary.h>
 
 /*
 

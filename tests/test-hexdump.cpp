@@ -1,8 +1,8 @@
 #include "unittestframework.h"
 
 
-#include "hexdumper.h"
-#include "hexdumper.h"
+#include <cpputils/hexdumper.h>
+#include <cpputils/hexdumper.h>
 
 #include <sstream>
 #include <vector>

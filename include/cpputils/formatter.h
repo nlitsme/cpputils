@@ -27,11 +27,11 @@
 #include <set>
 #include <map>
 
-#include "stringconvert.h"
-#include "hexdumper.h"
-#include "fhandle.h"
+#include <cpputils/stringconvert.h>
+#include <cpputils/hexdumper.h>
+#include <cpputils/fhandle.h>
 
-#include "templateutils.h"
+#include <cpputils/templateutils.h>
 
 
 /******************************************************************************
@@ -370,7 +370,7 @@ constexpr bool is_hexdumper_v = is_hexdumper<T>::value;
 }
 
 // note: need to include this as late as possible, so clang will know about operator<<(vector) etc.
-#include "is_stream_insertable.h"
+#include <cpputils/is_stream_insertable.h>
 /*****************************************************************************
  * the StringFormatter class,
  *

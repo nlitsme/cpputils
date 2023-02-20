@@ -5,14 +5,28 @@
 
 #include <signal.h>
 
-#include "mmem.h"
-#include "mmem.h"
-#include "mmfile.h"
-#include "mmfile.h"
-#include "formatter.h"
+#include <cpputils/mmem.h>
+#include <cpputils/mmem.h>
+#include <cpputils/mmfile.h>
+#include <cpputils/mmfile.h>
+#include <cpputils/formatter.h>
 
 #include <vector>
 #include <cstdlib>
+
+#if defined(__MACH__)
+// simulate the linux memfd_create function
+int memfd_create(const char *name, int flags)
+{
+    char uname[L_tmpnam];
+    if (std::tmpnam(uname)) {
+        int f = open(uname, O_CREAT, 0666);
+        std::remove(uname);
+        return f;
+    }
+    return -1;
+}
+#endif
 
 TEST_CASE("mmem0") {
 

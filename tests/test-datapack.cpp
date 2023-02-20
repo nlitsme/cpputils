@@ -1,7 +1,7 @@
 #include "unittestframework.h"
 
-#include "datapacking.h"
-#include "datapacking.h"
+#include <cpputils/datapacking.h>
+#include <cpputils/datapacking.h>
 TEST_CASE("packer") {
     SECTION("limits") {
         SECTION("empty") {
