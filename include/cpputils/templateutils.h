@@ -7,6 +7,8 @@
 #include <string_view>
 #include <array>
 
+#define HAVE_db59c0d370a4d148_TEMPLATEUTILS
+
 /**  test if T is a container type */
 template<typename T>
 struct is_container : std::false_type {};
