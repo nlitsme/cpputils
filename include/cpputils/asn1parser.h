@@ -203,7 +203,9 @@ struct asn1tlv<std::istream::pos_type> {
 
         while (!done && bitcount < bitlimit) {
             uint8_t byte = is.get();
-            if (byte<0)
+            if (value>=(1<<(8*sizeof(value)-7-1)))
+                throw std::runtime_error("truncated integer");
+            if (value<=-(1<<(8*sizeof(value)-7-1)))
                 throw std::runtime_error("truncated integer");
             value <<= 7;
             value |= byte&0x7F;
@@ -357,7 +359,7 @@ ASNOBJ get_nth_tlv(ASNOBJ obj, int n)
             i++;
         }
         else {
-            if (tlv.tagvalue == -n-1)
+            if (tlv.tagvalue == unsigned(-n-1))
                 return tlv;
         }
     }
