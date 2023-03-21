@@ -478,7 +478,7 @@ template<typename V>
 Hexdumper<typename V::value_type> dumper(const V& v)
 {
     if (v.empty()) {
-        typename V::value_type x{0};
+        static typename V::value_type x{0};
         // handle the empty case separately.
         return Hexdumper<typename V::value_type>(&x, 0);
     }
