@@ -78,6 +78,7 @@ public:
 };
 #else
 #include <sys/time.h>
+#include <ctime>
 #include <unistd.h>     // for usleep
 class HiresTimer {
     struct timeval _tv;
