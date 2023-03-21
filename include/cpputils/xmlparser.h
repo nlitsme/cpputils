@@ -166,7 +166,9 @@ public:
     }
     static bool isnamechar(char c)
     {
-        if (c < 0) return true;
+        if constexpr (std::is_signed_v<char>) {
+            if (c < 0) return true;
+        }
         if (c <= 0x2c) return false;
         if (c == 0x2f) return false;
         if (c <= 0x3a) return true;
@@ -175,7 +177,11 @@ public:
         if (c <= 0x5e) return false;
         if (c == 0x60) return false;
         if (c <= 0x7a) return true;
-        if (c <= 0x7f) return false;
+        if constexpr (std::is_unsigned_v<char>) {
+            // NOTE: this should never happen for signed chars,
+            //   but somehow I keep getting a compiler warning for this line: always true.
+            if (c <= 0x7f) return false;
+        }
 
         // note: not following xml spec exactly, 
         // also unicode 80-b6, b8-bf, d7, f7, 37e, 2000-200b, 200e-203e,
