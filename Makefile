@@ -57,7 +57,7 @@ llvm: all
 
 
 SCANBUILD=$(firstword $(wildcard /usr/bin/scan-build*))
-scan: CMAKE:=$(SCANBUILD) -o $$(pwd)/build/scanbuild $(CMAKE)
+scan: CMAKE:=$(SCANBUILD) $(if $(CXX),--use-c++=$(CXX)) $(if $(CC),--use-cc=$(CC)) -o $$(pwd)/build/scanbuild $(CMAKE)
 scan: ctest
 
 vc: CMAKE:=cmake.exe
