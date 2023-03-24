@@ -13,6 +13,3 @@
 #include <cpputils/stringconvert.h>
 #include <cpputils/stringlibrary.h>
 
-TEST_CASE("main") {
-    CHECK(true);
-}
