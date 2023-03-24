@@ -164,9 +164,13 @@ public:
         std::reverse(attrs.begin(), attrs.end());
         return attrs;
     }
-    static bool isnamechar(char c)
+
+    // NOTE: this needs to be a templated function, otherwise the
+    // if-constexpr will not eliminate the always-true comparisons.
+    template<typename CHAR=char>
+    static bool isnamechar(CHAR c)
     {
-        if constexpr (std::is_signed_v<char>) {
+        if constexpr (std::is_signed_v<CHAR>) {
             if (c < 0) return true;
         }
         if (c <= 0x2c) return false;
@@ -177,7 +181,7 @@ public:
         if (c <= 0x5e) return false;
         if (c == 0x60) return false;
         if (c <= 0x7a) return true;
-        if constexpr (std::is_unsigned_v<char>) {
+        if constexpr (std::is_unsigned_v<CHAR>) {
             // NOTE: this should never happen for signed chars,
             //   but somehow I keep getting a compiler warning for this line: always true.
             if (c <= 0x7f) return false;
