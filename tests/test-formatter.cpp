@@ -41,6 +41,19 @@ TEST_CASE("formatter") {
         CHECK( stringformat("%s", "a-c-string") == "a-c-string" );
         CHECK( stringformat("%s", std::string("a-std-string")) == "a-std-string" );
 
+        // how is null handled by %s.
+        CHECK( stringformat("%s", nullptr) == "(null)");
+        CHECK( stringformat("%s", NULL) == "0");
+        CHECK( stringformat("%s", 0) == "0");
+        CHECK( stringformat("%s", (const char*)0) == "(null)");
+
+        // how is null handled by %p
+        CHECK( stringformat("%p", nullptr) == "nullptr");
+        CHECK( stringformat("%p", NULL) == "0");
+        CHECK( stringformat("%p", 0) == "0");
+        CHECK( stringformat("%p", (const char*)0) == "0");
+
+
         // check negatives
         CHECK( stringformat("%i", 123) != "321" );
         CHECK_FALSE( stringformat("%i", 123) != "123" );
