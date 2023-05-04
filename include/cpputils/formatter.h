@@ -4,13 +4,70 @@
  *
  * most features of the printf format strings are implemented.
  * integer and string size specifiers like  '%ld', '%zs' or '%ls' are ignored.
+ 
+ * specification:
+ *  -  +/-  for sign, algignment
+ *  -  width.precision
+ *
  *
  * Usage:
  *   std::cout << string::formatter("%d", 123);
- *
- *   or:
- *
  *   print("%d", 123);
+ *   fprint(FILE*, fmt, ...)
+ *   stringformat(fmt, ...)   -> std::string
+ *   qstringformat(fmt, ...)  -> QString
+ *   windebug(fmt, ...)
+ *
+ * supported format types:
+ *  - %i, %d, %u: decimal integers
+ *  - %o: octal integers
+ *  - %x, %X: hexadecimal integers
+ *  - %f, %F: float
+ *  - %g, %G: shortest of float with exponent, or float
+ *  - %a, %A: hexadecimal float
+ *  - %e, %E: float with exponent
+ *  - %c    : character
+ *  - %s    : c-string, or std::string, and anything which has an opeator<< defined.
+ *  - %p    : pointer value as 0xXXXXX
+ *
+ * additional non standard formatting types:
+ *  - %s: any c++ type T which has an operator<<(os, T) implemented will be printed 
+ *  - %b: calls hexumper
+ *      %b  - spaced hex followed by ascii: "xx xx xx  aaa"
+ *      %0b  - hex followed by ascii: "xxxxxx  aaa"
+ *      %-b  - spaced hex without ascii : "xx xx xx"
+ *      %-0b  - unspaced hex without ascii:  "xxxxxx"
+ *      %+b  - only ascii : "aaa"
+ *
+ * not supported:
+ *  - %*  - variable sized format
+ *  - %#  - explicit prefix
+ *
+ * operator<<(os, T) implementations are provided for the following types:
+
+ * On Windows:
+ *  - Platform::String^
+ *  - any type which has a 'ToString()' method
+ *  - Platform::Guid
+ *  - Windows::Storage::Streams::IBuffer^
+ *  - GUID
+ * With QT:
+ *   - QString
+ * from stl:
+ *   - std::vector, std::array, std::set of numbers
+ *   - std::vector, std::array, std::set of printable types
+ *   - note: std::array of printable types should be printable, but somehow isn't.
+ *   - std::map
+ *
+ * other:
+ *  - int128_t, uint128_t
+ *  - 32, 16 bit char type strings are converted as utf-16 or utf-32
+ *
+ * TODO:
+ *  - how should we handle printing a nullptr as a string?
+ *     1) ignore it, and print '(null)'  like the old printf library.
+ *     2) throw an exception.
+ *     3) crash with SIGSEGV, null-pointer dereference.
  *
  *
  * (C) 2016 Willem Hengeveld <itsme@xs4all.nl>
@@ -35,7 +92,7 @@
 
 
 /******************************************************************************
- * add StringFormatter support for various types by implementing a operatoer<<:
+ * add StringFormatter support for various types by implementing a operator<<:
  *
  *
  *  windows managed c++  Platform::String, Platform::Guid
@@ -101,6 +158,8 @@ inline std::ostream& operator<<(std::ostream&os, const GUID& guid)
 #endif
 
 #ifdef QT_VERSION
+#include <QByteArray>
+#include <QString>
 inline std::ostream& operator<<(std::ostream&os, const QString& s)
 {
     QByteArray a = s.toUtf8();
@@ -600,7 +659,13 @@ struct StringFormatter {
                     {
                         // nop
                     }
-                    else if (output_using_operator(os, value)) {
+                    else if (type=='s' && output_null(os, value))
+                    {
+                        // nop
+                    }
+                    else if (output_using_operator(os, value))
+                    {
+                        // when type ~ float/double : '[AEFGaefg]' || type == 's' || other outputs failed.
                         // nop
                     }
                     else {
@@ -693,6 +758,17 @@ struct StringFormatter {
             return true;
         }
 
+        return false;
+    }
+    template<typename T>
+    static bool output_null(std::ostream& os, T value)
+    {
+        if constexpr (std::is_pointer_v<T> || std::is_null_pointer_v<T>) {
+            if (value)
+                return false;
+            os << "(null)";
+            return true;
+        }
         return false;
     }
 
