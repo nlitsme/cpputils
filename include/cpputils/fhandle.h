@@ -103,11 +103,12 @@ struct filehandle {
         _p->close();
     }
 
-    int64_t size()
+    uint64_t size()
     {
         struct stat st;
         if (fstat(fh(), &st))
-            return -1;
+            throw std::system_error(errno, std::generic_category(), "fstat");
+
         if (st.st_mode&S_IFREG)
             return st.st_size;
 #ifndef _WIN32
@@ -116,22 +117,22 @@ struct filehandle {
             uint64_t bkcount;
             uint32_t bksize;
             if (-1==ioctl(fh(), DKIOCGETBLOCKCOUNT, &bkcount))
-                return -1;
+                throw std::system_error(errno, std::generic_category(), "ioctl(DKIOCGETBLOCKCOUNT)");
             if (-1==ioctl(fh(), DKIOCGETBLOCKSIZE, &bksize))
-                return -1;
+                throw std::system_error(errno, std::generic_category(), "ioctl(DKIOCGETBLOCKSIZE)");
             return bkcount*bksize;
 #endif
 #ifdef BLKGETSIZE64
             uint64_t devsize;
             if (-1==ioctl(fh(), BLKGETSIZE64, &devsize))
-                return -1;
+                throw std::system_error(errno, std::generic_category(), "ioctl(BLKGETSIZE64)");
             return devsize;
 #endif
         }
 #endif
         else {
             // pipe or socket
-            return -1;
+            throw std::runtime_error("fstat");
         }
     }
 
