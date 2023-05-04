@@ -11,6 +11,7 @@ endif()
 list(REMOVE_ITEM UnittestSrc test-makeasn1.cpp)
 
 add_executable(cpputils_unittests ${UnittestSrc})
+set_property(TARGET cpputils_unittests PROPERTY OUTPUT_NAME unittests)
 target_link_libraries(cpputils_unittests cpputils doctest::doctest)
 target_compile_definitions(cpputils_unittests PRIVATE USE_DOCTEST)
 
