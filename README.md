@@ -18,6 +18,23 @@ various c++ utility classes
 * xmlparser: idea based on the python html.parser module.
 
 
+# usage:
+
+Several methods of including this project:
+ * include this project using cmake `add\_subdirectory`
+ * add the Findcpputils.cmake to your `CMAKE\_MODULE\_PATH`, and then use `find\_package(cpputils)`
+ * add `-I cpputils/include` to your compiler commandline.
+
+How to use the include files:
+
+```
+#include <cpputils/formatter.h>
+
+int main(...)
+{
+    print("%s\n", std::string("test"));
+}
+```
 
 ## hexdumper
 
@@ -164,4 +181,4 @@ several targets exist:
  * add support for different alphabets in base32/base64.
 
 
-(C) 2016 Willem Hengeveld <itsme@xs4all.nl>
+(C) 2016-2023 Willem Hengeveld <itsme@xs4all.nl>

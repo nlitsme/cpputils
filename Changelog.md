@@ -1,3 +1,8 @@
+## Fri Jun  2 14:56:14 CEST 2023
+ * added minmax.h
+ * several minor improvements
+ * reorganising lib structure, now include path always has 'cpputils'
+
 ## Tue Nov  8 15:58:20 CET 2022
  * improved `packer_base` for `back_inserter`.
  * fhandle: fixed bug with return value of read/write of non-byte sized types
