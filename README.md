@@ -179,6 +179,7 @@ several targets exist:
  * `"%+08d"`  produces the wrong result: the sign will be after the padding, instead of in front.
  * `"%.8s"`  string truncation does not work.
  * add support for different alphabets in base32/base64.
-
+ * add linereader which takes either a filehandle, or a range
+ * add read() which allocates it's return buffer.
 
 (C) 2016-2023 Willem Hengeveld <itsme@xs4all.nl>
