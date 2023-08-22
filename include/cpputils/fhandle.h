@@ -207,11 +207,11 @@ struct filehandle {
     {
         return read(first, std::distance(first, last));
     }
-    template<typename RANGE>
-    std::enable_if_t<!std::is_scalar_v<RANGE>, size_t> read(RANGE r)
-    {
-        return read(&*r.begin(), r.size());
-    }
+//  template<typename RANGE>
+//  std::enable_if_t<!std::is_scalar_v<RANGE>, size_t> read(RANGE r)
+//  {
+//      return read(&*r.begin(), r.size());
+//  }
     template<typename INT>
     std::enable_if_t<std::is_scalar_v<INT>, std::vector<uint8_t>> read(INT count)
     {
@@ -229,6 +229,18 @@ struct filehandle {
         size_t n = read(r.data(), r.size());
         return r.first(n);
     }
+    std::span<uint64_t> readspan(std::span<uint64_t> r)
+    {
+        size_t n = read(r.data(), r.size());
+        return r.first(n);
+    }
+    template<typename T>
+    std::span<T> readspan(std::span<T> r)
+    {
+        size_t n = read(r.data(), r.size());
+        return r.first(n);
+    }
+
 #endif
     template<typename PTR>
     size_t pread(uint64_t ofs, PTR ptr, size_t count)
