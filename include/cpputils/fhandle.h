@@ -121,18 +121,19 @@ struct filehandle {
             if (-1==ioctl(fh(), DKIOCGETBLOCKSIZE, &bksize))
                 throw std::system_error(errno, std::generic_category(), "ioctl(DKIOCGETBLOCKSIZE)");
             return bkcount*bksize;
-#endif
-#ifdef BLKGETSIZE64
+#elif defined(BLKGETSIZE64)
             uint64_t devsize;
             if (-1==ioctl(fh(), BLKGETSIZE64, &devsize))
                 throw std::system_error(errno, std::generic_category(), "ioctl(BLKGETSIZE64)");
             return devsize;
+#else
+            throw std::runtime_error("size not implemented for block dev");
 #endif
         }
 #endif
         else {
             // pipe or socket
-            throw std::runtime_error("fstat");
+            throw std::runtime_error("size not implemented for pipe or socket");
         }
     }
 
