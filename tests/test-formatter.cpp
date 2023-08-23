@@ -43,15 +43,20 @@ TEST_CASE("formatter") {
 
         // how is null handled by %s.
         CHECK( stringformat("%s", nullptr) == "(null)");
-        CHECK( stringformat("%s", NULL) == "0");
+        CHECK( stringformat("%s", NULL) == "0");   // bsd: (null)
         CHECK( stringformat("%s", 0) == "0");
         CHECK( stringformat("%s", (const char*)0) == "(null)");
 
         // how is null handled by %p
         CHECK( stringformat("%p", nullptr) == "nullptr");
-        CHECK( stringformat("%p", NULL) == "0");
+        CHECK( stringformat("%p", NULL) == "0");   // bsd: nullptr
         CHECK( stringformat("%p", 0) == "0");
+
         CHECK( stringformat("%p", (const char*)0) == "0");
+        // "%p", (..*)0 -->
+        // bsd, osx:  0x0
+        // win:       0000000000000000
+        // linux:     0
 
 
         // check negatives
