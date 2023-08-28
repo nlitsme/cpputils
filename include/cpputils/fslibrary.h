@@ -1,7 +1,12 @@
 #pragma once
 #include <numeric>
 #include <cpputils/stringlibrary.h>
+#ifndef _WIN32
 #include <dirent.h>
+#endif
+#ifdef _WIN32
+#error "fslibrary not yet implemented for windows"
+#endif
 
 #define dbgprint(...)
 /*
@@ -73,6 +78,7 @@ struct fileenumerator {
     RecursionType recurse;
     int filter;  // bitmask of (1<<DT_nnn) values
 
+#ifndef _WIN32
     struct iter {
         pathvector path;
         RecursionType recurse;
@@ -194,7 +200,7 @@ struct fileenumerator {
             return cur != rhs.cur || recurse != rhs.recurse;
         }
     };
-
+#endif
     fileenumerator(const std::string& path, int filter=(1<<DT_REG), RecursionType recurse=SINGLE)
         : path{path}, recurse(recurse), filter(filter)
     {
