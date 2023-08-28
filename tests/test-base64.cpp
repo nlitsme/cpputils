@@ -12,7 +12,14 @@ TEST_CASE("base64") {
         D=2,  // decode must succeed.
         FD=4, // decode must fail.
     };
-    std::vector<std::tuple<std::vector<uint8_t>, int, std::string>> testcases = {
+    struct testent {
+        std::vector<uint8_t> data;
+        int flags;
+        std::string txt;
+    };
+
+
+    std::vector<testent> testcases = {
         { { }, E|D, "" },
         { { }, E|D|NP, "" },
         { { }, D,   "\n" },
@@ -98,23 +105,23 @@ E|D, "//79/Pv6+fj39vX08/Lx8O/u7ezr6uno5+bl5OPi4eDf3t3c29rZ2NfW1dTT0tHQz87NzMvKyc
 
     };
     SECTION("cases") {
-        for (auto& [data, flags, txt] : testcases) {
-            if (flags&E) {
-                if (flags&NP) {
-                    auto e = base64_encode_unpadded(data);
-                    CHECK(e == txt);
+        for (auto& ent : testcases) {
+            if (ent.flags&E) {
+                if (ent.flags&NP) {
+                    auto e = base64_encode_unpadded(ent.data);
+                    CHECK(e == ent.txt);
                 }
                 else {
-                    auto e = base64_encode(data);
-                    CHECK(e == txt);
+                    auto e = base64_encode(ent.data);
+                    CHECK(e == ent.txt);
                 }
             }
-            if (flags&D) {
-                auto d = base64_decode(txt);
-                CHECK(d == data);
+            if (ent.flags&D) {
+                auto d = base64_decode(ent.txt);
+                CHECK(d == ent.data);
             }
-            if (flags&FD) {
-                CHECK_THROWS(base64_decode(txt));
+            if (ent.flags&FD) {
+                CHECK_THROWS(base64_decode(ent.txt));
             }
         }
     }

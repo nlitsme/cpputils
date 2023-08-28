@@ -7,7 +7,14 @@
 
 TEST_CASE("base32") {
     enum { E=1, D=2, FD=4 };
-    std::vector<std::tuple<std::vector<uint8_t>, int, std::string>> testcases = {
+
+    struct testent {
+        std::vector<uint8_t> data;
+        int flags;
+        std::string txt;
+    };
+
+    std::vector<testent> testcases = {
         { { }, E|D, "" },
         { { }, D,   "\n" },
         { { }, D,   "\t" },
@@ -24,21 +31,19 @@ TEST_CASE("base32") {
         { { 0x66,0x6f,0x6f,0x62           }, E|D, "MZXW6YQ=" },
         { { 0x66,0x6f,0x6f,0x62,0x61      }, E|D, "MZXW6YTB" },
         { { 0x66,0x6f,0x6f,0x62,0x61,0x72 }, E|D, "MZXW6YTBOI======" },
-
-
     };
     SECTION("cases") {
-        for (auto& [data, flags, txt] : testcases) {
-            if (flags&E) {
-                auto e = base32_encode(data);
-                CHECK(e == txt);
+        for (auto& ent : testcases) {
+            if (ent.flags&E) {
+                auto e = base32_encode(ent.data);
+                CHECK(e == ent.txt);
             }
-            if (flags&D) {
-                auto d = base32_decode(txt);
-                CHECK(d == data);
+            if (ent.flags&D) {
+                auto d = base32_decode(ent.txt);
+                CHECK(d == ent.data);
             }
-            if (flags&FD) {
-                CHECK_THROWS(base32_decode(txt));
+            if (ent.flags&FD) {
+                CHECK_THROWS(base32_decode(ent.txt));
             }
         }
     }
