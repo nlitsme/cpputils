@@ -1,10 +1,12 @@
 #pragma once
 
-#include <sys/time.h>
+#include <ctime>
 #include <string>
 #include <system_error>
 #include <cpputils/formatter.h>
-
+#ifndef _WIN32
+#include <sys/time.h>
+#endif
 
 template<int DUMMY=0>
 class timedelta_cls {
@@ -69,16 +71,29 @@ public:
 
 template<int DUMMY=0>
 class timepoint_cls {
+#ifdef _WIN32
+    FILETIME _tv;
+#else
     struct timeval _tv;
+#endif
 public:
     timepoint_cls()
     {
+#ifdef _WIN32
+        _tv.dwLowDateTime = 0;
+        _tv.dwHighDateTime = 0;
+#else
         _tv.tv_sec = 0;
         _tv.tv_usec = 0;
+#endif
     }
     void setnow()
     {
+#ifdef _WIN32
+        GetSystemTimePreciseAsFileTime(&_tv);
+#else
         gettimeofday(&_tv, 0);
+#endif
     }
     static timepoint_cls now()
     {
@@ -89,32 +104,67 @@ public:
     }
     timepoint_cls(int64_t epochusec)
     {
+        set_unixepochusec(epochusec);
+    }
+    void set_unixepochusec(uint64_t epochusec)
+    {
+#ifdef _WIN32
+        // seconds since 1601-01-01 00:00:00
+        // ft = (time_t * 10000000) + 116444736000000000
+        // ft = (usec * 10) + 116444736000
+        uint64_t ft = (epochusec * 10) + 116444736000;
+        _tv.dwLowDateTime = (DWORD)ft;
+        _tv.dwHighDateTime = DWORD(ft>>32);
+#else
+        // seconds since 1970-01-01 00:00:00
         _tv.tv_sec = epochusec / 1000000;
         _tv.tv_usec = epochusec % 1000000;
+#endif
     }
-    bool empty() const { return _tv.tv_sec == 0; }
+#ifdef _WIN32
+    uint64_t msvcepochusec() const
+    {
+        return ( uint64_t(_tv.dwHighDateTime) << 32 ) | _tv.dwLowDateTime;
+    }
+    uint64_t unixepochusec() const
+    {
+        return msvcepochusec()/10 - 11644473600;
+    }
+    bool empty() const { return _tv.dwHighDateTime == 0; }
 
-    auto time() const { return _tv.tv_sec; }
-    auto usec() const { return _tv.tv_usec; }
+    operator const FILETIME&() const
+    {
+        return _tv;
+    }
+#else
+    uint64_t msvcepochusec() const
+    {
+        return (unixepochusec() * 10) + 116444736000;
+    }
+    uint64_t unixepochusec() const
+    {
+        return uint64_t(_tv.tv_sec)*1000000 + _tv.tv_usec;
+    }
+
+    bool empty() const { return _tv.tv_sec == 0; }
 
     operator const struct timeval&() const
     {
         return _tv;
     }
+#endif
+    auto time() const { return unixepochusec()/1000000; }
+    auto usec() const { return unixepochusec()%1000000; }
 
     timepoint_cls& operator+=(timedelta_cls<DUMMY> rhs)
     {
-        int64_t us = _tv.tv_usec + rhs.totalusec();
-        _tv.tv_usec = us % 1000000;
-        _tv.tv_sec += us/1000000;
+        set_unixepochusec(unixepochusec() + rhs.totalusec());
 
         return *this;
     }
     timepoint_cls& operator-=(timedelta_cls<DUMMY> rhs)
     {
-        int64_t us = _tv.tv_usec - rhs.totalusec();
-        _tv.tv_usec = us % 1000000;
-        _tv.tv_sec += us/1000000;
+        set_unixepochusec(unixepochusec() - rhs.totalusec());
 
         return *this;
     }
@@ -122,36 +172,41 @@ public:
 
     operator double() const
     {
-        return _tv.tv_sec + _tv.tv_usec * 0.000001;
+        return unixepochusec() * 0.000001;
     }
     operator int64_t() const
     {
-        return _tv.tv_sec * 1000000LL + _tv.tv_usec;
+        return unixepochusec();
     }
     std::string iso() const
     {
         struct tm tm;
-        time_t t = _tv.tv_sec;
+        time_t t = this->time();
         if (NULL == localtime_r(&t, &tm))
-            throw std::system_error(errno, std::generic_category(), "gmtime");
+            throw std::system_error(errno, std::generic_category(), "localtime");
 
         return stringformat("%04d-%02d-%02dT%02d:%02d:%02d.%06d%+03d:%02d", 
                 tm.tm_year+1900, tm.tm_mon+1, tm.tm_mday,
                 tm.tm_hour, tm.tm_min, tm.tm_sec,
-                _tv.tv_usec,
-                tm.tm_gmtoff/3600, (tm.tm_gmtoff/60)%60);
+                this->usec(),
+#ifdef _WIN32
+                0, 0
+#else
+                tm.tm_gmtoff/3600, (tm.tm_gmtoff/60)%60
+#endif
+                );
     }
     std::string isoutc() const
     {
         struct tm tm;
-        time_t t = _tv.tv_sec;
+        time_t t = this->time();
         if (NULL == gmtime_r(&t, &tm))
             throw std::system_error(errno, std::generic_category(), "gmtime");
 
         return stringformat("%04d-%02d-%02dT%02d:%02d:%02d.%06dZ", 
                 tm.tm_year+1900, tm.tm_mon+1, tm.tm_mday,
                 tm.tm_hour, tm.tm_min, tm.tm_sec,
-                _tv.tv_usec);
+                this->usec());
     }
     friend std::ostream& operator<<(std::ostream& os, const timepoint_cls& t)
     {
