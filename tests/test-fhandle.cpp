@@ -17,7 +17,10 @@ TEST_CASE("filehandle") {
         CHECK_THROWS( filehandle{-1} );
 
         // will throw on close 
+#ifndef _WIN32
+        // not checking on windows, there an invalid filehandle is fatal.
         CHECK_THROWS( filehandle{99}.close() );
+#endif
 
         // check default constructor
         CHECK( filehandle{}.empty() );
@@ -25,6 +28,8 @@ TEST_CASE("filehandle") {
 
         // copy constructor
         CHECK( filehandle{filehandle{}}.empty() );
+#ifndef _WIN32
+        // not checking on windows, there an invalid filehandle is fatal.
         CHECK_THROWS( filehandle{filehandle{99}}.close() );
 
         filehandle f;
@@ -43,6 +48,7 @@ TEST_CASE("filehandle") {
 
         CHECK_THROWS( f.close() ); // because 99 is not a valid fd.
         CHECK_NOTHROW( g.close() );  // now g is also already closed
+#endif
     }
 #ifndef _WIN32
 // TODO - create tests which work on windows as well.
