@@ -7,6 +7,7 @@
 
 #ifdef _WIN32
 #include <io.h>
+#include <windows.h>
 #endif
 #ifndef _WIN32
 #include <sys/stat.h>
@@ -154,7 +155,23 @@ struct filehandle {
         if (-1==::ftruncate(fh(), pos))
             throw std::system_error(errno, std::generic_category(), "truncate");
 #else
-        throw std::runtime_error("truncate not implemented on windows");
+        HANDLE msfh = (HANDLE)_get_osfhandle(fh());
+        LARGE_INTEGER cur;
+        // save filepos
+        LARGE_INTEGER liZero; liZero.QuadPart = 0;
+        if (!SetFilePointerEx(msfh, liZero, &cur, FILE_CURRENT))
+            throw std::system_error(errno, std::generic_category(), "SetFilePointerEx");
+
+        // change file size
+        LARGE_INTEGER liPos; liPos.QuadPart = pos;
+        if (!SetFilePointerEx(msfh, liPos, NULL, FILE_BEGIN))
+            throw std::system_error(errno, std::generic_category(), "SetFilePointerEx");
+        if (!SetEndOfFile(msfh))
+            throw std::system_error(errno, std::generic_category(), "SetEndOfFile");
+
+        // restore filepos
+        if (!SetFilePointerEx(msfh, cur, NULL, FILE_BEGIN))
+            throw std::system_error(errno, std::generic_category(), "SetFilePointerEx");
 #endif
     }
 
