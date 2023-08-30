@@ -1,13 +1,22 @@
 #pragma once
 // class wrappong a memmapped object
 
-#ifdef _WIN32
-#error "Shared memory support on windows not yet implemented!"
-#endif
-
+#ifndef _WIN32
 #include <sys/mman.h>
 #include <stdio.h>
 #include <unistd.h>
+#endif
+#ifdef _WIN32
+#include <windows.h>
+#include <memoryapi.h>
+#include <io.h>    // get_osfhandle
+enum {
+    PROT_READ = 1,
+    PROT_WRITE = 2,
+};
+
+#endif
+
 #include <stdint.h>
 #include <algorithm>
 #include <system_error>
@@ -20,6 +29,8 @@ extern "C" void*  __mmap2(void*, size_t, int, int, int, size_t);
 #define mymmap mmap
 #define mmapoffset(x) (x)
 #endif
+
+#define dbgprint(...)
 
 /*
  * NOTE: problem on macosx: you can't mmap a block or char device.
@@ -71,7 +82,7 @@ struct mappedmem {
 
         mm.pmem= nullptr;
     }
-
+#ifndef _WIN32
     // maps offsets start..end from file.
     mappedmem(int f, uint64_t start, uint64_t end, int mmapmode= PROT_READ|PROT_WRITE)
     {
@@ -103,23 +114,88 @@ struct mappedmem {
         if (munmap(pmem, phys_length))
             perror("munmap");
     }
-    uint8_t *ptr()
+#endif
+#ifdef _WIN32
+    HANDLE m;
+    int xlatmode2Protect(int mmode)
     {
-        return pmem+dataofs;
+        int r = 0;
+        switch(mmode&(PROT_READ|PROT_WRITE))
+        {
+           case PROT_READ|PROT_WRITE: r |= PAGE_READWRITE; break;
+           case PROT_READ: r |= PAGE_READONLY; break;
+        }
+        return r;
+    }
+    int xlatmode2Access(int mmode)
+    {
+        int r = 0;
+        if (mmode&PROT_READ)
+            r |= FILE_MAP_READ;
+        if (mmode&PROT_WRITE)
+            r |= FILE_MAP_WRITE;
+        return r;
+    }
+    static uint64_t getpagesize()
+    {
+        SYSTEM_INFO si;
+        GetSystemInfo(&si);
+        return si.dwAllocationGranularity;
     }
 
-    uint8_t *begin()
+    mappedmem(int f, uint64_t start, uint64_t end, int mmapmode= PROT_READ|PROT_WRITE)
+        : m(INVALID_HANDLE_VALUE), pmem(NULL)
     {
-        return ptr();
+        uint64_t pagesize= std::max(0x1000, (int)getpagesize());
+
+        uint64_t phys_start= round_down(start, pagesize);
+        uint64_t phys_end= round_up(end, pagesize);
+
+        phys_length= phys_end - phys_start;
+        length = end - start;
+        dataofs= start - phys_start;
+
+        if (phys_length==0) {
+            pmem = NULL;
+            return;
+        }
+
+        HANDLE fh=INVALID_HANDLE_VALUE;// note: both indicator value for anon-mapping, and error from get_osfhandle
+        if (f!=-1) {
+            fh = (HANDLE)_get_osfhandle(f);
+            if (fh==INVALID_HANDLE_VALUE)
+                throw std::system_error(errno, std::generic_category(), "invalid filehandle");
+        }
+        m = CreateFileMapping(fh, NULL, xlatmode2Protect(mmapmode), (phys_end-phys_start)>>32, (phys_end-phys_start)&0xFFFFFFFF, NULL);
+        if (m==NULL)
+            throw std::system_error(errno, std::generic_category(), "CreateFileMapping");
+        pmem = (uint8_t*)MapViewOfFile(m, xlatmode2Access(mmapmode), phys_start>>32, phys_start&0xFFFFFFFF, phys_end-phys_start);
+        if (pmem==NULL)
+            throw std::system_error(errno, std::generic_category(), "MapViewOfFile");
     }
-    uint8_t *end()
+    ~mappedmem()
     {
-        return ptr() + length;
+        if (pmem)
+            if (!UnmapViewOfFile(pmem))
+                dbgprint("Error in UnmapViewOfFile: %08x\n", GetLastError());
+        if (m)
+            if (!CloseHandle(m))
+                dbgprint("Error in CloseHandle: %08x\n", GetLastError());
     }
+#endif
+
+    uint8_t *data() { return pmem+dataofs; }
+    const uint8_t *data() const { return pmem+dataofs; }
+
+    uint8_t *begin() { return data(); }
+    uint8_t *end() { return data() + length; }
+    const uint8_t *begin() const { return data(); }
+    const uint8_t *end() const { return data() + length; }
     size_t size()
     {
         return length;
     }
+    uint8_t& operator[](size_t ix) { return data()[ix]; }
 
     // returns true when addresses stayed the same.
     bool resize(uint64_t newsize)
