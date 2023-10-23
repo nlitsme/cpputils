@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 
 struct StandardBase64 {
     static char code2char(int code)

@@ -5,6 +5,7 @@
 #include <string>
 #include <stdexcept>
 #include <cpputils/b64-alphabet.h>
+#include <cstdint>
 /*
 Functions for base64 encoding and decoding.
 

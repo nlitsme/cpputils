@@ -4,6 +4,7 @@
 // include twice to detect proper header behaviour
 #include <cpputils/crccalc.h>
 #include <cpputils/crccalc.h>
+#include <cstdint>
 
 template<typename P>
 uint32_t crc24_1(P ptr, size_t size)

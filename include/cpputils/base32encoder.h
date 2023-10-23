@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <stdexcept>
+#include <cstdint>
 
 // encode a 5 byte chunk into 8 characters
 template<typename P, typename S>

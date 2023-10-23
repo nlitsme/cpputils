@@ -1,4 +1,4 @@
-#include <kiss/unittestframework.h>
+#include "unittestframework.h"
 
 // include twice to detect proper header behaviour
 #include <cpputils/timepoint.h>

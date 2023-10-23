@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include <cstdint>
 
 template<typename INT, INT poly, int nbits>
 class CrcCalc {
