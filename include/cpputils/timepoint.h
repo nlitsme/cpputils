@@ -26,7 +26,7 @@ public:
     int64_t totalseconds() const { return _usec/1000/1000; }
     int64_t totalminutes() const { return _usec/1000/1000/60; }
     int64_t totalhours() const { return _usec/1000/1000/60/60; }
-    int64_t totaldays() const { return _usec/1000000/60/60/24; }
+    int64_t totaldays() const { return _usec/1000/1000/60/60/24; }
 
     int usec() const { return _usec % 1000000; }
     int msec() const { return (_usec/1000) % 1000; }
@@ -65,7 +65,6 @@ public:
     friend bool operator>=(timedelta_cls lhs, timedelta_cls rhs) { return lhs.totalusec() >= rhs.totalusec(); }
     friend bool operator>(timedelta_cls lhs, timedelta_cls rhs) { return lhs.totalusec() > rhs.totalusec(); }
     friend bool operator<=(timedelta_cls lhs, timedelta_cls rhs) { return lhs.totalusec() <= rhs.totalusec(); }
-
 
 };
 
