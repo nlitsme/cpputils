@@ -4,6 +4,7 @@
 #include <iterator>
 #include <algorithm>
 #include <cpputils/string-base.h>
+#include <cstdint>
 
 /*
  * converts strings to numbers.

@@ -6,6 +6,7 @@
  */
 #include <ostream>
 #include <iomanip>
+#include <cstdint>
 
 //
 // ... design ...
