@@ -241,6 +241,18 @@ class ArgParser {
                 throw std::logic_error("characters trailing number");
             return res.first;
         }
+        double getdouble()
+        {
+            getstr(); // ignoring result, we use 'p' directly.
+
+            // note: can't use <charconv> std::from_chars<double>, since that is not implemented in libc++ yet.
+
+            char *numend;
+            double res = strtod(p, &numend);
+            if (numend != pend)
+                throw std::logic_error("characters trailing number");
+            return res;
+        }
 
     };
 
