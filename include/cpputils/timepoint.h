@@ -86,6 +86,15 @@ public:
         _tv.tv_usec = 0;
 #endif
     }
+    timepoint_cls(const timepoint_cls& tp)
+    {
+        *this = tp;
+    }
+    auto& operator=(const timepoint_cls& tp)
+    {
+        _tv = tp._tv;
+        return *this;
+    }
     void setnow()
     {
 #ifdef _WIN32
