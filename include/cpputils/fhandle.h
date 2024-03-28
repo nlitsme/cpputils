@@ -30,10 +30,11 @@
 //
 // `filehandle` can be assigned to, copied, deleted safely.
 
-// todo: add 'open' method
-
 struct filehandle {
 
+    // the 'ptr' class owns the filehandle,
+    // the 'filehandle' has a shared_ptr to the 'ptr',
+    // this makes sure the object can be copied as needed.
     struct ptr {
         int fh = -1;
         ptr(int fh)
@@ -41,6 +42,8 @@ struct filehandle {
         {
         }
         ~ptr() { close(); }
+
+        bool empty() const { return fh==-1; }
 
         void close()
         {
@@ -73,7 +76,12 @@ struct filehandle {
     // construct with path + flags opens a filesystem file.
     filehandle(const std::string& filename, int openflags = O_RDONLY, int mode=0666)
     {
-        *this = open(filename.c_str(), openflags, mode);
+        open(filename, openflags, mode);
+    }
+
+    void open(const std::string& filename, int openflags = O_RDONLY, int mode=0666)
+    {
+        *this = ::open(filename.c_str(), openflags, mode);
     }
 
     // discards and optionally closes any handle currently retained,
@@ -91,19 +99,28 @@ struct filehandle {
         _p = fh._p;
         return *this;
     }
-    bool empty() const { return !_p; }
+    bool empty() const { return !_p || _p->empty(); }
 
+    // boolean-context checks if the filehandle has been set.
     operator bool () const { return !empty(); }
+
+
+    // int-context returns the filehandle, so it can be passed to posix functions.
     operator int () const { return fh(); }
     int fh() const {
         if (!_p) throw std::runtime_error("no filehandle set");
         return _p->fh;
     }
+
+    // explicitly close the filehandle.
+    // note: other copies will note an exception when using the handle.
     void close() {
         if (!_p) throw std::runtime_error("no filehandle set");
         _p->close();
     }
 
+    // for regular-files, returns the filesize,
+    // for block-devices, returns the device size.
     uint64_t size()
     {
         struct stat st;
@@ -138,6 +155,7 @@ struct filehandle {
         }
     }
 
+    // note: this changes the process-global, OS maintained file pointer.
     uint64_t seek(int64_t pos, int whence=SEEK_SET)
     {
         auto rc = ::lseek(fh(), pos, whence);
@@ -145,10 +163,13 @@ struct filehandle {
             throw std::system_error(errno, std::generic_category(), "lseek");
         return rc;
     }
+    // note: this returns the process-global, OS maintained file pointer.
     uint64_t tell()
     {
         return seek(0, SEEK_CUR);
     }
+
+    // modify the file's size.
     void trunc(uint64_t pos)
     {
 #ifndef _WIN32
@@ -176,6 +197,11 @@ struct filehandle {
     }
 
     // ============================= write =============================
+    // write    (PTR ptr, size_t count) -> size_t
+    // write    (const RANGE& r) -> size_t
+    // write    (PTR first, PTR last) -> size_t
+    // pwrite   (uint64_t ofs, PTR ptr, size_t count) -> size_t
+
     template<typename PTR>
     auto write(PTR ptr, size_t count)
     {
@@ -197,6 +223,10 @@ struct filehandle {
         return write(first, std::distance(first, last));
     }
 
+    // Write without using the process-global filepointer.
+    // Use this when writing to different locations in the file from
+    // different threads.
+    // The user should still make sure it controls who is writing where.
     template<typename PTR>
     auto pwrite(uint64_t ofs, PTR ptr, size_t count)
     {
@@ -209,6 +239,12 @@ struct filehandle {
 
 
     // ============================= read =============================
+    // - read    (PTR ptr, size_t count) -> size_t
+    // - read    (PTR first, PTR last) -> size_t
+    // - read    (INT count) -> bytevector
+    // - read    (RANGE r) -> size_t
+    // - readspan(std::span<T> r) -> std::span<const T>
+    // - pread   (uint64_t ofs, PTR ptr, size_t count) -> size_t
 
     template<typename PTR>
     size_t read(PTR ptr, size_t count)
@@ -260,6 +296,9 @@ struct filehandle {
     }
 
 #endif
+    // Read without using the process-global filepointer.
+    // Use this when reading from different locations in the file from
+    // different threads.
     template<typename PTR>
     size_t pread(uint64_t ofs, PTR ptr, size_t count)
     {
