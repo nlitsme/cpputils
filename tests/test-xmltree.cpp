@@ -78,7 +78,7 @@ TEST_CASE("xmltree-5") {   // unclosed tag.
 
     CHECK(!tree.validate());
 }
-TEST_CASE("xmltree-5") {   // empty string
+TEST_CASE("xmltree-6") {   // empty string
     XmlNodeTree tree;
     using namespace std::string_literals;
     tree.parse(""s);
