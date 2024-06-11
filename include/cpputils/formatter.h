@@ -79,6 +79,7 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
+#include <stdexcept>
 #include <vector>
 #include <array>
 #include <set>
