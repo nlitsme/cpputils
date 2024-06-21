@@ -89,6 +89,7 @@ struct stringsplitter {
         }
     };
 
+    // TODO: support two different string types
     stringsplitter(const S& str, const S& sep)
         : _str(str), _sep(sep)
     {
