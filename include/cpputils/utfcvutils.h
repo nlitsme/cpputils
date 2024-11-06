@@ -429,13 +429,13 @@ auto utf16toutf8(S src, S send, D dst, D dend)
 {
     utf32char_t w=0;
     int n=-1;
-    bool emit=false;
+    bool emitdata=false;
     while (src < send)
     {
         uint16_t c = *src;
         if ((c<0xd800) || (c>=0xe000)) {
             w = c;
-            emit= true;
+            emitdata= true;
         }
         else if (c<0xdc00) {
             // break on  d8xx d8xx sequences
@@ -443,7 +443,7 @@ auto utf16toutf8(S src, S send, D dst, D dend)
                 break;
 
             w = c&0x3ff;
-            emit= false;
+            emitdata= false;
             n = 0;
         }
         else { // c=dc00 .. dfff
@@ -452,11 +452,11 @@ auto utf16toutf8(S src, S send, D dst, D dend)
                 break;
 
             w = 0x10000 + ((w<<10) | (c&0x3ff));
-            emit= true;
+            emitdata= true;
 
             n = -1;
         }
-        if (emit) {
+        if (emitdata) {
             if (w<0x80) {
                 if (dst+1 > dend)
                     break;
