@@ -54,9 +54,9 @@
  * todo: added 'last' argument to *convert functions, so we can support non-NUL terminated strings.
  *
  */
-typedef uint8_t utf8char_t;
-typedef uint16_t utf16char_t;
-typedef uint32_t utf32char_t;
+typedef char     utf8char_t;
+typedef char16_t utf16char_t;
+typedef char32_t utf32char_t;
 
 
 // =========
@@ -504,19 +504,19 @@ std::tuple<utf32char_t, P> getutf8(P p, P pend)
     utf8char_t b0= *p++;
     utf32char_t c;
     int n;
-    if (b0>=0xf0) {
+    if ((b0&0xf0)&0xf0) {
         c= b0&7;
         n=3;
     }
-    else if (b0>=0xe0) {
+    else if ((b0&0xe0)==0xe0) {
         c= b0&15;
         n=2;
     }
-    else if (b0>=0xc0) {
+    else if ((b0&0xc0)==0xc0) {
         c= b0&31;
         n=1;
     }
-    else if (b0>=0x80) {
+    else if ((b0&0x80)==0x80) {
         throw std::range_error("invalid utf8");
     }
     else {
