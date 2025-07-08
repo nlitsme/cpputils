@@ -14,13 +14,13 @@ Note: this object may be quite unnescesary, since the mmap manual states:
 
  */
 // todo: make this copyable.
+// todo: add span
 class mappedfile {
     filehandle _f;
     mappedmem _m;
 public:
     mappedfile(filehandle fh, int mmapmode)
-        : _f(fh),
-        _m(_f, 0, _f.size(), mmapmode)
+        : _f(fh), _m(_f, 0, _f.size(), mmapmode)
     {
     }
 
@@ -34,10 +34,15 @@ public:
     }
     auto file() { return _f; }
 
+    uint8_t *data() { return _m.data(); }
+    const uint8_t *data() const { return _m.data(); }
+    uint8_t *begin() { return _m.begin(); }
+    uint8_t *end() { return _m.end(); }
+    const uint8_t *begin() const { return _m.begin(); }
+    const uint8_t *end() const { return _m.end(); }
+    size_t size() { return _m.size(); }
+    uint8_t& operator[](size_t ix) { return _m[ix]; }
 
-    auto size() { return _m.size(); }
-    auto begin() { return _m.begin(); }
-    auto end() { return _m.end(); }
 
     // return true if pointers did not move.
     bool resize(uint64_t newsize)
