@@ -57,6 +57,8 @@ class ArgParser {
         bool longmatch;
         bool isoption;
 
+        bool _options_ended = false;  // detects '--'
+
         void setcurrent()
         {
             longmatch = false;
@@ -102,9 +104,11 @@ class ArgParser {
         {
             if (i==argc)
                 throw std::range_error("arg out of range");
-            if (*p=='-') {
+            if (!_options_ended && *p=='-') {
                 // a single '-' by itself is not considered an option,
                 // so 'getstr()' will return "-"
+                if (optionterminator())
+                    _options_ended = true;
                 isoption = p[1]!=0;
                 return p[1];
             }
