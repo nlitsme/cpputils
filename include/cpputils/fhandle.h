@@ -30,6 +30,7 @@
 //
 // `filehandle` can be assigned to, copied, deleted safely.
 
+// todo: add support for spans.
 struct filehandle {
 
     // the 'ptr' class owns the filehandle,
@@ -266,9 +267,12 @@ struct filehandle {
 //  {
 //      return read(&*r.begin(), r.size());
 //  }
-    template<typename INT>
-    std::enable_if_t<std::is_scalar_v<INT>, std::vector<uint8_t>> read(INT count)
+    template<typename INT=size_t>
+    std::enable_if_t<std::is_scalar_v<INT>, std::vector<uint8_t>> read(INT count=INT(-1))
     {
+        if (count==INT(-1))
+            count = size() - tell();
+
         std::vector<uint8_t> data(count);
         auto rc = read(&data[0], data.size());
         data.resize(rc);
