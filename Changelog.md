@@ -1,3 +1,31 @@
+## Thu Oct  2 21:34:27 CEST 2025
+    utfcv: newer c++ compilers no longer support unsigned chars in strings
+    mmfile: added data(), operator[], const iter
+    fhandle: fh.read() now reads entire remaining file
+    argparse: fixed problem with -- terminating the options list
+    utfcv: changed emit to emitdata to avoid problems with some external libraries which define emit as a macro
+    asn1: removed unused and incomplete certificate parser
+    unittest for xnltree
+    fhandle: added comments explaining filehandle. added open method
+    timepoint: added copy constructor and assignment operator
+    added argparse.getdouble
+    added unittest for timepoint
+    timepoint: more consistent expressions
+    cmake: always referene the symlinked dirs through the top level cmake source dir
+    unittests: formatter: %p has different results on all platforms -> disabled test
+    unittests: disabled some tests for windows
+    mmem: added windows support
+    fslib: added windows support
+    fhandle: added truncate for windows.
+    unittests: added trivial fslibrary test
+    unittests: avoid problem with structured bindings and clang
+    added windows support for timepoint
+    explicit message that fslib does not yet work on windows
+    mmem.h: corrected win32 compiler error message
+    unittest: note difference on '%p' behaviour
+    fhandle: fixed missing returnvalue on freebsd
+    fhandle: replacing  read(range)  with readspan(range). I think this makes code more readable
+
 ## Fri Jun  2 14:56:14 CEST 2023
  * added minmax.h
  * several minor improvements
